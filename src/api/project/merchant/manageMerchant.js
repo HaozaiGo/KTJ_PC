@@ -132,3 +132,29 @@ export function checkAlbums(params) {
     params,
   });
 }
+
+// 分账
+export function subAccountList(params) {
+  return request({
+    url: `/api/api/bill/wx/share/receiver/list`,
+    method: "get",
+    params,
+  });
+}
+
+// 新增分账接受方
+export function addAccountList(data) {
+  return request({
+    url: `/api/api/bill/wx/share/receiver`,
+    method: "post",
+    data,
+  });
+}
+
+// 删除
+export function deleteAccount(receiverId) {
+  return request({
+    url: `/api/api/bill/wx/share/receiver/${receiverId}`,
+    method: "delete"
+  });
+}

@@ -1,8 +1,8 @@
 
-## 一个基于Vue3 + vite4 构建的项目 （主要面向中后台）
+## 一个基于Vue3 + vite4 构建的项目KTJ
 
 ## Author：xiaohao
-## Init Time 2023年-03月-13日 
+## Init Time 2024-06
 
 ## 简单介绍
 
@@ -11,11 +11,6 @@
 ** Http 沿用 Axios
 ** 加入ake各组件及思路沿用 vue-Element-Energy
 ** 组件库 element-plus
-
-## 特别鸣谢
-@huangcx、@huilong、@YangHuajian、@LuoMinJing
-
-
 
 ## Project Setup
 

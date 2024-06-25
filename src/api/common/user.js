@@ -29,7 +29,7 @@ export async function login(data) {
 // 商家端登陆
 export function marchentLogin(data) {
   return request({
-    url: "/api/api/store/login",
+    url: "/store/api/store/login",
     method: "post",
     data,
   });
@@ -37,7 +37,7 @@ export function marchentLogin(data) {
 //商家路由
 export function getMarchentRoute(data) {
   return request({
-    url: "/api/api/store/getRouters",
+    url: "/store/api/store/getRouters",
     method: "get",
     data,
   });

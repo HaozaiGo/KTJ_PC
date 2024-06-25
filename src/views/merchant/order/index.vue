@@ -35,7 +35,7 @@
 
     <div>
       <el-table
-        :data="tableData.row"
+        :data="tableData"
         style="width: 100%; margin: 10px 0"
         row-key="id"
         border
@@ -103,12 +103,6 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        layout="prev, pager, next"
-        :total="tableData.total"
-        style="float: right"
-        @current-change="changePageSize"
-      />
     </div>
 
     <el-dialog
@@ -348,7 +342,12 @@
     </el-dialog>
 
     <el-dialog v-model="state.dialogVisible1" title="查看进件状态" width="900">
-      <el-descriptions class="margin-top" :column="3" size="Default" border>
+      <el-descriptions
+        class="margin-top"
+        :column="3"
+        size="Default"
+        border
+      >
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">业务申请编号</div>
@@ -406,7 +405,7 @@ import {
   deleteRow,
 } from "@/api/project/merchant/settledPlatform.js";
 defineOptions({
-  name: "settled-Platform",
+  name: "O-rder",
   isRouter: true,
 });
 const options = ref([]); //审批状态
@@ -415,14 +414,9 @@ const query = reactive({
   phone: "",
   applyTime: "",
   approveStatus: "",
-  pageNum:1,
 });
 const dialogVisible = ref(false);
-
-const tableData = ref({
-  row: [],
-  total: 0,
-});
+const tableData = ref([]);
 const check = async (row) => {
   state.setCheck.applyId = row.applyId;
   state.setCheck.approveStatus = "";
@@ -460,15 +454,11 @@ const handleComfirm = async () => {
 const checkInStatus = () => {
   state.dialogVisible1 = true;
 };
-const changePageSize = (e) => {
-  query.pageNum = e;
-  getList();
-};
+
 const getList = async () => {
   const res = await getLists(query);
   if (res.code === 0) {
-    tableData.value.row = res.rows;
-    tableData.value.total = res.total;
+    tableData.value = res.rows;
   }
 };
 const deleteUser = (row) => {

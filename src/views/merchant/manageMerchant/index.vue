@@ -50,6 +50,7 @@
         border
         default-expand-all
         @selection-change="handleSelectionChange"
+        :max-height="tableHeight"
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="name" label="商家名称" sortable />
@@ -78,7 +79,12 @@
           sortable
           width="110"
         />
-
+        <el-table-column
+          prop="commentCount"
+          label="签约状态"
+          sortable
+          width="110"
+        />
         <el-table-column label="商家上线" width="120">
           <template #default="scope">
             <div>
@@ -132,7 +138,7 @@
                 type="primary"
                 size="small"
                 @click="setting(scope.row)"
-                >配置</el-button
+                >商家配置</el-button
               >
             </div>
             <div>
@@ -156,9 +162,19 @@
                 :href="`${formData.origin}/bill/store/qrcode/mini?storeId=${scope.row.storeId}`"
                 download="商家二维码.png"
                 target="_blank"
-                style="color: #409eff; font-size: 13px"
+                style="color: #409eff; font-size: 13px; margin-left: 13px"
                 >二维码</a
               >
+            </div>
+            <div>
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="setSubAccount(scope.row)"
+              >
+                设置分账
+              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -362,11 +378,6 @@
             >
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="分账到平台（服务商）的比例">
-          <el-input v-model="formData.settingForm.wxShareRate">
-            <template #append>%</template>
-          </el-input>
-        </el-form-item>
         <el-form-item label="创建时间">
           <el-input v-model="formData.settingForm.createTime" disabled />
         </el-form-item>
@@ -542,9 +553,9 @@
     >
       <div>
         <el-image
-          v-for="(item,index) in formData.albumsList"
+          v-for="(item, index) in formData.albumsList"
           :key="index"
-          style="width: 150px; height: 150px;margin-right:15px"
+          style="width: 150px; height: 150px; margin-right: 15px"
           :src="formData.origin + item.imageUrl"
           :zoom-rate="1.2"
           :max-scale="7"
@@ -591,7 +602,8 @@ import {
   checkAlbums,
 } from "@/api/project/merchant/manageMerchant.js";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
-
+import { useRouter } from "vue-router";
+const router = useRouter();
 defineOptions({
   name: "manage-Merchant",
   isRouter: true,
@@ -632,7 +644,6 @@ class newFormData {
 class settingFormData {
   wxMchId = ""; //微信商户号
   wxPayStatus = ""; //是否开通微信支付
-  wxShareRate = ""; //分账比例
   wxShareStatus = ""; //是否开通分账模式
 }
 let formData = reactive({
@@ -651,6 +662,7 @@ let formData = reactive({
   settingForm: new settingFormData(), //配置
   checkData: {}, //查看商家资料
 });
+const tableHeight = inject("$com").tableHeight();
 const formRef = ref(null);
 const rules = {
   name: [
@@ -749,6 +761,13 @@ const seeMerchantData = async (item) => {
     formData.checkData = res.data;
   }
   formData.dialogVisible1 = true;
+};
+
+const setSubAccount = (e) => {
+  router.push({
+    path: `/merchant/manageMerchant/subAccount`,
+    query: { storeId: e.storeId },
+  });
 };
 const checkAlbum = async (item) => {
   const res = await checkAlbums({ storeId: item.storeId });

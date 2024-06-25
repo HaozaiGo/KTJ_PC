@@ -23,6 +23,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""), //地址重写
       },
+      '/store': {
+        target: 'http://192.168.1.59',//开发
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/jss/, ""), //地址重写
+      },
     },
     port: 8088, // 访问端口号
     host: '0.0.0.0', // 配置项目可以局域网访问
