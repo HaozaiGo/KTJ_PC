@@ -141,7 +141,6 @@ export function subAccountList(params) {
     params,
   });
 }
-
 // 新增分账接受方
 export function addAccountList(data) {
   return request({
@@ -150,7 +149,6 @@ export function addAccountList(data) {
     data,
   });
 }
-
 // 删除
 export function deleteAccount(receiverId) {
   return request({
