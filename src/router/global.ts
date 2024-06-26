@@ -13,7 +13,7 @@ function getModules() {
 }
 
 function getComponents() {
-	const components = import.meta.glob('../views/**/*.vue', { eager: true });
+	const components = import.meta.glob('../views/**/*.vue');
 	return components
 }
 
