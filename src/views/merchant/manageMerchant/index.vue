@@ -762,7 +762,6 @@ const seeMerchantData = async (item) => {
   }
   formData.dialogVisible1 = true;
 };
-
 const setSubAccount = (e) => {
   router.push({
     path: `/merchant/manageMerchant/subAccount`,
@@ -783,7 +782,6 @@ const checkAlbum = async (item) => {
     }
   }
 };
-
 // 新增
 const add = async () => {
   formData.state = "add";
