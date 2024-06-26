@@ -8,12 +8,12 @@ import { defineAsyncComponent } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
 function getModules() {
-	const components = import.meta.glob('../views/**/*.vue');
+	const components = import.meta.glob('./src/views/**/*.vue');
 	return components
 }
 
 function getComponents() {
-	const components = import.meta.glob('../views/**/*.vue');
+	const components = import.meta.glob('./src/views/**/*.vue', { eager: true });
 	return components
 }
 
@@ -29,6 +29,7 @@ export const vueRouter = function (): Array<RouteRecordRaw> {
 		const viewSrc = components[key];
 
 		const file = viewSrc.default;
+		console.log(file);
 		// console.log(file);
 		// 处理path路径
 		let pathSp = file.__file.split('views/');
