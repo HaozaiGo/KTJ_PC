@@ -16,6 +16,11 @@ export default defineConfig({
     // extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
   },
   define: { 'process.env': {} },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true
+    }
+  },
   server: {
     proxy: {
       '/api': {
