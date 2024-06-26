@@ -16,13 +16,14 @@
     "axios": "^1.6.8",
     "echarts": "^5.5.0",
     "element-plus": "^2.6.1",
-    "lodash-es": "^4.17.21",
     "js-cookie": "^2.2.1",
     "jsencrypt": "^3.0.0-rc.1",
     "leaflet": "^1.9.3",
     "leaflet-draw": "^1.0.4",
+    "lodash-es": "^4.17.21",
     "path-browserify": "^1.0.1",
     "pinia": "^2.1.7",
+    "vite-plugin-commonjs": "^0.10.1",
     "vue": "^3.4.21",
     "vue-router": "^4.1.6",
     "worker-loader": "^3.0.8"
@@ -42,10 +43,10 @@
     "prettier": "^2.7.1",
     "sass": "^1.58.3",
     "typescript": "^5.4.2",
+    "unplugin-auto-import": "^0.17.5",
     "vite": "^5.2.7",
     "vite-plugin-mock-dev-server": "^1.4.7",
     "vite-plugin-svg-icons": "^2.0.1",
-    "vue-tsc": "^2.0.6",
-    "unplugin-auto-import": "^0.17.5"
+    "vue-tsc": "^2.0.6"
   }
 }
