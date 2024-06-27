@@ -17,28 +17,22 @@ function getComponents() {
 	return components
 }
 // 注册路由
-export const vueRouter =  function (): Array<RouteRecordRaw> {
+export const vueRouter = function (): Array<RouteRecordRaw> {
 	let routerList: Array<RouteRecordRaw> = [];
 	const modules = getModules();
 	const components = getComponents();
-	console.log(components);
-	console.log(modules);
-
-	// for (const path in modules) {
-	// 	const module = await modules[path]()
-	// 	// 在这里处理导入的模块
-	// 	console.log(path);
-		
-	// }
-
+	// console.log(modules);
+	// console.log(components);
 	Object.keys(modules).forEach(key => {
 		const viewSrc = components[key];
+		console.log(viewSrc);
+
 		const file = viewSrc.default;
-		// console.log(file);
 		// 处理path路径
-		let pathSp = file.__file.split('views/');
+		let pathSp = key.split('views/');
 		const pathRes = pathSp[1].replace('/index.vue', '');
-		// console.log(pathRes);
+		console.log(modules[key]);
+
 		if (!file.isRouter) return
 		routerList.push({
 			path: pathRes,
@@ -56,10 +50,10 @@ export const asyncComponent = function (app: App<Element>): void {
 	Object.keys(modules).forEach((key: string) => {
 		const viewSrc = components[key];
 		// console.log(viewSrc);
-		
+
 		const file = viewSrc.default;
 		// console.log(file);
-		
+
 		if (!file.isComponents) return
 
 		const AsyncComponent = defineAsyncComponent(modules[key])
