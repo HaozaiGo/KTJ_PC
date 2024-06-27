@@ -26,7 +26,6 @@ export const vueRouter = function (): Array<RouteRecordRaw> {
 	Object.keys(modules).forEach(key => {
 		const viewSrc = components[key];
 		console.log(viewSrc);
-
 		const file = viewSrc.default;
 		// 处理path路径
 		let pathSp = key.split('views/');
