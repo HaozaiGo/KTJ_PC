@@ -8,7 +8,7 @@ import { defineAsyncComponent } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
 function getModules() {
-	const components = import.meta.glob('/src/views/**/*.vue');
+	const components = import.meta.glob('/src/views/**/*.vue', { eager: true });
 	return components
 }
 
@@ -23,13 +23,21 @@ export const vueRouter = function (): Array<RouteRecordRaw> {
 	let routerList: Array<RouteRecordRaw> = [];
 	const modules = getModules();
 	const components = getComponents();
+	console.log(components);
+	console.log(modules);
+
+	// for (const path in modules) {
+	// 	const module = await modules[path]()
+	// 	// 在这里处理导入的模块
+	// 	console.log(path);
+
+	// }
 
 	Object.keys(modules).forEach(key => {
 
 		const viewSrc = components[key];
 
 		const file = viewSrc.default;
-		console.log(file);
 		// console.log(file);
 		// 处理path路径
 		let pathSp = file.__file.split('views/');
@@ -56,10 +64,10 @@ export const asyncComponent = function (app: App<Element>): void {
 	Object.keys(modules).forEach((key: string) => {
 		const viewSrc = components[key];
 		// console.log(viewSrc);
-		
+
 		const file = viewSrc.default;
 		// console.log(file);
-		
+
 		if (!file.isComponents) return
 
 		const AsyncComponent = defineAsyncComponent(modules[key])
