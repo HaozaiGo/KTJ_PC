@@ -8,12 +8,12 @@ import { defineAsyncComponent } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
 function getModules() {
-	const components = import.meta.glob('./src/views/**/*.vue');
+	const components = import.meta.glob('/src/views/**/*.vue');
 	return components
 }
 
 function getComponents() {
-	const components = import.meta.glob('./src/views/**/*.vue', { eager: true });
+	const components = import.meta.glob('/src/views/**/*.vue', { eager: true });
 	return components
 }
 
