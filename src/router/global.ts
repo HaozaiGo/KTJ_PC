@@ -16,8 +16,6 @@ function getComponents() {
 	const components = import.meta.glob('/src/views/**/*.vue', { eager: true });
 	return components
 }
-
-
 // 注册路由
 export const vueRouter =  function (): Array<RouteRecordRaw> {
 	let routerList: Array<RouteRecordRaw> = [];
