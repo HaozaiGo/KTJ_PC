@@ -49,9 +49,7 @@ export const asyncComponent = function (app: App<Element>): void {
 	Object.keys(modules).forEach((key: string) => {
 		const viewSrc = components[key];
 		// console.log(viewSrc);
-
 		const file = viewSrc.default;
-		// console.log(file);
 
 		if (!file.isComponents) return
 
