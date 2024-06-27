@@ -44,7 +44,6 @@ export const vueRouter =  function (): Array<RouteRecordRaw> {
 		const pathRes = pathSp[1].replace('/index.vue', '');
 		// console.log(pathRes);
 		if (!file.isRouter) return
-
 		routerList.push({
 			path: pathRes,
 			name: `${file.name}`,
@@ -53,8 +52,6 @@ export const vueRouter =  function (): Array<RouteRecordRaw> {
 	})
 	console.log(routerList);
 	return routerList
-
-
 
 }
 // 注册组件
