@@ -34,9 +34,7 @@ export const vueRouter =  function (): Array<RouteRecordRaw> {
 	// }
 
 	Object.keys(modules).forEach(key => {
-
 		const viewSrc = components[key];
-		
 		const file = viewSrc.default;
 		// console.log(file);
 		// 处理path路径
@@ -52,7 +50,6 @@ export const vueRouter =  function (): Array<RouteRecordRaw> {
 	})
 	console.log(routerList);
 	return routerList
-
 }
 // 注册组件
 export const asyncComponent = function (app: App<Element>): void {
