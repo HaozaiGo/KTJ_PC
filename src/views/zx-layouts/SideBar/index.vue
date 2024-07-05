@@ -9,7 +9,7 @@
       @open="handleOpen"
       @close="handleClose"
     >
-      <el-menu-item index="0" @click="router.replace('/Index')">
+      <el-menu-item index="0" @click="handleBackToHome">
         <el-icon>
           <HomeFilled />
         </el-icon>
@@ -74,19 +74,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting,
-} from "@element-plus/icons-vue";
-import { reactive, toRefs, onBeforeMount, onMounted } from "vue";
+import { reactive, toRefs, onBeforeMount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { baseSettings } from "@/stores/counter";
 const router = useRouter();
 const data = JSON.parse(localStorage.getItem("routes"));
 const data1 = reactive({
-  // routes: JSON.parse(localStorage.getItem("routes")),
   routes: [
     {
       meta: { title: "商家审核" },
@@ -176,8 +168,18 @@ const data1 = reactive({
     },
   ],
 });
+const role = ref("");
 onBeforeMount(() => {});
-onMounted(() => {});
+onMounted(() => {
+  role.value = String(localStorage.getItem("role"));
+});
+const handleBackToHome = () => {
+  if (role.value === "platform") {
+    router.push({ path: "/Index" });
+  }else{
+    router.push({ path: "/home" });
+  }
+};
 const handleOpen = () => {};
 const handleClose = () => {};
 const handleClickRoute = (item: any, children: any, menu: any) => {

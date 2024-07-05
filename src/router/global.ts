@@ -25,12 +25,12 @@ export const vueRouter = function (): Array<RouteRecordRaw> {
 	// console.log(components);
 	Object.keys(modules).forEach(key => {
 		const viewSrc = components[key];
-		console.log(viewSrc);
+		// console.log(viewSrc);
 		const file = viewSrc.default;
 		// 处理path路径
 		let pathSp = key.split('views/');
 		const pathRes = pathSp[1].replace('/index.vue', '');
-		console.log(modules[key]);
+		// console.log(modules[key]);
 
 		if (!file.isRouter) return
 		routerList.push({
@@ -56,5 +56,5 @@ export const asyncComponent = function (app: App<Element>): void {
 		const AsyncComponent = defineAsyncComponent(modules[key])
 		app.component(file.name, AsyncComponent)
 	})
-	console.log(app._component)
+	// console.log(app._component)
 }

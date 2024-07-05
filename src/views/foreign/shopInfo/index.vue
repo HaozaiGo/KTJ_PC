@@ -75,7 +75,7 @@
             >
               修改信息
             </el-button>
-            <el-button link type="primary" size="small">查看评论</el-button>
+            <!-- <el-button link type="primary" size="small">查看评论</el-button> -->
             <el-button
               link
               type="primary"

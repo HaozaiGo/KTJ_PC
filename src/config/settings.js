@@ -10,8 +10,6 @@
  */
 
 let settings = {
-  //前缀访问路径 //灵石wmmsservice
-  urlBefore: "/KTJ",
   // 部署时的URL
   publicPath: "/KTJ/",
   // 生产环境构建文件的目录名

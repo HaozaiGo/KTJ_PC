@@ -5,10 +5,17 @@ import request from "@/config/request.js";
 
 const commonMethod = {
   baseUrl: "http://192.168.1.59",
+  socketUrl:"192.168.1.59:8081",
   // 字典
   getDict(dictType: string) {
     return request({
       url: `/api/api/system/dict/type/type?dictTypes=` + dictType,
+      method: "get",
+    });
+  },
+  getStoreDict(dictType: string) {
+    return request({
+      url: `/store/api/system/dict/type/type?dictTypes=` + dictType,
       method: "get",
     });
   },

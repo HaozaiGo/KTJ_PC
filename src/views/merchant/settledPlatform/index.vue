@@ -40,6 +40,7 @@
         row-key="id"
         border
         default-expand-all
+        v-loading="state.loading"
       >
         <el-table-column
           prop="storeName"
@@ -75,7 +76,7 @@
         <el-table-column prop="reason" label="不通过原因" sortable />
         <el-table-column prop="approveStatusLabel" label="状态" width="100">
         </el-table-column>
-        <el-table-column label="操作" width="220">
+        <el-table-column label="操作" width="240">
           <template #default="scope">
             <el-button
               link
@@ -92,6 +93,14 @@
               @click="deleteUser(scope.row)"
               >删除</el-button
             >
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="comeIn(scope.row)"
+            >
+              特约进件
+            </el-button>
             <el-button
               link
               type="primary"
@@ -353,43 +362,47 @@
           <template #label>
             <div class="cell-item">业务申请编号</div>
           </template>
-          business_code
+          {{ state.comeInStuteData.businessCode }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">微信支付申请单号</div>
           </template>
-          applyment_id
+          {{ state.comeInStuteData.applymentId }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">特约商户号</div>
           </template>
-          sub_mchid
+          {{ state.comeInStuteData.subMchid }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">超级管理员签约链接</div>
           </template>
-          sign_url
+          <el-image
+            style="width: 100px; height: 100px"
+            :src="state.comeInStuteData.signUrl"
+            :fit="fit"
+          />
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">申请单状态</div>
           </template>
-          applyment_state
+          {{ state.comeInStuteData.applymentState }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">申请状态描述</div>
           </template>
-          applyment_state_msg
+          {{ state.comeInStuteData.applymentStateMsg }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">驳回原因详情</div>
           </template>
-          audit_detail
+          {{ state.comeInStuteData.auditDetail[0].rejectReason }}
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
@@ -404,6 +417,8 @@ import {
   checkInfo,
   passCheck,
   deleteRow,
+  comeInApi,
+  checkComeStatus,
 } from "@/api/project/merchant/settledPlatform.js";
 defineOptions({
   name: "settled-Platform",
@@ -415,7 +430,7 @@ const query = reactive({
   phone: "",
   applyTime: "",
   approveStatus: "",
-  pageNum:1,
+  pageNum: 1,
 });
 const dialogVisible = ref(false);
 
@@ -434,6 +449,7 @@ const check = async (row) => {
   dialogVisible.value = true;
 };
 const state = reactive({
+  loading: false,
   dialogVisible1: false,
   checkData: {},
   setCheck: {
@@ -442,7 +458,13 @@ const state = reactive({
     reason: "",
   },
   setCheckOptions: [],
+  comeInStuteData: {}, //进件状态
 });
+const comeIn = async (row) => {
+  state.loading = false;
+  const res = await comeInApi({ applyId: row.applyId });
+  state.loading = true;
+};
 const handleComfirm = async () => {
   if (state.setCheck.approveStatus === "") {
     ElMessage({
@@ -457,7 +479,14 @@ const handleComfirm = async () => {
     }
   }
 };
-const checkInStatus = () => {
+const checkInStatus = async (row) => {
+  const res = await checkComeStatus({
+    applyId: row.applyId,
+    applymentId: row.applymentId,
+  });
+  if (res.code === 0) {
+    state.comeInStuteData = res.data;
+  }
   state.dialogVisible1 = true;
 };
 const changePageSize = (e) => {

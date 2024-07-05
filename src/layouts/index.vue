@@ -25,7 +25,7 @@
       </div>
     </div>
     <div
-      v-else
+      v-else-if="layout === 'vertical'"
       class="layout-container-vertical"
       :class="{
         fixed: header === 'fixed',
@@ -71,13 +71,12 @@ export default {
     SideBar,
     TagsBar,
     AppMain,
-    // TagsBar,
   },
   mixins: [Media],
   data() {
     return {
       device: "",
-      layout: "",
+      layout: "vertical",
     };
   },
   computed: {

@@ -6,14 +6,6 @@ export function getRouterList(data) {
     method: "get",
   });
 }
-
-// 获取天气
-export function getWeather(data) {
-  return request({
-    url: "/system/weather?city=" + data,
-    method: "get",
-  });
-}
 // 获取项目列表
 export function usersubprojects() {
   return request({

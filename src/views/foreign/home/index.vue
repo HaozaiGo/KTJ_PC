@@ -18,7 +18,7 @@
           </div>
         </el-col>
 
-        <el-col :span="6" :xs="24">
+        <el-col :span="3" :xs="24">
           <div class="flex-sr h-ful">
             <el-statistic
               v-for="item in statisticData"
@@ -106,15 +106,13 @@
 <script setup lang="ts">
 import type { EpPropMergeType } from "element-plus/es/utils/vue/props/types";
 defineOptions({
-  name: "In-dex",
+  name: "Home",
   inheritAttrs: false,
-  isRouter: true,
 });
-
 import { useUserStore } from "@/stores/modules/user";
 import { useTransition, TransitionPresets } from "@vueuse/core";
-import { ref, computed, defineAsyncComponent } from "vue";
-
+import { ref, computed, defineAsyncComponent, onMounted } from "vue";
+import { getWeather } from "@/api/common/util";
 const userStore = useUserStore();
 const date: Date = new Date();
 
@@ -175,19 +173,6 @@ const statisticData = ref([
     title: "消息",
     key: "message",
   },
-  {
-    value: 50,
-    iconClass: "#icon-bangbandaiban",
-    title: "待办",
-    suffix: "/100",
-    key: "upcoming",
-  },
-  {
-    value: 10,
-    iconClass: "project",
-    title: "项目",
-    key: "project",
-  },
 ]);
 
 interface CardProp {
@@ -242,6 +227,12 @@ const chartData = ref(["BarChart", "PieChart", "RadarChart"]);
 const chartComponent = (item: string) => {
   return defineAsyncComponent(() => import(`./components/${item}.vue`));
 };
+const getWeatherApi = async () => {
+  
+};
+onMounted(() => {
+  getWeatherApi()
+});
 </script>
 
 <style lang="scss" scoped>

@@ -2,79 +2,79 @@
   <div class="content">
     <div class="search">
       <el-input
-        v-model="query.storeName"
+        v-model="query.orderNo"
         style="width: 200px"
-        placeholder="店铺名称"
+        placeholder="订单编号"
       />
       <el-input
         v-model="query.phone"
         style="width: 200px"
-        placeholder="手机号"
+        placeholder="买家手机号"
       />
 
       <el-date-picker
-        v-model="query.applyTime"
+        v-model="query.orderTime"
         type="date"
-        placeholder="申请时间"
+        placeholder="下单时间"
         size="default"
+        value-format="YYYY-MM-DD"
       />
-      <el-select
-        v-model="query.approveStatus"
-        placeholder="审批状态"
-        style="width: 200px"
-      >
-        <el-option
-          v-for="item in options"
-          :key="item.dictValue"
-          :label="item.dictLabel"
-          :value="item.dictValue"
-        />
-      </el-select>
+
       <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
+      <div style="margin-top: 10px;">
+        <el-input
+          v-model="query.nickName"
+          style="width: 200px"
+          placeholder="商家名称"
+        />
+        <el-input
+          v-model="query.tradeType"
+          style="width: 200px"
+          placeholder="交易类型"
+        />
+        <el-select
+          v-model="query.payStatus"
+          placeholder="支付状态"
+          style="width: 220px"
+          clearable
+        >
+          <el-option
+            v-for="item in state.setCheckOptions"
+            :key="item.dictValue"
+            :label="item.dictLabel"
+            :value="item.dictValue"
+          />
+        </el-select>
+      </div>
     </div>
 
     <div>
       <el-table
-        :data="tableData"
+        :data="tableData.row"
         style="width: 100%; margin: 10px 0"
         row-key="id"
         border
         default-expand-all
       >
+        <el-table-column prop="orderId" label="订单ID" sortable width="180" />
+        <el-table-column prop="orderNo" label="订单编号" sortable />
+        <el-table-column prop="storeName" label="商家名称" sortable />
+        <el-table-column prop="amount" label="支付金额" sortable />
         <el-table-column
-          prop="storeName"
-          label="店铺名称"
-          sortable
-          width="180"
-        />
-        <el-table-column
-          prop="businessMerchantName"
-          label="营业执照的商户名称"
-          sortable
-        />
-        <el-table-column
-          prop="mainStoreTypeNames"
-          label="主商铺类型"
+          prop="orderTime"
+          label="下单时间"
           sortable
           width="150"
         />
-        <el-table-column prop="phone" label="手机号" sortable width="150" />
-        <el-table-column prop="linkMan" label="联系人" sortable width="120" />
         <el-table-column
-          prop="applyTime"
-          label="申请时间"
+          prop="payStatusLabel"
+          label="支付状态"
           sortable
-          width="130"
+          width="150"
         />
-        <el-table-column
-          prop="approveTime"
-          label="审批时间"
-          sortable
-          width="130"
-        />
-        <el-table-column prop="reason" label="不通过原因" sortable />
-        <el-table-column prop="approveStatusLabel" label="状态" width="100">
-        </el-table-column>
+        <el-table-column prop="payTime" label="支付时间" sortable width="130" />
+        <el-table-column prop="payType" label="订单支付类型" sortable />
+        <el-table-column prop="phone" label="买家手机号" sortable />
         <el-table-column label="操作" width="220">
           <template #default="scope">
             <el-button
@@ -83,312 +83,136 @@
               size="small"
               @click="check(scope.row)"
             >
-              审核
+              更新状态
             </el-button>
             <el-button
               link
               type="primary"
               size="small"
-              @click="deleteUser(scope.row)"
-              >删除</el-button
+              @click="orderDetail(scope.row)"
+              >订单详情</el-button
             >
-            <el-button
-              link
-              type="primary"
-              size="small"
-              @click="checkInStatus(scope.row)"
-            >
-              进件状态
-            </el-button>
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        layout="prev, pager, next"
+        :total="tableData.total"
+        style="float: right"
+        @current-change="changePageSize"
+      />
     </div>
 
-    <el-dialog
-      v-model="dialogVisible"
-      title="商家审核"
-      width="1000"
-      align-center
-    >
-      <div>
-        <el-descriptions class="margin-top" title="" :column="3" border>
-          <template #extra>
-            <el-button type="primary">通知商家</el-button>
+    <el-dialog v-model="state.dialogVisible1" title="查看订单状态" width="1000">
+      <el-descriptions class="margin-top" :column="3" size="Default" border>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">订单ID</div>
           </template>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">
-                <el-icon><House /></el-icon>
-                店铺名称
-              </div>
-            </template>
-            {{ state.checkData.storeName }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">
-                <el-icon :style="iconStyle">
-                  <user />
-                </el-icon>
-                联系人
-              </div>
-            </template>
-            {{ state.checkData.linkMan }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">
-                <el-icon :style="iconStyle">
-                  <iphone />
-                </el-icon>
-                手机号
-              </div>
-            </template>
-            {{ state.checkData.phone }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">
-                <el-icon :style="iconStyle">
-                  <location />
-                </el-icon>
-                店铺地址
-              </div>
-            </template>
-            {{ state.checkData.storeAddress
-            }}<el-tag size="small">选择地址</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">
-                <el-icon :style="iconStyle">
-                  <office-building />
-                </el-icon>
-                省市区
-              </div>
-            </template>
-            {{ state.checkData.provinces }}/{{ state.checkData.citys }}/{{
-              state.checkData.districts
-            }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">
-                <el-icon><Message /></el-icon>邮箱
-              </div>
-            </template>
-            {{ state.checkData.email }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">营业执照的商户名称</div>
-            </template>
-            {{ state.checkData.businessMerchantName }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">营业执照法人名称</div>
-            </template>
-            {{ state.checkData.businessLegalName }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">注册号/统一社会信用代码</div>
-            </template>
-            {{ state.checkData.businessLicenseNumber }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">银行卡号</div>
-            </template>
-            {{ state.checkData.bankNo }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">主商铺类型</div>
-            </template>
-            {{ state.checkData.mainStoreTypeNames }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">副商铺类型</div>
-            </template>
-            {{ state.checkData.deputyStoreTypeNames }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">身份证人名称</div>
-            </template>
-            {{ state.checkData.identityName }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">身份证号</div>
-            </template>
-            {{ state.checkData.identityNo }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">申请时间</div>
-            </template>
-            {{ state.checkData.applyTime }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">店铺封面图</div>
-            </template>
-            <el-image
-              style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.coverUrl"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="['/api/api' + state.checkData.coverUrl]"
-              fit="cover"
-            />
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">身份证正面</div>
-            </template>
-            <el-image
-              style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.identityPositiveUrl"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="[
-                '/api/api' + state.checkData.identityPositiveUrl,
-              ]"
-              fit="cover"
-            />
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">身份证反面</div>
-            </template>
-            <el-image
-              style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.identityNegativeUrl"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="[
-                '/api/api' + state.checkData.identityNegativeUrl,
-              ]"
-              fit="cover"
-            />
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">许可证</div>
-            </template>
-            <el-image
-              style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.permitUrl"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="['/api/api' + state.checkData.permitUrl]"
-              fit="cover"
-            />
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">银行卡</div>
-            </template>
-            <el-image
-              style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.bankUrl"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="['/api/api' + state.checkData.bankUrl]"
-              fit="cover"
-            />
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">其他证件</div>
-            </template>
-          </el-descriptions-item>
-        </el-descriptions>
-        <el-radio-group
-          v-model="state.setCheck.approveStatus"
-          style="margin-top: 20px"
-        >
-          <el-radio
-            v-for="(item, index) in state.setCheckOptions"
-            :key="index"
-            :value="item.dictValue"
-            >{{ item.dictLabel }}</el-radio
-          >
-        </el-radio-group>
-        <el-input
-          v-model="state.setCheck.reason"
-          style="width: 500px; display: block; margin-top: 20px"
-          :rows="3"
-          type="textarea"
-          placeholder="审核备注"
-        />
-      </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="handleComfirm()" type="primary">审核</el-button>
-          <el-button @click="dialogVisible = false"> 取消 </el-button>
-        </div>
-      </template>
-    </el-dialog>
+          {{ state.orderDetailData.orderId }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">订单编号</div>
+          </template>
+          {{ state.orderDetailData.orderNo }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">微信支付订单号</div>
+          </template>
+          {{ state.orderDetailData.transactionId }}
+        </el-descriptions-item>
 
-    <el-dialog v-model="state.dialogVisible1" title="查看进件状态" width="900">
-      <el-descriptions
-        class="margin-top"
-        :column="3"
-        size="Default"
-        border
-      >
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">业务申请编号</div>
+            <div class="cell-item">商家名称</div>
           </template>
-          business_code
+          {{ state.orderDetailData.storeName }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">微信支付申请单号</div>
+            <div class="cell-item">子商户号</div>
           </template>
-          applyment_id
+          {{ state.orderDetailData.subMchid }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">特约商户号</div>
+            <div class="cell-item">支付金额</div>
           </template>
-          sub_mchid
+          {{ state.orderDetailData.amount }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">超级管理员签约链接</div>
+            <div class="cell-item">买家昵称</div>
           </template>
-          sign_url
+          {{ state.orderDetailData.nickName }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">申请单状态</div>
+            <div class="cell-item">买家手机号</div>
           </template>
-          applyment_state
+          {{ state.orderDetailData.phone }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">申请状态描述</div>
+            <div class="cell-item">交易类型</div>
           </template>
-          applyment_state_msg
+          {{ state.orderDetailData.tradeType }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">驳回原因详情</div>
+            <div class="cell-item">交易状态</div>
           </template>
-          audit_detail
+          {{ state.orderDetailData.tradeState }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">交易状态描述</div>
+          </template>
+          {{ state.orderDetailData.tradeStateDesc }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">微信手续费</div>
+          </template>
+          {{ state.orderDetailData.wxRateAmount }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">微信手续费率</div>
+          </template>
+          {{ state.orderDetailData.wxRate }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">解冻状态</div>
+          </template>
+          {{ state.orderDetailData.unfreezeStatusLabel }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">是否分账</div>
+          </template>
+          {{ state.orderDetailData.profitSharingLabel }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">支付时间</div>
+          </template>
+          {{ state.orderDetailData.payTime }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">下单时间</div>
+          </template>
+          {{ state.orderDetailData.orderTime }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">银行类型</div>
+          </template>
+          {{ state.orderDetailData.bankType }}
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
@@ -397,94 +221,63 @@
 
 <script setup>
 import { reactive, onMounted, ref, inject } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getLists,
   checkInfo,
-  passCheck,
-  deleteRow,
-} from "@/api/project/merchant/settledPlatform.js";
+  checkOrderDetail,
+} from "@/api/project/merchant/order.js";
 defineOptions({
   name: "O-rder",
   isRouter: true,
 });
-const options = ref([]); //审批状态
 const query = reactive({
-  storeName: "",
+  orderNo: "",
+  nickName: "",
   phone: "",
-  applyTime: "",
-  approveStatus: "",
+  tradeType: "",
+  orderTime: "",
+  payStatus: "",
+  pageNum: 1,
 });
-const dialogVisible = ref(false);
-const tableData = ref([]);
-const check = async (row) => {
-  state.setCheck.applyId = row.applyId;
-  state.setCheck.approveStatus = "";
-  state.setCheck.reason = "";
-  const res = await checkInfo(state.setCheck.applyId);
-  if (res.code === 0) {
-    state.checkData = res.data;
-  }
-  dialogVisible.value = true;
-};
+
+const tableData = ref({
+  row: [],
+  total: 0,
+});
 const state = reactive({
   dialogVisible1: false,
-  checkData: {},
-  setCheck: {
-    applyId: "",
-    approveStatus: "",
-    reason: "",
-  },
   setCheckOptions: [],
+  orderDetailData: {},
 });
-const handleComfirm = async () => {
-  if (state.setCheck.approveStatus === "") {
-    ElMessage({
-      type: "warning",
-      message: `请选择审核结果！`,
-    });
-  } else {
-    const res = await passCheck(state.setCheck);
-    if (res.code === 0) {
-      dialogVisible.value = false;
-      getList();
-    }
-  }
-};
-const checkInStatus = () => {
-  state.dialogVisible1 = true;
+const check = async (row) => {
+  const res = await checkInfo(row.orderId);
+
+  getList();
 };
 
 const getList = async () => {
   const res = await getLists(query);
   if (res.code === 0) {
-    tableData.value = res.rows;
+    tableData.value.row = res.rows;
+    tableData.value.total = res.total;
   }
 };
-const deleteUser = (row) => {
-  ElMessageBox.confirm("确定删除所选数据?", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  })
-    .then(async () => {
-      await deleteRow(row.applyId);
-      getList();
-    })
-    .catch((action) => {
-      console.log(action);
-    });
+const orderDetail = async (row) => {
+  const res = await checkOrderDetail(row.orderId);
+  if (res.code === 0) {
+    state.orderDetailData = res.data;
+  }
+  state.dialogVisible1 = true;
 };
-
+const changePageSize = (e) => {
+  query.pageNum = e;
+  getList();
+};
 onMounted(async () => {
   inject("$com")
-    .getDict("bill_approve_status,bill_approve_status")
+    .getDict("bill_pay_status")
     .then((res) => {
-      options.value = res.data[0].list;
-      const idx = res.data[0].list.findIndex((x) => x.isDefault === "1");
-      query.approveStatus = res.data[0].list[idx].isDefault;
-
-      state.setCheckOptions = res.data[1].list;
+      state.setCheckOptions = res.data[0].list;
       getList();
     });
 });

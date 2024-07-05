@@ -30,6 +30,12 @@ export const constantRoutes = [
     component: (resolve: any) => import("@/views/status/404.vue"),
     hidden: true,
   },
+  // {
+  //   path: "",
+  //   component: () => import("@/views/login/merchantLogin.vue"),
+    
+  // },
+  
   {
     path: "",
     component: Layout,
@@ -42,6 +48,13 @@ export const constantRoutes = [
         name: "首页",
         meta: { title: "首页", icon: "#icon-shouye", noCache: true, affix: true }
       },
+      {
+        path: "home",
+        component: (resolve: any) => import("@/views/foreign/home/index.vue"),
+        // component: (resolve:any) => require("@/views/index/index"),
+        name: "商家首页",
+        meta: { title: "商家首页", icon: "#icon-shouye", noCache: true, affix: true }
+      },
       ...vueRouter(),
     ],
   },
@@ -53,16 +66,6 @@ const router = createRouter({
   // import.meta.env.BASE_URL
   history: createWebHistory(setting.publicPath),
   routes: constantRoutes,
-  // [
-  //   {
-  //     path: "/about",
-  //     name: "about",
-  //     // route level code-splitting
-  //     // this generates a separate chunk (About.[hash].js) for this route
-  //     // which is lazy-loaded when the route is visited.
-  //     component: () => import("../views/AboutView.vue"),
-  //   },
-  // ],
 });
 /**
  * 重置路由

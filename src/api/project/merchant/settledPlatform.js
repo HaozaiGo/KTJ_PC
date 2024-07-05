@@ -29,3 +29,20 @@ export function checkInfo(applyId) {
     method: "get",
   });
 }
+// 特约进件
+export function comeInApi(params) {
+  return request({
+    url: `/api/api/bill/apply/order/applyment`,
+    method: "get",
+    params
+  });
+}
+
+//进件状态
+export function checkComeStatus(params) {
+  return request({
+    url: `/api/api/bill/apply/order/applyment/${params.applyId}/${params.applymentId}`,
+    method: "get",
+  });
+}
+

@@ -39,8 +39,8 @@
             :loading="state.loading"
             >登录</el-button
           >
-          <!-- <input class="loginBtn" value="登录" /> -->
-          <p class="no">
+     
+          <!-- <p class="no">
             更换登录方式<span
               style="
                 text-decoration: underline;
@@ -49,7 +49,7 @@
               "
               >手机动态码登陆</span
             >
-          </p>
+          </p> -->
         </el-form>
       </div>
     </div>
@@ -90,9 +90,13 @@ const handleLogin = async () => {
           "routes",
           JSON.stringify(marchantRoute.data)
         );
+        window.localStorage.setItem(
+          "role",
+          "merchant"
+        );
         state.loading = false;
         setTimeout(() => {
-          router.push("/index");
+          router.push("/home");
         }, 200);
       } else {
         state.loading = false;

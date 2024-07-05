@@ -256,6 +256,7 @@ export default {
               // console.log(route);
               this.store.setRoute(route);
               window.localStorage.setItem("routes", JSON.stringify(route));
+              window.localStorage.setItem("role", "platform");
               setTimeout(() => {
                 this.$router.push("/index");
               }, 300);
