@@ -18,7 +18,7 @@ export const constantRoutes = [
   {
     path: "/signup",
     component: () => import("@/views/login/merchantLogin.vue"),
-    hidden: true,
+    hidden: true, 
   },
   // 数据大屏
   {
