@@ -68,7 +68,6 @@
         <a>注册账号 免费入驻</a>
       </div>
     </div>
-
     <!-- 底部备案号 -->
     <div class="beian">
       <div style="text-align: center">
@@ -170,7 +169,7 @@ export default {
   left: 0;
   right: 0;
   padding: 20px 0;
-  a{
+  a {
     font-size: 12px;
   }
 }
@@ -240,7 +239,6 @@ export default {
   /* background-color: #d9ead3; */
   cursor: pointer;
 }
-
 .login-box input {
   display: block;
   width: 100%;
