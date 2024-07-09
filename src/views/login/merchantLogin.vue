@@ -15,6 +15,7 @@
       </div>
     </div>
     <div class="login-box">
+      <h1 style="text-align: center;letter-spacing: 2px;">帮到你商家管理中心</h1>
       <div class="tab">
         <div :class="{ active: isAccountLogin }" @click="isAccountLogin = true">
           账号密码登录
@@ -81,10 +82,10 @@
             <p>15363821692</p>
           </div>
         </div>
-        <a style="color: #000;margin-right: 10px;" >
-          佛山市魁腾蛟科技有限公司
+        <a style="color: #716c6c;margin-right: 10px;" >
+          魁腾蛟科技有限公司
         </a>
-        <a style="color: #000" href="https://beian.miit.gov.cn/">
+        <a style="color: #716c6c" href="https://beian.miit.gov.cn/">
           ICP备案/许可证号： 粤ICP备2024277904号
         </a>
       </div>
@@ -170,7 +171,7 @@ export default {
   right: 0;
   padding: 20px 0;
   a {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 .login-container {
@@ -207,7 +208,7 @@ export default {
 
 .login-box {
   background-color: #fff;
-  padding: 80px 50px;
+  padding: 60px 50px;
   border-radius: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   min-width: 22vw;
@@ -216,17 +217,10 @@ export default {
 .tab {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 29px;
-  font-size: 21px;
+  margin: 20px 0px 30px 0px;
+  font-size: 18px;
 }
 
-.tab button {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 10px;
-}
 .tab div {
   padding: 0px 10px;
 }
