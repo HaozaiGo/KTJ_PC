@@ -13,7 +13,6 @@
       <div>终点地点：</div>
       <div><el-input v-model="state.endPointLong"></el-input></div>
       <div><el-input v-model="state.endPointLat"></el-input></div>
-      <!-- <el-button type="primary" @click="getDistance">确定</el-button> -->
     </div>
     <div class="box">
       两点距离：{{ mapDistance }}
