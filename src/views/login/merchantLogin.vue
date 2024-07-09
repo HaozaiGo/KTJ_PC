@@ -6,8 +6,6 @@
         alt="logo"
         style="width: 220px; height: 230px"
       />
-
-      <!-- <h1>帮到你</h1> -->
       <div>
         <img
           src="@/assets/img/login_images/text.png"
@@ -67,7 +65,29 @@
         <button @click="login">登录</button>
       </div>
       <div class="register">
-        <a href="#">注册账号 免费入驻</a>
+        <a>注册账号 免费入驻</a>
+      </div>
+    </div>
+
+    <!-- 底部备案号 -->
+    <div class="beian">
+      <div style="text-align: center">
+        <div class="flex contact" style="justify-content: center;margin-bottom: 10px;">
+          <div>
+            <p style="font-size: 16px;color: #000;font-weight: bold;">联系邮箱</p>
+            <p>bdnc1c@qq.com</p>
+          </div>
+          <div>
+            <p style="font-size: 16px;color: #000;font-weight: bold;">商家咨询请致电</p>
+            <p>15363821692</p>
+          </div>
+        </div>
+        <a style="color: #000;margin-right: 10px;" >
+          佛山市魁腾蛟科技有限公司
+        </a>
+        <a style="color: #000" href="https://beian.miit.gov.cn/">
+          ICP备案/许可证号： 粤ICP备2024277904号
+        </a>
       </div>
     </div>
   </div>
@@ -139,15 +159,20 @@ export default {
 </script>
 
 <style scoped>
-:deep(.el-form-item__content) {
-  /* display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 17px;
-  margin-bottom: 18px; */
+.contact div{
+  border-left: 1px dotted #ccc;
+  border-right: 1px dotted #ccc;
+  padding: 0px 20px;
+}
+.beian {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 0;
+  a{
+    font-size: 12px;
+  }
 }
 .login-container {
   display: flex;
