@@ -99,8 +99,8 @@ export default {
   data() {
     return {
       isAccountLogin: true,
-      account: "132564987123",
-      password: "123456",
+      account: "",
+      password: "",
       phone: "",
       code: "",
 
