@@ -1,21 +1,40 @@
 <template>
-  <div class="loginContent">
-    <div class="Box">
-      <div class="left">
-        <div class="centerBox">
-          <img src="@/assets/img/login_images/KTJ_Logo.png" alt="" />
-          <h4>帮到你商户线上经营平台</h4>
-          <p></p>
+  <div class="login-container">
+    <div class="logo">
+      <img
+        src="@/assets/img/login_images/Logo.png"
+        alt="logo"
+        style="width: 220px; height: 230px"
+      />
+
+      <!-- <h1>帮到你</h1> -->
+      <div>
+        <img
+          src="@/assets/img/login_images/text.png"
+          alt="logo"
+          style="width: 400px; height: 150px; margin-left: 40px"
+        />
+      </div>
+    </div>
+    <div class="login-box">
+      <div class="tab">
+        <div :class="{ active: isAccountLogin }" @click="isAccountLogin = true">
+          账号密码登录
+        </div>
+        <div
+          :class="{ active: !isAccountLogin }"
+          @click="isAccountLogin = false"
+        >
+          手机验证登录
         </div>
       </div>
-      <div class="right">
-        <el-form
+      <div v-if="isAccountLogin">
+        <!-- <el-form
           ref="ruleFormRef"
           :model="state.LoginForm"
           :rules="rules"
           label-width="auto"
         >
-          <h3>账号登录</h3>
           <el-form-item prop="username">
             <el-input
               v-model="state.LoginForm.username"
@@ -32,219 +51,200 @@
               show-password
             />
           </el-form-item>
-          <el-button
-            type="primary"
-            @click="handleLogin"
-            style="width: 286px"
-            :loading="state.loading"
-            >登录</el-button
-          >
-     
-          <!-- <p class="no">
-            更换登录方式<span
-              style="
-                text-decoration: underline;
-                cursor: pointer;
-                font-size: 14px;
-              "
-              >手机动态码登陆</span
-            >
-          </p> -->
-        </el-form>
+        </el-form> -->
+        <input type="text" placeholder="账号" v-model="account" />
+        <input
+          type="password"
+          placeholder="密码"
+          v-model="password"
+          @keyup.enter="login"
+        />
+        <button @click="login">登录</button>
+      </div>
+      <div v-else>
+        <input type="text" placeholder="手机号" v-model="phone" />
+        <input type="text" placeholder="验证码" v-model="code" />
+        <button @click="login">登录</button>
+      </div>
+      <div class="register">
+        <a href="#">注册账号 免费入驻</a>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { useRouter } from "vue-router";
-import { reactive, onMounted, ref } from "vue";
+<script>
 import { marchentLogin, getMarchentRoute } from "@/api/common/user.js";
-const router = useRouter();
-const rules = reactive({
-  username: [{ required: true, message: "请填写用户号", trigger: "blur" }],
-  password: [{ required: true, message: "请填写密码", trigger: "blur" }],
-});
-const ruleFormRef = ref(null);
-const state = reactive({
-  loading: false,
-  LoginForm: {
-    username: "132564987123",
-    password: "123456",
-  },
-});
-const handleLogin = async () => {
-  if (!ruleFormRef.value) return;
-  await ruleFormRef.value.validate(async (valid, fields) => {
-    if (valid) {
-      const res = await marchentLogin(state.LoginForm);
-      state.loading = true;
-      if (res.code === 0) {
-        //设置token
-        window.localStorage.setItem("token", res.data.token);
-        // window
-        //获取商家路由
-        const marchantRoute = await getMarchentRoute();
+export default {
+  data() {
+    return {
+      isAccountLogin: true,
+      account: "132564987123",
+      password: "123456",
+      phone: "",
+      code: "",
 
-        window.localStorage.setItem(
-          "routes",
-          JSON.stringify(marchantRoute.data)
-        );
-        window.localStorage.setItem(
-          "role",
-          "merchant"
-        );
-        state.loading = false;
-        setTimeout(() => {
-          router.push("/home");
-        }, 200);
+      state: {
+        loading: false,
+        LoginForm: {
+          username: "",
+          password: "",
+        },
+      },
+    };
+  },
+  methods: {
+    async login() {
+      if (this.isAccountLogin) {
+        console.log("Account:", this.account);
+        console.log("Password:", this.password);
+        if (this.account == "" || this.password == "") {
+          this.$message.error("账号或密码不能为空");
+          return;
+        }
+        try {
+          this.state.LoginForm.username = this.account;
+          this.state.LoginForm.password = this.password;
+
+          const res = await marchentLogin(this.state.LoginForm);
+          this.state.loading = true;
+          if (res.code === 0) {
+            //设置token
+            window.localStorage.setItem("token", res.data.token);
+            //获取商家路由
+            const marchantRoute = await getMarchentRoute();
+
+            window.localStorage.setItem(
+              "routes",
+              JSON.stringify(marchantRoute.data)
+            );
+            window.localStorage.setItem("role", "merchant");
+            this.state.loading = false;
+            setTimeout(() => {
+              this.$router.push("/home");
+            }, 200);
+          } else {
+            this.state.loading = false;
+          }
+        } catch (e) {
+          this.$message.error("账号或密码错误");
+        }
       } else {
-        state.loading = false;
+        console.log("Phone:", this.phone);
+        console.log("Code:", this.code);
       }
-    } else {
-      console.log("error submit!", fields);
-    }
-  });
+    },
+  },
 };
-onMounted(() => {
-  localStorage.clear();
-});
 </script>
 
-<style lang="scss" scoped>
-.loginContent {
-  height: 100vh;
-  background: url("https://images.pexels.com/photos/290595/pexels-photo-290595.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")
-    no-repeat;
-  background-size: 100% 120%;
+<style scoped>
+:deep(.el-form-item__content) {
+  /* display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-bottom: 18px; */
 }
-.Box {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 650px;
-  height: 400px;
+.login-container {
   display: flex;
+  /* flex-direction: column; */
+  align-items: center;
+  /* background-color: #ebcc9d; */
+  background-color: #d9ead39e;
+  height: 100vh;
+  justify-content: center;
 }
 
-.left {
-  position: relative;
-  width: 45%;
-  height: 100%;
-  background: url("https://img0.baidu.com/it/u=4234357226,4114415663&fm=253&fmt=auto&app=138&f=PNG?w=900&h=462")
-    no-repeat;
-  background-size: cover;
-  opacity: 1;
-}
-
-.right {
-  position: relative;
-  width: 55%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-.centerBox {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
+.logo {
+  display: flex;
+  align-items: center;
   text-align: center;
-}
-
-.left img {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 5px;
-}
-
-.left p {
-  font-size: 14px;
-  color: #fff;
-}
-
-.left h4 {
-  font-size: 18px;
-  color: #fff;
-  margin-bottom: 10px;
-}
-
-.right form {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  text-align: center;
-}
-
-h3 {
   margin-bottom: 20px;
-  color: #5f89ca;
+  transform: translateX(-130px);
 }
 
-input {
-  width: 100%;
-  height: 30px;
-  border: 1px solid #5f89ca;
-  background-color: transparent;
-  padding-left: 10px;
-  font-size: 12px;
-  color: #000000;
-  margin-bottom: 15px;
-  outline: none;
+.logo img {
+  height: 100px;
 }
 
-.loginBtn {
-  width: 100%;
-  height: 35px;
-  line-height: 32px;
-  text-align: center;
-  font-size: 15px;
-  color: #fff;
-  background: #5f89ca;
-  outline: none;
-  border: none;
-  margin-top: 10px;
+.logo h1 {
+  font-size: 32px;
+  margin: 10px 0;
 }
 
-.loginBtn:hover {
-  cursor: pointer;
-  background-color: deepskyblue;
-}
-
-.no {
-  cursor: pointer;
-  margin-top: 10px;
-  text-align: center;
-  font-size: 12px;
+.logo p {
+  font-size: 24px;
   color: #000;
 }
 
-.yzmBox {
+.login-box {
+  background-color: #fff;
+  padding: 80px 50px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-width: 22vw;
+}
+
+.tab {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-around;
+  margin-bottom: 29px;
+  font-size: 21px;
 }
 
-.yzmBox input {
-  width: 70%;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.yzmBox .btn {
+.tab button {
+  background: none;
+  border: none;
+  font-size: 18px;
   cursor: pointer;
-  width: 29%;
-  background-color: #5f89ca;
-  color: #ffffff;
-  height: 30px;
-  outline: none;
-  border: 1px solid #5f89ca;
-  font-size: 12px;
-  margin-left: 1%;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  padding: 10px;
+}
+.tab div {
+  padding: 0px 10px;
+}
+.tab div.active {
+  border-bottom: 2px solid #000;
+
+  font-weight: bold;
+}
+.tab div:hover {
+  /* background-color: #d9ead3; */
+  cursor: pointer;
+}
+
+.login-box input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 17px;
+  margin-bottom: 18px;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.register {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.register a {
+  color: #4caf50;
+  text-decoration: none;
 }
 </style>

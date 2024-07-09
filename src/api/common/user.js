@@ -31,6 +31,7 @@ export function marchentLogin(data) {
   return request({
     url: "/store/api/store/login",
     method: "post",
+    noToken: true,
     data,
   });
 }

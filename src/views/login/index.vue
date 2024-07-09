@@ -239,6 +239,7 @@ export default {
           this.loading = true;
           const res = await login(this.loginForm);
           // 登录success
+          console.log(res);
           if (res.code === 0) {
             window.localStorage.setItem("token", res.data);
           } else {

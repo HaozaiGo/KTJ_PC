@@ -4,7 +4,8 @@
 import request from "@/config/request.js";
 
 const commonMethod = {
-  baseUrl: "http://192.168.1.59",
+  // baseUrl: "http://192.168.1.59",
+  baseUrl:"http://124.223.101.232",
   socketUrl:"192.168.1.59:8081",
   // 字典
   getDict(dictType: string) {

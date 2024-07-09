@@ -23,7 +23,8 @@ let loadingInstance;
 // request拦截器
 service.interceptors.request.use(
   (config) => {
-    if (getToken()) {
+    console.log(config);
+    if (getToken() && config?.noToken!== true) {
       config.headers["Authorization"] =
         "Bearer " + window.localStorage.getItem("token");
     }

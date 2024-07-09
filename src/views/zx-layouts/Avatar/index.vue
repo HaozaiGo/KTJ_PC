@@ -11,6 +11,7 @@
         align-items: center;
       "
       @click="callUs"
+      v-if="role === 'merchant'"
     >
       <el-icon color="#fff"><User /></el-icon>
       <span style="color: #fff">客服</span>
@@ -109,6 +110,7 @@ export default {
     },
     logout() {
       window.localStorage.removeItem("token");
+      window.localStorage.removeItem("routes");
       if (this.role === "platform") {
         this.$router.replace(`/login`);
       } else {

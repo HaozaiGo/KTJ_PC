@@ -47,6 +47,7 @@ export async function encryptedData(data) {
 //   return data;
 // }
 
+// KTJ专属加密
 const AES_KEY = CryptoJS.enc.Utf8.parse("KTJ20240715_0001");
 const iv = CryptoJS.enc.Utf8.parse("KTJ20240715_IV01");
 
