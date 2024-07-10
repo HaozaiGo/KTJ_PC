@@ -2,7 +2,7 @@ import request from "@/config/request.js";
 
 export function getRoleList(params) {
   return request({
-    url: "/api/api/system/role/list",
+    url: "/api/system/role/list",
     method: "get",
     params,
   });
@@ -10,7 +10,7 @@ export function getRoleList(params) {
 // 新增角色
 export function addRole(data) {
   return request({
-    url: "/api/api/system/role",
+    url: "/api/system/role",
     method: "post",
     data,
   });
@@ -18,14 +18,14 @@ export function addRole(data) {
 // 获取当前角色详情
 export function getRoleDetail(roleId) {
   return request({
-    url: `/api/api/system/role/${roleId}`,
+    url: `/api/system/role/${roleId}`,
     method: "get",
   });
 }
 // 修改角色
 export function editRole(data) {
   return request({
-    url: "/api/api/system/role",
+    url: "/api/system/role",
     method: "put",
     data,
   });
@@ -33,7 +33,7 @@ export function editRole(data) {
 // 修改状态
 export function statusChange(params) {
   return request({
-    url: "/api/api/system/role/changeStatus",
+    url: "/api/system/role/changeStatus",
     method: "put",
     params,
   });
@@ -41,14 +41,14 @@ export function statusChange(params) {
 // 删除角色
 export function deleteRole(roleIds) {
   return request({
-    url: `/api/api/system/role/${roleIds}`,
+    url: `/api/system/role/${roleIds}`,
     method: "delete",
   });
 }
 // 获取对应角色部门树列表
 export function getRoleDepartmentTree(roleId) {
   return request({
-    url: `/api/api/system/role/deptTree/${roleId}`,
+    url: `/api/system/role/deptTree/${roleId}`,
     method: "get",
   });
 }
@@ -56,7 +56,7 @@ export function getRoleDepartmentTree(roleId) {
 
 export function saveDataScope(params) {
   return request({
-    url: `/api/api/system/role/dataScope`,
+    url: `/api/system/role/dataScope`,
     method: "put",
     params,
   });

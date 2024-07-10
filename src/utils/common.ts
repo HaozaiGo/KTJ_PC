@@ -10,7 +10,7 @@ const commonMethod = {
   // 字典
   getDict(dictType: string) {
     return request({
-      url: `/api/api/system/dict/type/type?dictTypes=` + dictType,
+      url: `/api/system/dict/type/type?dictTypes=` + dictType,
       method: "get",
     });
   },

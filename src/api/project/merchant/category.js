@@ -2,7 +2,7 @@ import request from "@/config/request.js";
 
 export function getCategoryList(params) {
   return request({
-    url: "/api/api/bill/store/type/tree",
+    url: "/api/bill/store/type/tree",
     method: "get",
     params,
   });
@@ -10,7 +10,7 @@ export function getCategoryList(params) {
 // 下拉树
 export function getSelectTree(params) {
   return request({
-    url: "/api/api/bill/store/type/select/tree",
+    url: "/api/bill/store/type/select/tree",
     method: "get",
     params,
   });
@@ -19,7 +19,7 @@ export function getSelectTree(params) {
 // 新增
 export function addtype(data) {
   return request({
-    url: "/api/api/bill/store/type",
+    url: "/api/bill/store/type",
     method: "post",
     data,
   });
@@ -34,7 +34,7 @@ export function deleteType(typeIds) {
 // 修改菜单
 export function editType(data) {
   return request({
-    url: "/api/api/bill/store/type",
+    url: "/api/bill/store/type",
     method: "put",
     data,
   });

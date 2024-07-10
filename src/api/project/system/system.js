@@ -10,7 +10,7 @@ import request from "@/config/request.js";
 
 export function getSystemUsers(params) {
   return request({
-    url: "/api/api/system/user/list",
+    url: "/api/system/user/list",
     method: "get",
     params,
   });
@@ -18,7 +18,7 @@ export function getSystemUsers(params) {
 // 新增系统用户
 export function addUser(data) {
   return request({
-    url: "/api/api/system/user",
+    url: "/api/system/user",
     method: "post",
     data,
   });
@@ -26,7 +26,7 @@ export function addUser(data) {
 // 编辑用户
 export function editUser(data) {
   return request({
-    url: "/api/api/system/user",
+    url: "/api/system/user",
     method: "put",
     data,
   });
@@ -34,14 +34,14 @@ export function editUser(data) {
 // 删除系统用户
 export function deleteSystemUser(userIds) {
   return request({
-    url: `/api/api/system/user/${userIds}`,
+    url: `/api/system/user/${userIds}`,
     method: "delete",
   });
 }
 // 更改状态
 export function statusChange(params) {
   return request({
-    url: "/api/api/system/user/changeStatus",
+    url: "/api/system/user/changeStatus",
     method: "put",
     params,
   });

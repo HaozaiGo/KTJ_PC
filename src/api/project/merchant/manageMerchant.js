@@ -2,14 +2,14 @@ import request from "@/config/request.js";
 
 export function getLists(params) {
   return request({
-    url: "/api/api/bill/store/list",
+    url: "/api/bill/store/list",
     method: "get",
     params,
   });
 }
 export function getFacilityList(params) {
   return request({
-    url: "/api/api/bill/facility/select",
+    url: "/api/bill/facility/select",
     method: "get",
     params,
   });
@@ -17,7 +17,7 @@ export function getFacilityList(params) {
 // 新增店铺信息
 export function addStop(data) {
   return request({
-    url: `/api/api/bill/store`,
+    url: `/api/bill/store`,
     method: "post",
     headers: {
       "Content-Type": "multipart/form-data", //修改请求头
@@ -27,7 +27,7 @@ export function addStop(data) {
 }
 // export function editShopInfo(data) {
 //   return request({
-//     url: `/api/api/store`,
+//     url: `/api/store`,
 //     method: "post",
 //     headers: {
 //       "Content-Type": "multipart/form-data", //修改请求头
@@ -39,7 +39,7 @@ export function addStop(data) {
 // 删除商铺
 export function deleteStop(storeIds) {
   return request({
-    url: `/api/api/bill/store/${storeIds}`,
+    url: `/api/bill/store/${storeIds}`,
     method: "delete",
   });
 }
@@ -47,7 +47,7 @@ export function deleteStop(storeIds) {
 // 修改状态
 export function setStatus(data) {
   return request({
-    url: `/api/api/store/status?onlineStatus=${data.status}&storeId=${data.storeId}`,
+    url: `/api/store/status?onlineStatus=${data.status}&storeId=${data.storeId}`,
     method: "post",
   });
 }
@@ -55,7 +55,7 @@ export function setStatus(data) {
 // 修改商家上线状态
 export function setShopOnlineStatus(data) {
   return request({
-    url: `/api/api/bill/store/online/status?ptOnlineStatus=${data.ptOnlineStatus}&storeId=${data.storeId}`,
+    url: `/api/bill/store/online/status?ptOnlineStatus=${data.ptOnlineStatus}&storeId=${data.storeId}`,
     method: "post",
   });
 }
@@ -63,21 +63,21 @@ export function setShopOnlineStatus(data) {
 // 修改商家启用状态
 export function setShopStatus(data) {
   return request({
-    url: `/api/api/bill/store/status?ptStatus=${data.ptStatus}&storeId=${data.storeId}`,
+    url: `/api/bill/store/status?ptStatus=${data.ptStatus}&storeId=${data.storeId}`,
     method: "post",
   });
 }
 
 export function getShopDetail(storeId) {
   return request({
-    url: `/api/api/bill/store/${storeId}`,
+    url: `/api/bill/store/${storeId}`,
     method: "get",
   });
 }
 // 导出
 export function exportShop(data) {
   return request({
-    url: `/api/api/bill/store/export`,
+    url: `/api/bill/store/export`,
     method: "post",
     data,
   });
@@ -86,7 +86,7 @@ export function exportShop(data) {
 // 商家店铺类型
 export function getTypeOptions(params) {
   return request({
-    url: `/api/api/bill/store/type/select/tree`,
+    url: `/api/bill/store/type/select/tree`,
     method: "get",
     params,
   });
@@ -95,14 +95,14 @@ export function getTypeOptions(params) {
 //查询商家配置详细信息
 export function getShopConfig(storeId) {
   return request({
-    url: `/api/api/bill/store/config/${storeId}`,
+    url: `/api/bill/store/config/${storeId}`,
     method: "get",
   });
 }
 // 修改商家配置
 export function shopConfigSetting(data) {
   return request({
-    url: `/api/api/bill/store/config`,
+    url: `/api/bill/store/config`,
     method: "put",
     data,
   });
@@ -110,7 +110,7 @@ export function shopConfigSetting(data) {
 // 查看商家资料
 export function checkMerchantData(storeId) {
   return request({
-    url: `/api/api/bill/store/material/${storeId}`,
+    url: `/api/bill/store/material/${storeId}`,
     method: "get",
   });
 }
@@ -118,7 +118,7 @@ export function checkMerchantData(storeId) {
 // 修改商家资料
 export function changeMerchantData(data) {
   return request({
-    url: `/api/api/bill/store/material`,
+    url: `/api/bill/store/material`,
     method: "post",
     data,
   });
@@ -127,7 +127,7 @@ export function changeMerchantData(data) {
 // 查看相册
 export function checkAlbums(params) {
   return request({
-    url: `/api/api/bill/store/images/list`,
+    url: `/api/bill/store/images/list`,
     method: "get",
     params,
   });
@@ -136,7 +136,7 @@ export function checkAlbums(params) {
 // 分账
 export function subAccountList(params) {
   return request({
-    url: `/api/api/bill/wx/share/receiver/list`,
+    url: `/api/bill/wx/share/receiver/list`,
     method: "get",
     params,
   });
@@ -144,7 +144,7 @@ export function subAccountList(params) {
 // 新增分账接受方
 export function addAccountList(data) {
   return request({
-    url: `/api/api/bill/wx/share/receiver`,
+    url: `/api/bill/wx/share/receiver`,
     method: "post",
     data,
   });
@@ -152,7 +152,7 @@ export function addAccountList(data) {
 // 删除
 export function deleteAccount(receiverId) {
   return request({
-    url: `/api/api/bill/wx/share/receiver/${receiverId}`,
+    url: `/api/bill/wx/share/receiver/${receiverId}`,
     method: "delete"
   });
 }

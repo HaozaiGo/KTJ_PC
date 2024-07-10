@@ -12,7 +12,7 @@ export async function login(data) {
     data = await encryptedData(data);
   }
   return request({
-    url: "/api/api/login",
+    url: "/api/login",
     method: "post",
     data: {
       username: data.username,
@@ -48,21 +48,21 @@ export function getMarchentRoute(data) {
 // 获取部门
 export function getDeptList() {
   return request({
-    url: "/api/api/system/user/deptTree",
+    url: "/api/system/user/deptTree",
     method: "get",
   });
 }
 // 获取角色
 export function getRoles() {
   return request({
-    url: "/api/api/system/user/roles",
+    url: "/api/system/user/roles",
     method: "get",
   });
 }
 // 获取菜单路由
 export function getRoute() {
   return request({
-    url: "/api/api/getRouters",
+    url: "/api/getRouters",
     method: "get",
   });
 }
