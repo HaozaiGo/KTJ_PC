@@ -458,12 +458,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + formData.checkData.businessLicenseUrl"
+              :src="'/api' + formData.checkData.businessLicenseUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api/api' + formData.checkData.businessLicenseUrl,
+                '/api' + formData.checkData.businessLicenseUrl,
               ]"
               fit="cover"
             />
@@ -474,12 +474,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + formData.checkData.identityPositiveUrl"
+              :src="'/api' + formData.checkData.identityPositiveUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api/api' + formData.checkData.identityPositiveUrl,
+                '/api' + formData.checkData.identityPositiveUrl,
               ]"
               fit="cover"
             />
@@ -490,12 +490,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + formData.checkData.identityNegativeUrl"
+              :src="'/api' + formData.checkData.identityNegativeUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api/api' + formData.checkData.identityNegativeUrl,
+                '/api' + formData.checkData.identityNegativeUrl,
               ]"
               fit="cover"
             />
@@ -506,11 +506,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + formData.checkData.permitUrl"
+              :src="'/api' + formData.checkData.permitUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api/api' + formData.checkData.permitUrl]"
+              :preview-src-list="['/api' + formData.checkData.permitUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -520,11 +520,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + formData.checkData.bankUrl"
+              :src="'/api' + formData.checkData.bankUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api/api' + formData.checkData.bankUrl]"
+              :preview-src-list="['/api' + formData.checkData.bankUrl]"
               fit="cover"
             />
           </el-descriptions-item>

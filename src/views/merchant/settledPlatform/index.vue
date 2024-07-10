@@ -255,11 +255,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.coverUrl"
+              :src="'/api' + state.checkData.coverUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api/api' + state.checkData.coverUrl]"
+              :preview-src-list="['/api' + state.checkData.coverUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -269,12 +269,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.identityPositiveUrl"
+              :src="'/api' + state.checkData.identityPositiveUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api/api' + state.checkData.identityPositiveUrl,
+                '/api' + state.checkData.identityPositiveUrl,
               ]"
               fit="cover"
             />
@@ -285,12 +285,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.identityNegativeUrl"
+              :src="'/api' + state.checkData.identityNegativeUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api/api' + state.checkData.identityNegativeUrl,
+                '/api' + state.checkData.identityNegativeUrl,
               ]"
               fit="cover"
             />
@@ -301,11 +301,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.permitUrl"
+              :src="'/api' + state.checkData.permitUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api/api' + state.checkData.permitUrl]"
+              :preview-src-list="['/api' + state.checkData.permitUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -315,11 +315,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api/api' + state.checkData.bankUrl"
+              :src="'/api' + state.checkData.bankUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api/api' + state.checkData.bankUrl]"
+              :preview-src-list="['/api' + state.checkData.bankUrl]"
               fit="cover"
             />
           </el-descriptions-item>
