@@ -9,6 +9,7 @@ const commonMethod = {
 
   // socketUrl:"192.168.1.59:8081",
   socketUrl: 'bdncn.cn/api',
+  role: window.localStorage.getItem("role") || "visitor",
   // 字典
   getDict(dictType: string) {
     return request({
