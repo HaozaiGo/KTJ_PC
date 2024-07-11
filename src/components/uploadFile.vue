@@ -35,7 +35,7 @@
   </div> -->
 </template>
 <script setup>
-import { ref, watch, inject } from "vue";
+import { ref, watch, inject, onMounted } from "vue";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 // import { uploadFileApi } from "@/api/common";
 const props = defineProps({
@@ -62,7 +62,7 @@ const props = defineProps({
   },
   fileList: {
     default: () => {
-     return [];
+      return [];
     },
     type: Array,
   },
@@ -75,24 +75,28 @@ const props = defineProps({
 let waitFileList = ref([]);
 waitFileList.value = props.fileList;
 
+onMounted(() => {
+  baseUrl.value = inject("$com").baseUrl;
+});
+
 watch(
   () => props.fileList,
   () => {
     console.log("props.fileList====>", props.fileList);
     waitFileList.value = props.fileList;
     if (props.fileList.length >= 1) {
-      imageUrl.value = "http://192.168.1.59/api/" + props.fileList[0].url;
+      imageUrl.value = baseUrl.value + "/api/" + props.fileList[0].url;
     } else {
       imageUrl.value = "";
     }
   }
 );
-
+const baseUrl = ref("");
 const emits = defineEmits(["uploadSuccess", "updateFile"]);
 const imageUrl = ref("");
 // 回显图
 if (props.fileList.length >= 1) {
-  imageUrl.value = "http://192.168.1.59/api/" + props.fileList[0].url;
+  imageUrl.value = baseUrl.value + "/api/" + props.fileList[0].url;
 } else {
   imageUrl.value = "";
 }

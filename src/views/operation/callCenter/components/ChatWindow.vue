@@ -63,7 +63,7 @@ export default {
     openWebSocket() {
       const url = common.socketUrl;
       var that = this;
-      this.ws = new WebSocket(`ws://${url}/ws/cs/message`);
+      this.ws = new WebSocket(`wss://${url}/ws/cs/message`);
 
       // 监听消息
       this.ws.addEventListener("message", function (event) {

@@ -53,7 +53,7 @@ const getUserListApi = async () => {
 const getUserListSocket = () => {
   // 连接websocket
   const url = socketUrl.value;
-  var ws = new WebSocket(`ws://${url}/ws/cs/room`);
+  var ws = new WebSocket(`wss://${url}/ws/cs/room`);
   // console.log(ws);
   // 监听消息
   ws.onmessage = function (event) {

@@ -24,8 +24,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-         //target: 'http://192.168.1.59',//开发
-        target: 'http://124.223.101.232',//开发
+        target: 'http://192.168.1.59',//开发
+        //target: 'http://124.223.101.232',//开发
         
         changeOrigin: true,
        // rewrite: (path) => path.replace(/^\/api/, ""), //地址重写

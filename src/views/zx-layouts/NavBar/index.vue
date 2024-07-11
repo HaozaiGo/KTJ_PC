@@ -75,6 +75,7 @@
             style="cursor: pointer"
             class="warning"
             @click="handleShowBigView"
+            v-if="role === 'platform'"
           >
             <el-icon style="transform: translateY(-2px)"><View /></el-icon>
             <span style="color: #fff">总览 </span>

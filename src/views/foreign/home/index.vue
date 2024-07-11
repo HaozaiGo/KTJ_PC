@@ -82,7 +82,7 @@
     </el-row>
 
     <!-- Echarts 图表 -->
-    <el-row :gutter="10" class="mt-3">
+    <!-- <el-row :gutter="10" class="mt-3">
       <el-col
         :xs="24"
         :sm="12"
@@ -99,7 +99,7 @@
           class="bg-[var(--el-bg-color-overlay)]"
         />
       </el-col>
-    </el-row>
+    </el-row> -->
   </div>
 </template>
 
