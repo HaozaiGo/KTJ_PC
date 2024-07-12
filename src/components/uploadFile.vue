@@ -118,15 +118,15 @@ const onUpload = async (file, fileList) => {
   let rawFile = file.raw;
   imageUrl.value = URL.createObjectURL(file.raw);
   if (
-    (rawFile.type == "image/jpeg" && rawFile.size / 1024 / 1024 > 10) ||
-    (rawFile.type == "image/png" && rawFile.size / 1024 / 1024 > 10) ||
-    (rawFile.type == "image/jpg" && rawFile.size / 1024 / 1024 > 10)
+    (rawFile.type == "image/jpeg" && rawFile.size / 1024 / 1024 > 5) ||
+    (rawFile.type == "image/png" && rawFile.size / 1024 / 1024 > 5) ||
+    (rawFile.type == "image/jpg" && rawFile.size / 1024 / 1024 > 5)
   ) {
-    ElMessage.error("图片大小不能超过10MB!");
+    ElMessage.error("图片大小不能超过5MB!");
     fileList.splice(-1, 1); //移除当前超出大小的文件
     return false;
-  } else if (rawFile.size / 1024 / 1024 > 20) {
-    ElMessage.error("文件大小不能超过20MB!");
+  } else if (rawFile.size / 1024 / 1024 > 10) {
+    ElMessage.error("文件大小不能超过10MB!");
     fileList.splice(-1, 1); //移除当前超出大小的文件
     return false;
   } else {
