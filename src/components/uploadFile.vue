@@ -85,13 +85,14 @@ watch(
   () => props.fileList,
   () => {
     console.log("props.fileList====>", props.fileList);
-    console.log(role.value);
+   
     waitFileList.value = props.fileList;
     if (props.fileList.length >= 1) {
-      imageUrl.value =
-        baseUrl.value + role.value === "merchant"
-          ? "/store/api/"
-          : "/api/" + props.fileList[0].url;
+      // imageUrl.value =
+      //   baseUrl.value + role.value === "merchant"
+      //     ? "/store/api/"
+      //     : "/api/" + props.fileList[0].url;
+      //     console.log(imageUrl.value);
     } else {
       imageUrl.value = "";
     }

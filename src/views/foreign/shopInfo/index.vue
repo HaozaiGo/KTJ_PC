@@ -476,6 +476,7 @@ const handleComfirm = () => {
           formDataBody.append(k, v);
         }
       }
+      console.log(formDataBody);
       await editShopInfo(formDataBody);
       getList();
       formData.drawer = false;
@@ -526,6 +527,7 @@ const uploadSuccess = (file, projectId) => {
 const updateFile = (uploadFiles, projectId) => {
   // console.log(projectId);
   for (let [k, v] of Object.entries(formData.data)) {
+   
     if (k == projectId) {
       formData.data[k] = "";
     }
