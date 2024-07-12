@@ -78,13 +78,14 @@ waitFileList.value = props.fileList;
 onMounted(() => {
   baseUrl.value = inject("$com").baseUrl;
   role.value = inject("$com").role;
-  console.log(role.value);
+ 
 });
 
 watch(
   () => props.fileList,
   () => {
-    // console.log("props.fileList====>", props.fileList);
+    console.log("props.fileList====>", props.fileList);
+    console.log(role.value);
     waitFileList.value = props.fileList;
     if (props.fileList.length >= 1) {
       imageUrl.value =
@@ -111,8 +112,8 @@ if (props.fileList.length >= 1) {
 }
 // 上传图片
 const onUpload = async (file, fileList) => {
-  // console.log(file);
-  // console.log(fileList);
+  console.log(file);
+  console.log(fileList);
   let rawFile = file.raw;
   imageUrl.value = URL.createObjectURL(file.raw);
   if (

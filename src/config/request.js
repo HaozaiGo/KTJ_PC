@@ -7,6 +7,7 @@ import { tansParams } from "@/utils/ruoyi";
 import { ElMessage } from "element-plus";
 import { refreshlogin } from "@/api/common/user";
 import { getToken, removeToken } from "@/utils/auth";
+import common from "@/utils/common";
 // import qs from "qs";
 import router from "@/router";
 axios.defaults.headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -23,8 +24,8 @@ let loadingInstance;
 // request拦截器
 service.interceptors.request.use(
   (config) => {
-    console.log(config);
-    if (getToken() && config?.noToken!== true) {
+    // console.log(config);
+    if (getToken() && config?.noToken !== true) {
       config.headers["Authorization"] =
         "Bearer " + window.localStorage.getItem("token");
     }
@@ -69,7 +70,11 @@ service.interceptors.response.use(
     }
     if (error == "invalid_token") {
       removeToken();
-      router.push("/login");
+      if (common.role === "merchant") {
+        router.replace("/signup");
+      } else {
+        router.replace("/login");
+      }
     }
     // 状态码 不等于succ 0  没有token
     if (code !== settings.successCode && access_token == undefined) {
@@ -82,7 +87,11 @@ service.interceptors.response.use(
         case settings.noPermissionCode:
           // 无权限 token失效
           removeToken();
-          router.push("/login");
+          if (common.role === "merchant") {
+            router.replace("/signup");
+          } else {
+            router.replace("/login");
+          }
           break;
         default:
           break;
