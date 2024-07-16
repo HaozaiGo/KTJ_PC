@@ -5,6 +5,7 @@
         v-model="query.name"
         style="width: 200px"
         placeholder="店铺名称"
+      
       />
       <el-input
         v-model="query.address"
@@ -12,7 +13,7 @@
         placeholder="店铺地址"
       />
 
-      <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
+      <el-button type="primary" icon="Search" @click="getList" id="create-post">搜索</el-button>
     </div>
 
     <div>
@@ -208,6 +209,7 @@
             @uploadSuccess="uploadSuccess"
             @updateFile="updateFile"
             :action="true"
+            :compress="true"
             projectId="coverUrl"
             :fileList="[
               {
@@ -280,6 +282,7 @@ import { reactive, onMounted, ref, toRefs, inject, nextTick } from "vue";
 import UploadFile from "@/components/uploadFile.vue";
 import myMap from "@/components/myMap.vue";
 import uploadFileLists from "@/components/uploadFileLists.vue";
+import { driver } from "driver.js";
 import {
   getLists,
   editShopInfo,
@@ -414,7 +417,20 @@ const tableData = ref({
   row: [],
   total: 0,
 });
-
+const tipsStep = () => {
+  const driver = new Driver();
+  console.log(driver);
+  driver.highlight({
+    element: "#create-post",
+    stageBackground: "#ffa0a0",
+    popover: {
+      title: "温馨提示",
+      description: "这是本站的首页",
+      position: "bottom",
+      className: "first-step",
+    },
+  });
+};
 // 上传相册
 const uploadAlbum = async (item) => {
   formData.dialogVisible = true;
@@ -527,7 +543,6 @@ const uploadSuccess = (file, projectId) => {
 const updateFile = (uploadFiles, projectId) => {
   // console.log(projectId);
   for (let [k, v] of Object.entries(formData.data)) {
-   
     if (k == projectId) {
       formData.data[k] = "";
     }
@@ -547,6 +562,7 @@ const changePageSize = (e) => {
 onMounted(async () => {
   getFacilityOption();
   getList();
+  tipsStep();
 });
 </script>
 

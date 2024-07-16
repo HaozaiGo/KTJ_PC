@@ -9,7 +9,9 @@
 <script>
 import MessageList from "./components/MessageList.vue";
 import ChatInput from "./components/ChatInput.vue";
-
+import { merchantGetBeforeChatContent } from "@/api/project/operation/callCenter.js";
+import common from "@/utils/common";
+import { encryptMessage } from "@/utils/encrypt.js";
 export default {
   name: "call-Us",
   isRouter: true,
@@ -26,44 +28,82 @@ export default {
   data() {
     return {
       messages: [],
+      socketUrl: null,
+      ws: null,
+      staffId: null,
     };
   },
   watch: {
     selectedUser(newVal) {
       if (newVal) {
-        // Reset the messages or load messages for the selected user
-        this.messages = [
-          { id: 1, text: "Hello", sender: "user" },
-          { id: 2, text: "Hi, how can I help you?", sender: "bot" },
-        ];
-        // 模拟新消息到来
-        // setTimeout(() => {
-        //   this.$emit("newMessage", newVal.id);
-        //   this.messages.push({
-        //     id: this.messages.length + 1,
-        //     text: "You have a new message!",
-        //     sender: "bot",
-        //   });
-        // }, 5000);
+        // this.messages = [
+        //   { id: 1, text: "Hello", sender: "user" },
+        //   { id: 2, text: "Hi, how can I help you?", sender: "bot" },
+        // ];
       }
     },
   },
   methods: {
+    // 获取之前的客服聊天记录
+    async getBeforeChatContent() {
+      const res = await merchantGetBeforeChatContent({
+        pageSize: 30,
+      });
+      if (res.code === 0) {
+        this.messages = res.rows;
+        this.setSocket();
+      }
+    },
+    // 获取list websocket
+    setSocket() {
+      var that = this;
+      this.socketUrl = common.socketUrl;
+      this.staffId = window.localStorage.getItem("staffId");
+      // 连接websocket
+      this.ws = new WebSocket(
+        `${this.socketUrl}/ws/cs/message/point/store/${this.staffId}`
+      );
+
+      // 监听消息
+      this.ws.addEventListener("message", function (event) {
+        try {
+          var data = event.data;
+          if (data === "连接成功") return;
+          // 新消息到来
+          that.messages.push({
+            message: data,
+            messageId: that.messages[that.messages.length - 1].messageId + 1,
+            type: "platform",
+            sendTime: new Date().toLocaleString(),
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      });
+    },
+
     sendMessage(message) {
       this.messages.push({
         id: this.messages.length + 1,
-        text: message,
-        sender: "user",
+        message: message,
+        type: "store",
       });
-      // 模拟机器人回复
-      setTimeout(() => {
-        this.messages.push({
-          id: this.messages.length + 1,
-          text: "This is an automated response.",
-          sender: "bot",
-        });
-      }, 1000);
+
+      const sendMsg = JSON.stringify({
+        formId: this.staffId,
+        formType: "store",
+        toId: 0,
+        toType: "platform",
+        content: message,
+      });
+
+      console.log(sendMsg);
+      // 发送消息
+      this.ws.send(encryptMessage(sendMsg));
     },
+  },
+  mounted() {
+    this.getBeforeChatContent();
   },
 };
 </script>

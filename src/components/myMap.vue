@@ -29,8 +29,8 @@ const initMap = () => {
   var point = new BMapGL.Point(113.168613, 23.074579);
   map.value.centerAndZoom(point, 15);
   // 添加标注
-  // var marker = new BMapGL.Marker(point);
-  // map.value.addOverlay(marker);
+  var marker = new BMapGL.Marker(point);
+  map.value.addOverlay(marker);
   // 开启鼠标滚轮缩放
   map.value.enableScrollWheelZoom(true);
 

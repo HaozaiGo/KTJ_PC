@@ -26,6 +26,9 @@ export default {
 .message-item.user {
   justify-content: flex-start;
 }
+.message-item.store {
+  justify-content: flex-start;
+}
 .message-item.platform {
   justify-content: flex-end;
 }
@@ -39,10 +42,19 @@ export default {
   max-width: 60%;
   padding: 10px;
   border-radius: 5px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
+}
+.message-text.store {
+  max-width: 60%;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #ffffff;
 }
 .message-item.user .message-text {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
+}
+.message-item.store .message-text {
+  background-color: #ffffff;
 }
 .message-item.platform .message-text {
   background-color: #e1ffc7;

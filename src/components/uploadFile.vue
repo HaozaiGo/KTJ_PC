@@ -37,10 +37,15 @@
 <script setup>
 import { ref, watch, inject, onMounted } from "vue";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
-// import { uploadFileApi } from "@/api/common";
+import common from "@/utils/common";
 const props = defineProps({
   // 需要自己设置action 外部的接口上传
   action: {
+    default: false,
+    type: Boolean,
+  },
+  // 开启压缩
+  compress: {
     default: false,
     type: Boolean,
   },
@@ -78,14 +83,13 @@ waitFileList.value = props.fileList;
 onMounted(() => {
   baseUrl.value = inject("$com").baseUrl;
   role.value = inject("$com").role;
- 
 });
 
 watch(
   () => props.fileList,
   () => {
     console.log("props.fileList====>", props.fileList);
-   
+
     waitFileList.value = props.fileList;
     if (props.fileList.length >= 1) {
       // imageUrl.value =
@@ -137,7 +141,19 @@ const onUpload = async (file, fileList) => {
         fileList.splice(0, 1);
       }
       if (props.action) {
-        emits("uploadSuccess", rawFile, props.projectId);
+        if (props.compress) {
+          // 压缩图片
+          common.compress(rawFile, function (val) {
+            let newfile = new window.File([val], file.name, {
+              type: file.type,
+            });
+            console.log(newfile);
+            // newfile.uid = file.uid;
+            emits("uploadSuccess", newfile, props.projectId);
+          });
+        } else {
+          emits("uploadSuccess", rawFile, props.projectId);
+        }
       } else {
         const loadingInstance = ElLoading.service({
           text: "正在上传",

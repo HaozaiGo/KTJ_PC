@@ -15,7 +15,9 @@
       </div>
     </div>
     <div class="login-box">
-      <h1 style="text-align: center;letter-spacing: 2px;">帮到你商家管理中心</h1>
+      <h1 style="text-align: center; letter-spacing: 2px">
+        帮到你商家管理中心
+      </h1>
       <div class="tab">
         <div :class="{ active: isAccountLogin }" @click="isAccountLogin = true">
           账号密码登录
@@ -72,19 +74,24 @@
     <!-- 底部备案号 -->
     <div class="beian">
       <div style="text-align: center">
-        <div class="flex contact" style="justify-content: center;margin-bottom: 10px;">
+        <div
+          class="flex contact"
+          style="justify-content: center; margin-bottom: 10px"
+        >
           <div>
-            <p style="font-size: 16px;color: #000;font-weight: bold;">联系邮箱</p>
+            <p style="font-size: 16px; color: #000; font-weight: bold">
+              联系邮箱
+            </p>
             <p>bdnc1c@qq.com</p>
           </div>
           <div>
-            <p style="font-size: 16px;color: #000;font-weight: bold;">商家咨询请致电</p>
+            <p style="font-size: 16px; color: #000; font-weight: bold">
+              商家咨询请致电
+            </p>
             <p>15363821692</p>
           </div>
         </div>
-        <a style="color: #716c6c;margin-right: 10px;" >
-          魁腾蛟科技有限公司
-        </a>
+        <a style="color: #716c6c; margin-right: 10px"> 魁腾蛟科技有限公司 </a>
         <a style="color: #716c6c" href="https://beian.miit.gov.cn/">
           ICP备案/许可证号： 粤ICP备2024277904号
         </a>
@@ -131,6 +138,7 @@ export default {
           if (res.code === 0) {
             //设置token
             window.localStorage.setItem("token", res.data.token);
+            window.localStorage.setItem("staffId", res.data.staffId);
             //获取商家路由
             const marchantRoute = await getMarchentRoute();
 
@@ -159,7 +167,7 @@ export default {
 </script>
 
 <style scoped>
-.contact div{
+.contact div {
   border-left: 1px dotted #ccc;
   border-right: 1px dotted #ccc;
   padding: 0px 20px;

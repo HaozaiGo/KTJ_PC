@@ -82,7 +82,11 @@ service.interceptors.response.use(
         case settings.invalidCode:
           // 登录失效
           removeToken();
-          router.push("/login");
+          if (common.role === "merchant") {
+            router.replace("/signup");
+          } else {
+            router.replace("/login");
+          }
           break;
         case settings.noPermissionCode:
           // 无权限 token失效

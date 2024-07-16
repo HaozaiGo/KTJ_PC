@@ -67,17 +67,23 @@
         <el-table-column prop="phone" label="商家电话" sortable />
         <el-table-column prop="price" label="商家均价" sortable width="110" />
         <el-table-column prop="score" label="人气分值" sortable width="110" />
-        <el-table-column
+        <!-- <el-table-column
           prop="commentCount"
           label="被评论数"
           sortable
           width="110"
-        />
+        /> -->
         <el-table-column
           prop="followCount"
           label="被关注数"
           sortable
           width="110"
+        />
+        <el-table-column
+          prop="mainStoreTypeNames"
+          label="商铺类型"
+          sortable
+          width="130"
         />
         <el-table-column
           prop="commentCount"

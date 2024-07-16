@@ -13,7 +13,10 @@
 <script>
 import MessageList from "./MessageList.vue";
 import ChatInput from "./ChatInput.vue";
-import { getChatRoomContent } from "@/api/project/operation/callCenter.js";
+import {
+  getChatRoomContent,
+  getChatRoomStoreContent,
+} from "@/api/project/operation/callCenter.js";
 import common from "@/utils/common";
 import { encryptMessage } from "@/utils/encrypt.js";
 export default {
@@ -21,6 +24,10 @@ export default {
     selectedUser: {
       type: Object,
       required: false,
+    },
+    type: {
+      type: String,
+      required: true,
     },
   },
   components: {
@@ -39,8 +46,17 @@ export default {
       if (newVal) {
         this.customerId = newVal.customerId;
         console.log(newVal);
-        this.getRoomMessage();
-        this.openWebSocket();
+        if (this.ws) {
+          
+          this.ws.close();
+          console.log("关闭之前的ws,success");
+        }
+
+        setTimeout(() => {
+          this.getRoomMessage();
+          this.openWebSocket();
+        }, 100);
+
         // this.messages = [
         //   { id: 1, text: "Hello", sender: "user" },
         //   { id: 2, text: "Hi, how can I help you?", sender: "bot" },
@@ -51,25 +67,42 @@ export default {
   methods: {
     // 获取对应room的信息
     async getRoomMessage() {
-      const res = await getChatRoomContent({
-        roomId: this.selectedUser.roomId,
-        pageSize: 20,
-      });
-      if (res.code === 0) {
-        this.messages = res.rows;
+      if (this.type === "user") {
+        const res = await getChatRoomContent({
+          roomId: this.selectedUser.roomId,
+          // customerId: this.selectedUser.customerId,
+          pageSize: 20,
+        });
+        if (res.code === 0) {
+          this.messages = res.rows;
+        }
+      } else if (this.type === "store") {
+        const res1 = await getChatRoomStoreContent({
+          roomId: this.selectedUser.roomId,
+          pageSize: 30,
+        });
+        if (res1.code === 0) {
+          this.messages = res1.rows;
+        }
       }
     },
     // 打开websockeet
     openWebSocket() {
       const url = common.socketUrl;
       var that = this;
-      this.ws = new WebSocket(`wss://${url}/ws/cs/message`);
+      this.ws = new WebSocket(
+        `${url}/ws/cs/message/${this.type}/${
+          this.type === "user"
+            ? this.selectedUser.customerId
+            : this.selectedUser.staffId
+        }`
+      );
 
       // 监听消息
       this.ws.addEventListener("message", function (event) {
         try {
           var data = event.data;
-    
+
           // 新消息到来
           that.messages.push({
             message: data,
@@ -84,19 +117,29 @@ export default {
     },
 
     sendMessage(message) {
+      var sendMsg;
       this.messages.push({
         id: this.messages.length + 1,
         message: message,
         type: "platform",
       });
-
-      const sendMsg = JSON.stringify({
-        formId: 0,
-        formType: "platform",
-        toId: this.customerId,
-        toType: "user",
-        content: message,
-      });
+      if (this.type === "user") {
+        sendMsg = JSON.stringify({
+          formId: 0,
+          formType: "platform",
+          toId: this.customerId,
+          toType: "user",
+          content: message,
+        });
+      } else if (this.type === "store") {
+        sendMsg = JSON.stringify({
+          formId: 0,
+          formType: "platform",
+          toId: this.selectedUser.staffId,
+          toType: "store",
+          content: message,
+        });
+      }
 
       console.log(sendMsg);
       // 发送消息

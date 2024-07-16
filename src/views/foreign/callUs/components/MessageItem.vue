@@ -1,6 +1,6 @@
 <template>
-  <div :class="['message-item', message.sender]">
-    <div class="message-text">{{ message.text }}</div>
+  <div :class="['message-item', message.type]">
+    <div class="message-text">{{ message.message }}</div>
   </div>
 </template>
 
@@ -21,10 +21,10 @@ export default {
   display: flex;
   margin-bottom: 10px;
 }
-.message-item.user {
+.message-item.store {
   justify-content: flex-end;
 }
-.message-item.bot {
+.message-item.platform {
   justify-content: flex-start;
 }
 .message-text {
@@ -33,10 +33,10 @@ export default {
   border-radius: 5px;
   background-color: #e1ffc7;
 }
-.message-item.user .message-text {
+.message-item.store .message-text {
   background-color: #dcf8c6;
 }
-.message-item.bot .message-text {
+.message-item.platform .message-text {
   background-color: #fff;
 }
 </style>
