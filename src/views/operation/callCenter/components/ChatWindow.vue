@@ -5,11 +5,9 @@
     <ChatInput @sendMessage="sendMessage" />
   </div>
   <div v-else class="chat-placeholder">
-    <!-- Please select a user to start chatting. -->
     请选择一个要回复的客户
   </div>
 </template>
-
 <script>
 import MessageList from "./MessageList.vue";
 import ChatInput from "./ChatInput.vue";
