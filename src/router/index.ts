@@ -14,11 +14,11 @@ export const constantRoutes = [
     component: () => import("@/views/login/index.vue"),
     hidden: true,
   },
- 
+
   {
     path: "/signup",
     component: () => import("@/views/login/merchantLogin.vue"),
-    hidden: true, 
+    hidden: true,
   },
   // 数据大屏
   {
@@ -51,6 +51,10 @@ export const constantRoutes = [
       ...vueRouter(),
     ],
   },
+  {
+    path: '/:catchAll(.*)',
+    redirect: '/404'
+  }
 
 ];
 
@@ -60,6 +64,15 @@ const router = createRouter({
   history: createWebHistory(setting.publicPath),
   routes: constantRoutes,
 });
+
+// 路由拦截
+
+// router.beforeEach(async (to, from) => {
+//   console.log(to);
+//   console.log(from);
+
+// })
+
 /**
  * 重置路由
  */

@@ -4,9 +4,7 @@
     <MessageList :messages="messages" />
     <ChatInput @sendMessage="sendMessage" />
   </div>
-  <div v-else class="chat-placeholder">
-    请选择一个要回复的客户
-  </div>
+  <div v-else class="chat-placeholder">请选择一个要回复的客户</div>
 </template>
 <script>
 import MessageList from "./MessageList.vue";
@@ -45,7 +43,6 @@ export default {
         this.customerId = newVal.customerId;
         console.log(newVal);
         if (this.ws) {
-          
           this.ws.close();
           console.log("关闭之前的ws,success");
         }
@@ -100,7 +97,7 @@ export default {
       this.ws.addEventListener("message", function (event) {
         try {
           var data = event.data;
-
+          if (data === "连接成功") return;
           // 新消息到来
           that.messages.push({
             message: data,

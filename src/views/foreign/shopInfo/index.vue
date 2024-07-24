@@ -5,7 +5,6 @@
         v-model="query.name"
         style="width: 200px"
         placeholder="店铺名称"
-      
       />
       <el-input
         v-model="query.address"
@@ -13,7 +12,7 @@
         placeholder="店铺地址"
       />
 
-      <el-button type="primary" icon="Search" @click="getList" id="create-post">搜索</el-button>
+      <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
     </div>
 
     <div>
@@ -36,6 +35,8 @@
         border
         default-expand-all
         @selection-change="handleSelectionChange"
+        ref="tableDom"
+        :max-height="tableHeight"
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="name" label="店铺名称" sortable />
@@ -220,7 +221,11 @@
           ></UploadFile>
         </el-form-item>
         <el-form-item label="店铺Logo" prop="logo" style="width: 90%">
-          <UploadFile
+
+          <cropperUpload>
+
+          </cropperUpload>
+          <!-- <UploadFile
             @uploadSuccess="uploadSuccess"
             @updateFile="updateFile"
             :action="true"
@@ -231,7 +236,7 @@
                 url: formData.data.logo,
               },
             ]"
-          ></UploadFile>
+          ></UploadFile> -->
         </el-form-item>
       </el-form>
 
@@ -282,7 +287,7 @@ import { reactive, onMounted, ref, toRefs, inject, nextTick } from "vue";
 import UploadFile from "@/components/uploadFile.vue";
 import myMap from "@/components/myMap.vue";
 import uploadFileLists from "@/components/uploadFileLists.vue";
-import { driver } from "driver.js";
+import cropperUpload from "@/components/uploadImgCut.vue";
 import {
   getLists,
   editShopInfo,
@@ -298,6 +303,7 @@ defineOptions({
   name: "Shop-Info",
   isRouter: true,
 });
+const tableDom = ref(null);
 const multipleSelection = ref([]);
 const FacilityList = ref([]);
 const query = reactive({
@@ -420,14 +426,18 @@ const tableData = ref({
 const tipsStep = () => {
   const driver = new Driver();
   console.log(driver);
+
+  console.log(tableDom.value);
   driver.highlight({
     element: "#create-post",
-    stageBackground: "#ffa0a0",
+    // stageBackground: "#ffa0a0",
     popover: {
       title: "温馨提示",
       description: "这是本站的首页",
-      position: "bottom",
-      className: "first-step",
+      position: "top",
+      closeBtnText: "关闭",
+      nextBtnText: "下一步",
+      // className: "first-step",
     },
   });
 };

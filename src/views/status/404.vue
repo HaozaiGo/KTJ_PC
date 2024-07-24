@@ -3,28 +3,13 @@
     <div class="error-content">
       <el-row :gutter="20">
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-          <!-- <div class="pic-error">
+          <div class="pic-error">
             <img
               alt="401"
               class="pic-error-parent"
-              src="@/assets/error_images/404.png"
+              src="@/assets/img/commonPic/404.jpg"
             />
-            <img
-              alt="401"
-              class="pic-error-child left"
-              src="@/assets/error_images/cloud.png"
-            />
-            <img
-              alt="401"
-              class="pic-error-child"
-              src="@/assets/error_images/cloud.png"
-            />
-            <img
-              alt="401"
-              class="pic-error-child"
-              src="@/assets/error_images/cloud.png"
-            />
-          </div> -->
+          </div>
         </el-col>
 
         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
@@ -32,9 +17,9 @@
             <div class="bullshit-oops">{{ oops }}</div>
             <div class="bullshit-headline">{{ headline }}</div>
             <div class="bullshit-info">{{ info }}</div>
-            <a class="bullshit-return-home" href="#/index">
+            <RouterLink class="bullshit-return-home" to="/">
               {{ jumpTime }}s&nbsp;{{ btn }}
-            </a>
+            </RouterLink>
           </div>
         </el-col>
       </el-row>
@@ -70,9 +55,6 @@ export default {
           this.jumpTime--;
         } else {
           this.$router.push({ path: "/" });
-          this.$store.dispatch("tagsBar/delOthersRoutes", {
-            path: "/",
-          });
           clearInterval(this.timer);
         }
       }, 1000);
@@ -92,7 +74,7 @@ export default {
     .pic-error {
       position: relative;
       float: left;
-      width: 120%;
+      width: 100%;
       overflow: hidden;
 
       &-parent {
