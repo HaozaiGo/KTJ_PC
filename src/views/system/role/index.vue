@@ -40,6 +40,7 @@
         border
         default-expand-all
         @selection-change="handleSelectionChange"
+        :max-height="tableHeight"
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="roleSort" label="角色编号" sortable />
@@ -199,7 +200,7 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref, getCurrentInstance } from "vue";
+import { reactive, onMounted, ref, getCurrentInstance, inject } from "vue";
 import {
   getRoleList,
   addRole,
@@ -231,6 +232,7 @@ const tree = ref();
 const tree_001 = ref();
 const treeData = ref([]); //菜单树
 const roleDepartmentTree = ref([]); //部门树
+const tableHeight = inject("$com").tableHeight();
 const query = reactive({
   roleName: "",
 });

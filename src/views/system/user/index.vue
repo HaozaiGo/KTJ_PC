@@ -45,6 +45,7 @@
         border
         default-expand-all
         @selection-change="handleSelectionChange"
+        :max-height="tableHeight"
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="userName" label="账号" sortable />
@@ -192,7 +193,7 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref, toRefs } from "vue";
+import { reactive, onMounted, ref, toRefs,inject } from "vue";
 import {
   getSystemUsers,
   addUser,
@@ -207,6 +208,7 @@ defineOptions({
   name: "U-ser",
   isRouter: true,
 });
+const tableHeight = inject("$com").tableHeight();
 const deptList = ref([]);
 const multipleSelection = ref([]);
 const rolesList = ref([]); //角色list

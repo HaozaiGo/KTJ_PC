@@ -41,6 +41,7 @@
         border
         default-expand-all
         v-loading="state.loading"
+        :max-height="tableHeight"
       >
         <el-table-column
           prop="storeName"
@@ -106,6 +107,7 @@
               type="primary"
               size="small"
               @click="checkInStatus(scope.row)"
+              v-if="scope.row.applymentId != null"
             >
               进件状态
             </el-button>
@@ -273,9 +275,7 @@
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="[
-                '/api' + state.checkData.identityPositiveUrl,
-              ]"
+              :preview-src-list="['/api' + state.checkData.identityPositiveUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -289,9 +289,7 @@
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="[
-                '/api' + state.checkData.identityNegativeUrl,
-              ]"
+              :preview-src-list="['/api' + state.checkData.identityNegativeUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -356,8 +354,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="state.dialogVisible1" title="查看进件状态" width="900">
-      <el-descriptions class="margin-top" :column="3" size="Default" border>
+    <el-dialog v-model="state.dialogVisible1" title="查看进件状态" width="1000">
+      <el-descriptions class="margin-top" :column="2" size="Default" border>
         <el-descriptions-item>
           <template #label>
             <div class="cell-item">业务申请编号</div>
@@ -402,7 +400,11 @@
           <template #label>
             <div class="cell-item">驳回原因详情</div>
           </template>
-          {{ state.comeInStuteData.auditDetail[0].rejectReason }}
+          {{
+            state.comeInStuteData.auditDetail.length > 0
+              ? state.comeInStuteData.auditDetail[0].rejectReason
+              : ""
+          }}
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
@@ -424,6 +426,7 @@ defineOptions({
   name: "settled-Platform",
   isRouter: true,
 });
+const tableHeight = inject("$com").tableHeight();
 const options = ref([]); //审批状态
 const query = reactive({
   storeName: "",
@@ -461,9 +464,13 @@ const state = reactive({
   comeInStuteData: {}, //进件状态
 });
 const comeIn = async (row) => {
-  state.loading = false;
   const res = await comeInApi({ applyId: row.applyId });
   state.loading = true;
+
+  if (res.code === 0) {
+    getList();
+    state.loading = false;
+  }
 };
 const handleComfirm = async () => {
   if (state.setCheck.approveStatus === "") {
@@ -530,6 +537,10 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+.content{
+  height: 600px;
+  overflow: hidden;
+}
 .demo-form-inline .el-input {
   --el-input-width: 200px;
 }

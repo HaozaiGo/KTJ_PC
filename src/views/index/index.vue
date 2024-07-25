@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div class="dashboard-container" :style="`height:${contentHeight}px`">
     <el-card shadow="never">
       <el-row justify="space-between">
         <el-col :span="18" :xs="24">
@@ -113,12 +113,12 @@ defineOptions({
 
 import { useUserStore } from "@/stores/modules/user";
 import { useTransition, TransitionPresets } from "@vueuse/core";
-import { ref, computed, defineAsyncComponent,onMounted } from "vue";
+import { ref, computed, defineAsyncComponent, onMounted } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const userStore = useUserStore();
 const date: Date = new Date();
-
+const contentHeight = window.innerHeight - 110;
 const greetings = computed(() => {
   const hours = date.getHours();
   if (hours >= 6 && hours < 8) {
@@ -244,9 +244,9 @@ const chartComponent = (item: string) => {
   return defineAsyncComponent(() => import(`./components/${item}.vue`));
 };
 onMounted(() => {
-  if(window.localStorage.getItem('routes') === null){
+  if (window.localStorage.getItem("routes") === null) {
     // 返回登录
-    router.replace('/login');
+    router.replace("/login");
   }
 });
 </script>
@@ -261,6 +261,8 @@ onMounted(() => {
 .dashboard-container {
   position: relative;
   padding: 24px;
+  overflow: hidden;
+  overflow-y: auto;
 
   .user-avatar {
     width: 40px;

@@ -55,16 +55,17 @@
         row-key="id"
         border
         default-expand-all
+        :max-height="tableHeight"
       >
         <el-table-column prop="orderId" label="订单ID" sortable width="180" />
-        <el-table-column prop="orderNo" label="订单编号" sortable />
-        <el-table-column prop="storeName" label="商家名称" sortable />
-        <el-table-column prop="amount" label="支付金额" sortable />
+        <el-table-column prop="orderNo" label="订单编号" sortable  width="150"/>
+        <el-table-column prop="storeName" label="商家名称" sortable  width="150" />
+        <el-table-column prop="amount" label="支付金额" sortable width="120"  />
         <el-table-column
           prop="orderTime"
           label="下单时间"
           sortable
-          width="150"
+          width="200"
         />
         <el-table-column
           prop="payStatusLabel"
@@ -72,9 +73,9 @@
           sortable
           width="150"
         />
-        <el-table-column prop="payTime" label="支付时间" sortable width="130" />
-        <el-table-column prop="payType" label="订单支付类型" sortable />
-        <el-table-column prop="phone" label="买家手机号" sortable />
+        <el-table-column prop="payTime" label="支付时间" sortable width="200" />
+        <el-table-column prop="payType" label="订单支付类型" sortable width="150" />
+        <el-table-column prop="phone" label="买家手机号" sortable width="150" />
         <el-table-column label="操作" width="220">
           <template #default="scope">
             <el-button
@@ -254,7 +255,7 @@ const check = async (row) => {
 
   getList();
 };
-
+const tableHeight = inject("$com").tableHeight();
 const getList = async () => {
   const res = await getLists(query);
   if (res.code === 0) {
