@@ -535,7 +535,6 @@ onMounted(async () => {
     });
 });
 </script>
-
 <style lang="scss" scoped>
 .content{
   height: 600px;

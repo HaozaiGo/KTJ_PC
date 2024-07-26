@@ -138,7 +138,6 @@ const getStoreListSocket = () => {
     }
   };
 };
-
 onMounted(() => {
   getUserListApi();
   // console.log(`the component is now mounted.`);

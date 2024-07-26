@@ -808,8 +808,6 @@ const edit = async (item) => {
     console.log(e);
   }
 
- 
-
   formData.data.coverUrlList = editData.data.coverUrl
     ? [
         {
