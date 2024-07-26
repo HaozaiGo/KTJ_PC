@@ -803,11 +803,12 @@ const edit = async (item) => {
   formData.data = { ...formData.data, ...editData.data };
   try {
     formData.data.facilities = formData.data.facilities.split(",");
+    formData.data.facilities = formData.data.facilities.map(Number);
   } catch (e) {
     console.log(e);
   }
 
-  formData.data.facilities = formData.data.facilities.map(Number);
+ 
 
   formData.data.coverUrlList = editData.data.coverUrl
     ? [
