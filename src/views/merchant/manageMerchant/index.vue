@@ -801,8 +801,12 @@ const edit = async (item) => {
   const editData = await getShopDetail(item.storeId);
 
   formData.data = { ...formData.data, ...editData.data };
+  try {
+    formData.data.facilities = formData.data.facilities.split(",");
+  } catch (e) {
+    console.log(e);
+  }
 
-  formData.data.facilities = formData.data.facilities.split(",");
   formData.data.facilities = formData.data.facilities.map(Number);
 
   formData.data.coverUrlList = editData.data.coverUrl
