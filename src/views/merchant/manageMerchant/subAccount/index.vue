@@ -10,7 +10,9 @@
     </div>
 
     <div>
-      <el-button type="primary" icon="Plus" round size="small" @click="add">新增</el-button>
+      <el-button type="primary" icon="Plus" round size="small" @click="add"
+        >新增</el-button
+      >
       <el-table
         :data="tableData.row"
         style="width: 100%; margin: 10px 0"
@@ -88,7 +90,7 @@ import { reactive, onMounted, ref, toRefs, inject } from "vue";
 import {
   subAccountList,
   addAccountList,
-  deleteAccount
+  deleteAccount,
 } from "@/api/project/merchant/manageMerchant.js";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { useRouter, useRoute } from "vue-router";
@@ -105,8 +107,8 @@ const query = reactive({
   pageNum: 1,
 });
 class Data {
-  rate="";
-  storeId="";
+  rate = "";
+  storeId = "";
 }
 let formData = reactive({
   data: new Data(),
@@ -144,10 +146,10 @@ const deleteUser = async (item) => {
     type: "warning",
   })
     .then(async () => {
-        const res = await deleteAccount(item.receiverId);
-        if (res.code === 0) {
-          getList();
-        }
+      const res = await deleteAccount(item.receiverId);
+      if (res.code === 0) {
+        getList();
+      }
     })
     .catch((action) => {
       console.log(action);
@@ -161,6 +163,7 @@ const handleComfirm = () => {
   if (!formRef.value) return;
   formRef.value.validate(async (valid) => {
     if (valid) {
+      formData.data.rate = formData.data.rate / 100;
       await addAccountList(formData.data);
       getList();
       dialogVisible.value = false;
@@ -175,7 +178,8 @@ const handleComfirm = () => {
 };
 
 const getList = async () => {
-  const res = await subAccountList(query);
+  const body = Object.assign(query, { storeId: storeId.value });
+  const res = await subAccountList(body);
   if (res.code === 0) {
     tableData.value.row = res.rows;
     tableData.value.total = res.total;

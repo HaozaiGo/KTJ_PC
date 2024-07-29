@@ -43,6 +43,18 @@
         @click="deleteUser"
         >删除</el-button
       >
+      <el-button
+        type="primary"
+        icon="Plus"
+        round
+        size="small"
+        @click="
+          Discounts.dialogVisible = true;
+          Discounts.settingAll = true;
+        "
+        :disabled="multipleSelection.length === 0"
+        >设置优惠</el-button
+      >
       <el-table
         :data="tableData.row"
         style="width: 100%; margin: 10px 0"
@@ -164,13 +176,14 @@
               >
                 商家相册
               </el-button>
-              <a
-                :href="`${formData.origin}/bill/store/qrcode/mini?storeId=${scope.row.storeId}`"
-                download="商家二维码.png"
-                target="_blank"
-                style="color: #409eff; font-size: 13px; margin-left: 13px"
-                >二维码</a
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="showScanCode(scope.row)"
               >
+                二维码
+              </el-button>
             </div>
             <div>
               <el-button
@@ -180,6 +193,14 @@
                 @click="setSubAccount(scope.row)"
               >
                 设置分账
+              </el-button>
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="setDiscounts(scope.row)"
+              >
+                设置优惠
               </el-button>
             </div>
           </template>
@@ -192,6 +213,26 @@
         @current-change="changePageSize"
       />
     </div>
+    <!-- 设置优惠 -->
+
+    <el-dialog v-model="Discounts.dialogVisible" title="设置优惠" width="500">
+      <el-form :model="Discounts" label-width="auto" style="max-width: 450px">
+        <el-form-item label="优惠力度">
+          <el-input
+            v-model="Discounts.discount"
+            style="width: 200px"
+            type="number"
+            ><template #append>%</template></el-input
+          >
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="Discounts.dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="comfirmDiscount"> 确定 </el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <el-drawer
       v-model="formData.drawer"
@@ -288,7 +329,6 @@
           <el-time-select
             v-model="formData.data.startTime"
             style="width: 200px"
-            :max-time="formData.data.endTime"
             class="mr-4"
             placeholder="营业开始时间"
             start="00:00"
@@ -300,7 +340,6 @@
           <el-time-select
             v-model="formData.data.endTime"
             style="width: 200px"
-            :min-time="formData.data.startTime"
             placeholder="营业结束时间"
             start="00:00"
             step="00:30"
@@ -585,6 +624,29 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 二维码 -->
+    <el-dialog v-model="ScanCode.dialogVisible" title="商家二维码" width="500">
+      <div style="width: 100%; text-align: center">
+        <el-image
+          :src="`${formData.origin}/bill/store/qrcode/mini?storeId=${ScanCode.storeId}`"
+          style="width: 280px; height: 280px"
+        />
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="ScanCode.dialogVisible = false">取消</el-button>
+          <a
+            :href="`${formData.origin}/bill/store/qrcode/mini?storeId=${ScanCode.storeId}`"
+            download="商家二维码.png"
+            target="_blank"
+            style="color: #409eff; font-size: 12px; margin-left: 13px;padding: 8px 15px;border: 1px solid #ccc ;border-radius: 5px;"
+            >下载</a
+          >
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -598,7 +660,7 @@ import {
   deleteStop,
   getFacilityList,
   getShopDetail,
-  setStatus,
+  setStoreStatus,
   getTypeOptions,
   setShopOnlineStatus,
   setShopStatus,
@@ -606,13 +668,25 @@ import {
   getShopConfig,
   checkMerchantData,
   checkAlbums,
+  discountAPI,
 } from "@/api/project/merchant/manageMerchant.js";
+import { editShopInfo } from "@/api/project/foreign/shopInfo.js";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
 const router = useRouter();
 defineOptions({
   name: "manage-Merchant",
   isRouter: true,
+});
+const Discounts = reactive({
+  dialogVisible: false,
+  discount: null,
+  storeId: "",
+  settingAll: false,
+});
+const ScanCode = reactive({
+  dialogVisible: false,
+  storeId: "",
 });
 const multipleSelection = ref([]);
 const FacilityList = ref([]);
@@ -753,6 +827,37 @@ const tableData = ref({
   row: [],
   total: 0,
 });
+const showScanCode = (row) => {
+  ScanCode.dialogVisible = true;
+  ScanCode.storeId = row.storeId;
+};
+const comfirmDiscount = async () => {
+  if (Discounts.settingAll) {
+    const storeIds = multipleSelection.value.map((x) => x.storeId);
+    const res = await discountAPI({
+      discount: Discounts.discount / 100,
+      storeIds: storeIds,
+    });
+    if (res.code === 0) {
+      Discounts.dialogVisible = false;
+    }
+  } else {
+    const res = await discountAPI({
+      discount: Discounts.discount / 100,
+      storeIds: [Discounts.storeId],
+    });
+    if (res.code === 0) {
+      Discounts.dialogVisible = false;
+    }
+  }
+  getList();
+};
+const setDiscounts = (row) => {
+  console.log(row);
+  Discounts.discount = row.discount * 100;
+  Discounts.dialogVisible = true;
+  Discounts.storeId = row.storeId;
+};
 const setting = async (item) => {
   const res = await getShopConfig(item.storeId);
   if (res.code === 0) {
@@ -851,12 +956,12 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val;
 };
 const handleComfirm = () => {
-  if (formData.state === "check") {
-    formData.drawer = false;
-  }
+  // if (formData.state === "check") {
+  //   formData.drawer = false;
+  // }
   if (!formRef.value) return;
   formRef.value.validate(async (valid) => {
-    if (valid && formData.state === "add") {
+    if (valid) {
       const formDataBody = new FormData();
       for (let [k, v] of Object.entries(formData.data)) {
         if (k === "files") {
@@ -873,16 +978,20 @@ const handleComfirm = () => {
           formDataBody.append(k, v);
         }
       }
-
-      const res = await addStop(formDataBody);
+      if (formData.state === "check") {
+        const res1 = await editShopInfo(formDataBody);
+        if (res1.code === 0) formData.drawer = false;
+      } else {
+        const res = await addStop(formDataBody);
+        if (res.code === 0) formData.drawer = false;
+      }
       getList();
-      if (res.code === 0) formData.drawer = false;
     }
   });
 };
 // 开关
 const switchChange = async (item) => {
-  await setStatus({
+  await setStoreStatus({
     status: item.onlineStatus === "1" ? 1 : 0,
     storeId: item.storeId,
   });

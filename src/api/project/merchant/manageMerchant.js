@@ -43,6 +43,13 @@ export function deleteStop(storeIds) {
     method: "delete",
   });
 }
+// 修改商家平台状态
+export function setStoreStatus(data) {
+  return request({
+    url: `/api/bill/store/status?ptStatus=${data.status}&storeId=${data.storeId}`,
+    method: "post",
+  });
+}
 
 // 修改状态
 export function setStatus(data) {
@@ -154,5 +161,13 @@ export function deleteAccount(receiverId) {
   return request({
     url: `/api/bill/wx/share/receiver/${receiverId}`,
     method: "delete"
+  });
+}
+// 修改商家折扣
+export function discountAPI(data) {
+  return request({
+    url: `/api/bill/store/edit/discount`,
+    method: "post",
+    data,
   });
 }

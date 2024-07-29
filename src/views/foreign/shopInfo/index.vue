@@ -186,7 +186,6 @@
           <el-time-select
             v-model="formData.data.startTime"
             style="width: 200px"
-            :max-time="formData.data.endTime"
             class="mr-4"
             placeholder="营业开始时间"
             start="00:00"
@@ -198,7 +197,6 @@
           <el-time-select
             v-model="formData.data.endTime"
             style="width: 200px"
-            :min-time="formData.data.startTime"
             placeholder="营业结束时间"
             start="00:00"
             step="00:30"
@@ -221,10 +219,7 @@
           ></UploadFile>
         </el-form-item>
         <el-form-item label="店铺Logo" prop="logo" style="width: 90%">
-
-          <cropperUpload>
-
-          </cropperUpload>
+          <cropperUpload> </cropperUpload>
           <!-- <UploadFile
             @uploadSuccess="uploadSuccess"
             @updateFile="updateFile"
@@ -468,9 +463,13 @@ const edit = async (item) => {
   const editData = await getShopDetail(item.storeId);
 
   formData.data = { ...formData.data, ...editData.data };
+  try {
+    formData.data.facilities = formData.data.facilities.split(",");
+    formData.data.facilities = formData.data.facilities.map(Number);
+  } catch (e) {
+    console.log(e);
+  }
 
-  formData.data.facilities = formData.data.facilities.split(",");
-  formData.data.facilities = formData.data.facilities.map(Number);
   formData.drawer = true;
 };
 // 删除
