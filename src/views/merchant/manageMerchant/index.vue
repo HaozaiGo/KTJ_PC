@@ -467,18 +467,7 @@
             </template>
             {{ formData.checkData.bankNo }}
           </el-descriptions-item>
-          <!-- <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">主商铺类型</div>
-            </template>
-            {{ formData.checkData.mainStoreTypeNames }}
-          </el-descriptions-item>
-          <el-descriptions-item>
-            <template #label>
-              <div class="cell-item">副商铺类型</div>
-            </template>
-            {{ formData.checkData.deputyStoreTypeNames }}
-          </el-descriptions-item> -->
+      
           <el-descriptions-item>
             <template #label>
               <div class="cell-item">身份证人名称</div>
@@ -669,8 +658,8 @@ import {
   checkMerchantData,
   checkAlbums,
   discountAPI,
+  editShopInfo
 } from "@/api/project/merchant/manageMerchant.js";
-import { editShopInfo } from "@/api/project/foreign/shopInfo.js";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -868,7 +857,7 @@ const setting = async (item) => {
 // 查看商家资料
 const seeMerchantData = async (item) => {
   const res = await checkMerchantData(item.storeId);
-  if (res.code === 0) {
+  if (res.code === 0 && res.data) {
     formData.checkData = res.data;
   }
   formData.dialogVisible1 = true;

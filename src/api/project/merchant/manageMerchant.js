@@ -25,16 +25,17 @@ export function addStop(data) {
     data,
   });
 }
-// export function editShopInfo(data) {
-//   return request({
-//     url: `/api/store`,
-//     method: "post",
-//     headers: {
-//       "Content-Type": "multipart/form-data", //修改请求头
-//     },
-//     data,
-//   });
-// }
+// 修改商家信息
+export function editShopInfo(data) {
+  return request({
+    url: `/api/bill/store`,
+    method: "PUT",
+    headers: {
+      "Content-Type": "multipart/form-data", //修改请求头
+    },
+    data
+  });
+}
 
 // 删除商铺
 export function deleteStop(storeIds) {

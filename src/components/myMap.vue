@@ -65,7 +65,7 @@ const getClickLocation = (map) => {
     map.addOverlay(marker);
 
     geoc.getLocation(pt, function (rs) {
-      // console.log(rs);
+      console.log(rs);
       var addComp = rs.addressComponents;
       state.position =
         addComp.province +
@@ -77,12 +77,23 @@ const getClickLocation = (map) => {
         addComp.street +
         ", " +
         addComp.streetNumber;
-      state.latlng = rs.point;
+      // state.latlng = rs.point;
       state.citys = addComp.city;
       state.districts = addComp.district;
       state.provinces = addComp.province;
       state.street = addComp.street;
       state.streetNumber = addComp.streetNumber;
+
+
+      var convertor = new BMapGL.Convertor();
+      const ggPoint = new BMapGL.Point(pt.lng, pt.lat);
+      convertor.translate([ggPoint], 5, 3, function (data) {
+        console.log(data);
+        if(data.status === 0) {
+          state.latlng = data.points[0];
+        }
+      })
+
     });
   });
 };
