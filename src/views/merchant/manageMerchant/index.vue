@@ -351,6 +351,7 @@
             @uploadSuccess="uploadSuccess"
             @updateFile="updateFile"
             :action="true"
+            :compress="true"
             projectId="coverUrl"
             :fileList="formData.data.coverUrlList"
           ></UploadFile>
@@ -360,6 +361,7 @@
             @uploadSuccess="uploadSuccess"
             @updateFile="updateFile"
             :action="true"
+            :compress="true"
             projectId="logo"
             :fileList="formData.data.logoList"
           ></UploadFile>
@@ -467,7 +469,7 @@
             </template>
             {{ formData.checkData.bankNo }}
           </el-descriptions-item>
-      
+
           <el-descriptions-item>
             <template #label>
               <div class="cell-item">身份证人名称</div>
@@ -630,7 +632,14 @@
             :href="`${formData.origin}/bill/store/qrcode/mini?storeId=${ScanCode.storeId}`"
             download="商家二维码.png"
             target="_blank"
-            style="color: #409eff; font-size: 12px; margin-left: 13px;padding: 8px 15px;border: 1px solid #ccc ;border-radius: 5px;"
+            style="
+              color: #409eff;
+              font-size: 12px;
+              margin-left: 13px;
+              padding: 8px 15px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            "
             >下载</a
           >
         </div>
@@ -658,7 +667,7 @@ import {
   checkMerchantData,
   checkAlbums,
   discountAPI,
-  editShopInfo
+  editShopInfo,
 } from "@/api/project/merchant/manageMerchant.js";
 import { ElMessageBox, ElMessage, ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
@@ -895,6 +904,9 @@ const edit = async (item) => {
   const editData = await getShopDetail(item.storeId);
 
   formData.data = { ...formData.data, ...editData.data };
+  formData.data.fileNames = [];
+  formData.data.files = [];
+
   try {
     formData.data.facilities = formData.data.facilities.split(",");
     formData.data.facilities = formData.data.facilities.map(Number);
@@ -1027,11 +1039,14 @@ const getList = async () => {
   }
 };
 const uploadSuccess = (file, projectId) => {
-  // console.log(file);
   const loadingInstance = ElLoading.service({
     text: "正在上传",
     background: "rgba(0,0,0,.2)",
   });
+  // console.log(formData.data.fileNames);
+  // console.log(formData.data.files);
+
+  // console.log("----------");
   formData.data.fileNames.push(projectId);
   formData.data.files.push(file);
   formData.data[projectId] = projectId;

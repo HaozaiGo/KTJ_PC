@@ -92,11 +92,11 @@ watch(
 
     waitFileList.value = props.fileList;
     if (props.fileList.length >= 1) {
-      // imageUrl.value =
-      //   baseUrl.value + role.value === "merchant"
-      //     ? "/store/api/"
-      //     : "/api/" + props.fileList[0].url;
-      //     console.log(imageUrl.value);
+      imageUrl.value =
+        baseUrl.value + role.value === "merchant"
+          ? "/store/api/"
+          : "/api/" + props.fileList[0].url;
+          console.log(imageUrl.value);
     } else {
       imageUrl.value = "";
     }
@@ -147,7 +147,8 @@ const onUpload = async (file, fileList) => {
             let newfile = new window.File([val], file.name, {
               type: file.type,
             });
-            console.log(newfile);
+            // console.log(newfile);
+            // console.log('----压缩');
             // newfile.uid = file.uid;
             emits("uploadSuccess", newfile, props.projectId);
           });
