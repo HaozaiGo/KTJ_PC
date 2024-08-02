@@ -68,6 +68,8 @@ $base-menu-item-align:center;
 $base-app-main-height: calc(
   100% - #{$base-padding} 
 );
+// 表格基础高度
+$base-table-height: calc(100% - 100px);
 $base-leftSize-menu-width:80px;
 //纵向布局时左侧导航未折叠时的宽度
 $base-left-menu-width: 190px;
@@ -87,6 +89,7 @@ $base-transition: all 0.3s;
   tags-bar-background-active: $base-color-blue;
   button-background: $base-color-blue;
   pagination-background-active: $base-color-blue;
+  table-height:$base-app-main-height
 }
 
 .search {
