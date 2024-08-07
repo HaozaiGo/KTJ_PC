@@ -23,9 +23,9 @@
           添加菜式类型
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item @click="addTaste">添加口味</el-dropdown-item>
-              <el-dropdown-item @click="deleteTaste">删除口味</el-dropdown-item>
-              <el-dropdown-item @click="editTaste">修改口味</el-dropdown-item>
+              <el-dropdown-item @click="addTaste">添加菜式</el-dropdown-item>
+              <el-dropdown-item @click="deleteTaste">删除菜式</el-dropdown-item>
+              <el-dropdown-item @click="editTaste">修改菜式</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -48,11 +48,11 @@
       <el-col :xs="22" :sm="18">
         <div>
           <el-button
-            @click="addTaste1"
+            @click="addMenus"
             type="primary"
             style="margin-bottom: 20px"
           >
-            添加口味信息
+            添加菜品
           </el-button>
 
           <div>
@@ -102,17 +102,57 @@
                       "
                     >
                       <img
-                        :src="item.imgUrl"
+                        :src="filePath + item.coverUrl"
                         class="image multi-content"
-                        style="max-width: 100%"
+                        style="height: 200px; width: 294px"
                       />
                       <div style="padding: 14px">
-                        <span>{{ item.name }}</span>
-                        <div class="bottom card-header">
-                          <div class="time">{{ currentDate }}</div>
-                          <el-button text class="button"
-                            >Operation button</el-button
-                          >
+                        <span style="font-size: 20px; font-weight: bold">{{
+                          item.name
+                        }}</span>
+                        <div class="bottom card-header flex-sb">
+                          <div class="money">
+                            {{ item.price
+                            }}<span
+                              style="
+                                font-size: 14px;
+                                margin: 0 5px;
+                                display: inline-block;
+                              "
+                              >¥/{{ item.unit }}</span
+                            >
+                            <span
+                              style="
+                                text-decoration: line-through;
+                                font-size: 16px;
+                              "
+                            >
+                              {{ item.oldPrice }}</span
+                            >
+                            <span
+                              style="
+                                font-size: 14px;
+                                margin: 0 5px;
+                                display: inline-block;
+                              "
+                              v-if="item.oldPrice"
+                              >¥</span
+                            >
+                          </div>
+                          <div>
+                            <el-button
+                              text
+                              class="button"
+                              @click="handleEditMenu(item)"
+                              ><el-icon size="23"><Edit /></el-icon
+                            ></el-button>
+                            <el-button
+                              text
+                              class="button"
+                              @click="handleDelMenu(item)"
+                              ><el-icon size="23"><DeleteFilled /></el-icon
+                            ></el-button>
+                          </div>
                         </div>
                       </div>
                     </el-card>
@@ -141,6 +181,11 @@
         <el-form-item label="菜式类型" prop="name">
           <el-input v-model="tasteData.form.name"> </el-input>
         </el-form-item>
+
+        <!-- test -->
+        <!-- <el-form-item>
+          <testUpload @input="testArr"></testUpload>
+         </el-form-item> -->
       </el-form>
 
       <template #footer>
@@ -150,27 +195,121 @@
         </div>
       </template>
     </el-dialog>
+    <!-- 菜品 -->
+    <el-dialog
+      v-model="tasteData.dialogVisible1"
+      :title="tasteData.status === 'add' ? '添加菜品' : '修改菜品'"
+      width="800"
+    >
+      <el-form
+        :model="tasteData.form1"
+        label-width="auto"
+        style="max-width: 750"
+        :rules="rules1"
+        ref="ruleFormRef1"
+      >
+        <el-form-item label="菜式封面" prop="coverUrl">
+          <uploadFile
+            :action="true"
+            :compress="true"
+            @uploadSuccess="uploadSuccess"
+            ref="uploadFileRef"
+            :fileList="tasteData.fileList"
+          ></uploadFile>
+        </el-form-item>
+        <el-form-item label="菜式名称" prop="name">
+          <el-input v-model="tasteData.form1.name" style="width: 250px">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="现价" prop="price">
+          <el-input
+            v-model="tasteData.form1.price"
+            style="max-width: 250px"
+            placeholder="输入现价"
+            type="number"
+          >
+            <template #append>¥</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="原价" prop="oldPrice">
+          <el-input
+            v-model="tasteData.form1.oldPrice"
+            style="max-width: 250px"
+            placeholder="输入原价"
+            type="number"
+          >
+            <template #append>¥</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="单位" prop="name">
+          <el-select
+            v-model="tasteData.form1.unit"
+            placeholder="选择单位"
+            style="width: 250px"
+          >
+            <el-option
+              v-for="item in unitOptions"
+              :key="item.dictValue"
+              :label="item.dictLabel"
+              :value="item.dictValue"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="口味选择" prop="tasteNeed">
+          <!-- <el-input v-model="tasteData.form1.tasteNeed"> </el-input> -->
+          <el-cascader
+            v-model="tasteData.form1.tasteNeed"
+            :options="CascaderOptions"
+            @change="handleChange"
+            :props="{ multiple: true }"
+            style="width:100%"
+            placeholder="选择口味"
+          />
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="tasteData.form1.remark"> </el-input>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="tasteData.dialogVisible1 = false">取消</el-button>
+          <el-button type="primary" @click="handleComfirm1"> 确定 </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted, ref, inject } from "vue";
-import { getTasteList } from "@/api/project/operation/taste.js";
+import { reactive, onMounted, ref, inject, nextTick } from "vue";
 import { getLists } from "@/api/project/foreign/shopInfo.js";
+import uploadFile from "@/components/uploadFile.vue";
 import {
   getTypeList,
   addMenuTypeApi,
   deleteMenuTypeApi,
   editMenuTypeApi,
+  getMenusList,
+  addMenuApi,
+  deleteMenuApi,
+  editMenuApi,
+  getTasteList,
 } from "@/api/project/foreign/menu.js";
 import { ElMessage, ElMessageBox } from "element-plus";
+
 defineOptions({
   name: "F-menus",
   isRouter: true,
 });
 onMounted(async () => {
+  inject("$com")
+    .getStoreDict("bill_store_menu_unit")
+    .then((res) => {
+      unitOptions.value = res.data[0].list;
+    });
   await getStoreList();
-
+  getCascaderOptions();
   setTimeout(() => {
     loading.value = false;
   }, 1000);
@@ -178,87 +317,107 @@ onMounted(async () => {
 const rules = {
   name: { required: true, message: "请输入口味名称", trigger: "blur" },
 };
+const filePath = localStorage.getItem("filePath");
 const ruleFormRef = ref(null);
+const ruleFormRef1 = ref(null);
+const uploadFileRef = ref();
 const StoreOptions = ref([]);
+const unitOptions = ref([]);
+const CascaderOptions = ref([]);
 const tableHeight = inject("$com").tableHeight();
 const loading = ref(true);
 const tasteData = reactive({
   dialogVisible: false,
   dialogVisible1: false,
   status: "add",
+  status1: "add",
   form: {
     name: "",
     storeId: "",
   },
   form1: {
     name: "",
+    oldPrice: null,
+    price: "",
+    storeId: "",
+    unit: "",
+    tasteNeed: "",
     typeId: "",
+    file: "",
+    coverUrl: "",
   },
   leftData: [],
-  rightData: [
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-      name: "Deer",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg",
-      name: "Horse",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg",
-      name: "Mountain Lion",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-      name: "Deer",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg",
-      name: "Horse",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg",
-      name: "Mountain Lion",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg",
-      name: "Mountain Lion",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
-      name: "Deer",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg",
-      name: "Horse",
-    },
-    {
-      imgUrl:
-        "https://fuss10.elemecdn.com/0/6f/e35ff375812e6b0020b6b4e8f9583jpeg.jpeg",
-      name: "Mountain Lion",
-    },
-  ],
+  rightData: [],
+  fileList: [],
   selected: {}, //选中的
 });
+class Form1 {
+  name = "";
+  oldPrice = null;
+  price = "";
+  storeId = "";
+  unit = "";
+  tasteNeed = "";
+  typeId = "";
+  file = "";
+  coverUrl = "";
+}
+const handleDelMenu = (row) => {
+  ElMessageBox.confirm("是否确定删除此菜品？", "提醒", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      const res = await deleteMenuApi({
+        storeId: tasteData.selected.storeId,
+        menuIds: row.menuId,
+      });
+      getList1();
+    })
+    .catch((e) => {
+      ElMessage({
+        type: "info",
+        message: "取消删除",
+      });
+    });
+};
+
+const getCascaderOptions = async () => {
+  const res = await getTasteList();
+  if (res.code === 0) {
+    CascaderOptions.value = res.data;
+  }
+};
+const handleEditMenu = (row) => {
+  tasteData.status1 = "edit";
+  tasteData.form1 = { ...row };
+  const url = row.coverUrl;
+
+  tasteData.fileList = [{ url: url }];
+  tasteData.dialogVisible1 = true;
+};
 const getList = async () => {
   const res = await getTypeList();
   if (res.code === 0) {
     tasteData.leftData = res.rows;
     tasteData.selected = tasteData.leftData[0];
+    getList1();
   }
 };
 const handleSelect = (e) => {
   tasteData.selected = tasteData.leftData[e];
   getList1();
+};
+const addMenus = async () => {
+  tasteData.form1 = new Form1();
+  tasteData.status1 = "add";
+  tasteData.fileList = [];
+  tasteData.dialogVisible1 = true;
+};
+const uploadSuccess = (file) => {
+  console.log(file);
+  tasteData.form1.file = file;
 };
 const handleComfirm = () => {
   if (!ruleFormRef.value) return;
@@ -283,6 +442,46 @@ const handleComfirm = () => {
       }
     }
   });
+};
+
+const handleComfirm1 = () => {
+  if (!ruleFormRef1.value) return;
+  ruleFormRef1.value.validate(async (valid) => {
+    if (valid) {
+      tasteData.form1.storeId = tasteData.selected.storeId;
+      tasteData.form1.typeId = tasteData.selected.typeId;
+      const formData = new FormData();
+
+      for (let key in tasteData.form1) {
+        if (tasteData.form1[key] === null) {
+          continue;
+        }
+        formData.append(key, tasteData.form1[key]);
+      }
+      if (tasteData.status1 === "add") {
+        const res = await addMenuApi(formData);
+        if (res.code === 0) {
+          tasteData.dialogVisible1 = false;
+          getList1();
+        }
+      } else {
+        const res = await editMenuApi(formData);
+        if (res.code === 0) {
+          tasteData.dialogVisible1 = false;
+          getList1();
+        }
+      }
+    }
+  });
+};
+const getList1 = async () => {
+  const res = await getMenusList({
+    typeId: tasteData.selected.typeId,
+    storeId: tasteData.selected.storeId,
+  });
+  if (res.code === 0) {
+    tasteData.rightData = res.rows;
+  }
 };
 const getStoreList = async () => {
   const res = await getLists();
@@ -328,5 +527,8 @@ const editTaste = () => {
 .tableHeight {
   flex-wrap: wrap;
   overflow-y: auto;
+}
+.money {
+  font-size: 20px;
 }
 </style>

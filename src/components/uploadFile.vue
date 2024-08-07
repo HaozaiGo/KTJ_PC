@@ -76,7 +76,7 @@ const props = defineProps({
     type: Boolean,
   },
 });
-
+const filePath = localStorage.getItem("filePath");
 let waitFileList = ref([]);
 waitFileList.value = props.fileList;
 
@@ -92,11 +92,8 @@ watch(
 
     waitFileList.value = props.fileList;
     if (props.fileList.length >= 1) {
-      imageUrl.value =
-        baseUrl.value + role.value === "merchant"
-          ? "/store/api/"
-          : "/api/" + props.fileList[0].url;
-          console.log(imageUrl.value);
+      imageUrl.value = filePath + props.fileList[0].url;
+      console.log(imageUrl.value);
     } else {
       imageUrl.value = "";
     }
@@ -108,10 +105,7 @@ const emits = defineEmits(["uploadSuccess", "updateFile"]);
 const imageUrl = ref("");
 // 回显图
 if (props.fileList.length >= 1) {
-  imageUrl.value =
-    baseUrl.value + role.value === "merchant"
-      ? "/store/api/"
-      : "/api/" + props.fileList[0].url;
+  imageUrl.value = filePath + props.fileList[0].url;
 } else {
   imageUrl.value = "";
 }

@@ -9,7 +9,7 @@ export function getLists(params) {
 }
 export function getFacilityList(params) {
   return request({
-    url: "/store/api/bill/facility/select",
+    url: "/store/api/store/facility/select",
     method: "get",
     params,
   });

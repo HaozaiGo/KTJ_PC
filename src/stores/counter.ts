@@ -2,7 +2,7 @@
  * @Author: xiaoHao
  */
 
-import { ref, computed } from "vue";
+import { ref, computed, provide } from "vue";
 import { defineStore } from "pinia";
 import settings from '@/config/settings.js'
 
@@ -26,6 +26,8 @@ export const baseSettings = defineStore('baseSettings', {
     collapse: false, //菜单属性
     header: settings.header, //自定义 header
     tagsBar: settings.tagsBar, //多标签页
+    baseFileUrl: "", //文件上传地址
+
   }),
   getters: {
     double: (state) => state.OverallHeight * 2,
@@ -35,7 +37,11 @@ export const baseSettings = defineStore('baseSettings', {
         state.visitedRoutes.push(Object.assign({}, route));
       }
 
+    },
+    rutunBaseFileUrl: (state) => {
+      return state.baseFileUrl
     }
+
   },
 
   actions: {

@@ -87,3 +87,11 @@ export function getPublicKey(data) {
     method: "post",
   });
 }
+
+// 获取文件资源地址
+export function getFilePath() {
+  return request({
+    url: "/store/api/store/cos",
+    method: "get",
+  });
+}

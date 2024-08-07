@@ -101,10 +101,17 @@
 </template>
 
 <script>
-import { marchentLogin, getMarchentRoute } from "@/api/common/user.js";
+import {
+  marchentLogin,
+  getMarchentRoute,
+  getFilePath,
+} from "@/api/common/user.js";
+import { baseSettings } from "@/stores/counter";
+
 export default {
   data() {
     return {
+      store: baseSettings(),
       isAccountLogin: true,
       account: "",
       password: "",
@@ -150,6 +157,7 @@ export default {
             this.state.loading = false;
             setTimeout(() => {
               this.$router.push("/home");
+              this.getBaseUrl();
             }, 200);
           } else {
             this.state.loading = false;
@@ -160,6 +168,16 @@ export default {
       } else {
         console.log("Phone:", this.phone);
         console.log("Code:", this.code);
+      }
+    },
+
+    // 获取文件资源地址
+    async getBaseUrl() {
+      const baseUrl = await getFilePath();
+      if (baseUrl.code === 0) {
+        this.store.baseFileUrl = baseUrl.data;
+        localStorage.setItem('filePath',baseUrl.data)
+        // console.log(this.store);
       }
     },
   },

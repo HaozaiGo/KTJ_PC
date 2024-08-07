@@ -51,10 +51,10 @@ export const constantRoutes = [
       ...vueRouter(),
     ],
   },
-  {
-    path: '/:catchAll(.*)',
-    redirect: '/404'
-  }
+  // {
+  //   path: '/:catchAll(.*)',
+  //   redirect: '/404'
+  // }
 
 ];
 
