@@ -120,7 +120,6 @@
           style="width: 280px; height: 280px"
         />
       </div>
-
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="ScanCode.dialogVisible = false">取消</el-button>
@@ -146,7 +145,6 @@
 
 <script setup>
 import { reactive, onMounted, ref, toRefs, inject } from "vue";
-
 import {
   getLists,
   getStoreListsApi,
@@ -156,7 +154,6 @@ import {
   // setStatus,
 } from "@/api/project/foreign/createDesk.js";
 import { ElMessageBox, ElMessage } from "element-plus";
-
 defineOptions({
   name: "create-desk",
   isRouter: true,
