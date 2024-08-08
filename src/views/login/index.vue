@@ -83,7 +83,7 @@ import router from "@/router/index.ts";
 import { isPassword, getCodeImg } from "@/utils/validate";
 import { getToken, removeToken } from "@/utils/auth.js";
 import { getRouterList, getFavorites } from "@/api/common/router.js";
-import { login } from "@/api/common/user.js";
+import { login,getFilePath } from "@/api/common/user.js";
 import { baseSettings } from "@/stores/counter";
 export default {
   name: "Login",
@@ -260,6 +260,7 @@ export default {
               window.localStorage.setItem("role", "platform");
               setTimeout(() => {
                 this.$router.push("/index");
+                this.getBaseUrl();
               }, 300);
             }
           });
@@ -269,6 +270,16 @@ export default {
           return false;
         }
       });
+    },
+
+    // 获取文件资源地址
+    async getBaseUrl() {
+      const baseUrl = await getFilePath();
+      if (baseUrl.code === 0) {
+        this.store.baseFileUrl = baseUrl.data;
+        localStorage.setItem('filePath',baseUrl.data)
+        // console.log(this.store);
+      }
     },
   },
 };

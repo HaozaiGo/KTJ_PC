@@ -70,7 +70,7 @@
           <template #default="scope">
             <el-image
               style="width: 100px; height: 100px"
-              :src="formData.origin + scope.row.logo"
+              :src="filePath + scope.row.logo"
               :fit="fit"
             />
           </template>
@@ -494,12 +494,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + formData.checkData.businessLicenseUrl"
+              :src="filePath + formData.checkData.businessLicenseUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api' + formData.checkData.businessLicenseUrl,
+               filePath + formData.checkData.businessLicenseUrl,
               ]"
               fit="cover"
             />
@@ -510,12 +510,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + formData.checkData.identityPositiveUrl"
+              :src="filePath + formData.checkData.identityPositiveUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api' + formData.checkData.identityPositiveUrl,
+                filePath + formData.checkData.identityPositiveUrl,
               ]"
               fit="cover"
             />
@@ -526,12 +526,12 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + formData.checkData.identityNegativeUrl"
+              :src="filePath + formData.checkData.identityNegativeUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
               :preview-src-list="[
-                '/api' + formData.checkData.identityNegativeUrl,
+                filePath + formData.checkData.identityNegativeUrl,
               ]"
               fit="cover"
             />
@@ -542,11 +542,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + formData.checkData.permitUrl"
+              :src="filePath + formData.checkData.permitUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + formData.checkData.permitUrl]"
+              :preview-src-list="[filePath + formData.checkData.permitUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -556,11 +556,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + formData.checkData.bankUrl"
+              :src="filePath + formData.checkData.bankUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + formData.checkData.bankUrl]"
+              :preview-src-list="[filePath + formData.checkData.bankUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -592,11 +592,11 @@
           v-for="(item, index) in formData.albumsList"
           :key="index"
           style="width: 150px; height: 150px; margin-right: 15px"
-          :src="formData.origin + item.imageUrl"
+          :src="filePath + item.imageUrl"
           :zoom-rate="1.2"
           :max-scale="7"
           :min-scale="0.2"
-          :preview-src-list="[formData.origin + item.imageUrl]"
+          :preview-src-list="[filePath + item.imageUrl]"
           :initial-index="4"
           fit="cover"
         />
@@ -686,6 +686,7 @@ const ScanCode = reactive({
   dialogVisible: false,
   storeId: "",
 });
+const filePath = localStorage.getItem("filePath");
 const multipleSelection = ref([]);
 const FacilityList = ref([]);
 const query = reactive({

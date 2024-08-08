@@ -262,7 +262,7 @@
             :options="CascaderOptions"
             @change="handleChange"
             :props="{ multiple: true }"
-            style="width:100%"
+            style="width: 100%"
             placeholder="选择口味"
           />
         </el-form-item>
@@ -475,12 +475,16 @@ const handleComfirm1 = () => {
   });
 };
 const getList1 = async () => {
-  const res = await getMenusList({
-    typeId: tasteData.selected.typeId,
-    storeId: tasteData.selected.storeId,
-  });
-  if (res.code === 0) {
-    tasteData.rightData = res.rows;
+  try {
+    const res = await getMenusList({
+      typeId: tasteData.selected.typeId,
+      storeId: tasteData.selected.storeId,
+    });
+    if (res.code === 0) {
+      tasteData.rightData = res.rows;
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
 const getStoreList = async () => {

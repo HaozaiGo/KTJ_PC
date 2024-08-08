@@ -44,7 +44,7 @@
           <template #default="scope">
             <el-image
               style="width: 100px; height: 100px"
-              :src="formData.origin + scope.row.logo"
+              :src="filePath + scope.row.logo"
               :fit="fit"
             />
           </template>
@@ -219,8 +219,8 @@
           ></UploadFile>
         </el-form-item>
         <el-form-item label="店铺Logo" prop="logo" style="width: 90%">
-          <cropperUpload> </cropperUpload>
-          <!-- <UploadFile
+          <!-- <cropperUpload> </cropperUpload> -->
+          <UploadFile
             @uploadSuccess="uploadSuccess"
             @updateFile="updateFile"
             :action="true"
@@ -231,7 +231,7 @@
                 url: formData.data.logo,
               },
             ]"
-          ></UploadFile> -->
+          ></UploadFile>
         </el-form-item>
       </el-form>
 
@@ -258,7 +258,7 @@
     <el-dialog v-model="formData.dialogVisible" title="上传相册" width="700">
       <div>
         <uploadFileLists
-          :action="formData.origin + '/store/images'"
+          :action="formData.origin + '/store/api/store/images'"
           :data="{ storeId: formData.data.storeId }"
           :fileList="formData.fileListAlbum"
           @remove="removeAlbum"
@@ -299,6 +299,7 @@ defineOptions({
   isRouter: true,
 });
 const tableDom = ref(null);
+const filePath = localStorage.getItem("filePath");
 const multipleSelection = ref([]);
 const FacilityList = ref([]);
 const query = reactive({
@@ -445,7 +446,7 @@ const uploadAlbum = async (item) => {
   const res = await getShopAlbums({ storeId: item.storeId });
   if (res.code === 0) {
     formData.fileListAlbum = res.data.map((x) => {
-      return { url: formData.origin + x.imageUrl, imageId: x.imageId };
+      return { url: filePath + x.imageUrl, imageId: x.imageId };
     });
   }
 };
@@ -453,7 +454,7 @@ const upLoadSuccess = async () => {
   const res = await getShopAlbums({ storeId: formData.data.storeId });
   if (res.code === 0) {
     formData.fileListAlbum = res.data.map((x) => {
-      return { url: formData.origin + x.imageUrl, imageId: x.imageId };
+      return { url: filePath + x.imageUrl, imageId: x.imageId };
     });
   }
 };

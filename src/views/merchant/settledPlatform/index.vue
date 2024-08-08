@@ -257,11 +257,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + state.checkData.coverUrl"
+              :src="filePath + state.checkData.coverUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + state.checkData.coverUrl]"
+              :preview-src-list="[filePath + state.checkData.coverUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -271,11 +271,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + state.checkData.identityPositiveUrl"
+              :src="filePath + state.checkData.identityPositiveUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + state.checkData.identityPositiveUrl]"
+              :preview-src-list="[filePath + state.checkData.identityPositiveUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -285,11 +285,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + state.checkData.identityNegativeUrl"
+              :src="filePath + state.checkData.identityNegativeUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + state.checkData.identityNegativeUrl]"
+              :preview-src-list="[filePath + state.checkData.identityNegativeUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -299,11 +299,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + state.checkData.permitUrl"
+              :src="filePath + state.checkData.permitUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + state.checkData.permitUrl]"
+              :preview-src-list="[filePath + state.checkData.permitUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -313,11 +313,11 @@
             </template>
             <el-image
               style="width: 150px; height: 100px"
-              :src="'/api' + state.checkData.bankUrl"
+              :src="filePath + state.checkData.bankUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="['/api' + state.checkData.bankUrl]"
+              :preview-src-list="[filePath + state.checkData.bankUrl]"
               fit="cover"
             />
           </el-descriptions-item>
@@ -436,6 +436,7 @@ const query = reactive({
   pageNum: 1,
 });
 const dialogVisible = ref(false);
+const filePath = localStorage.getItem("filePath");
 
 const tableData = ref({
   row: [],
