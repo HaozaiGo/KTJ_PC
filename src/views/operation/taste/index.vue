@@ -36,11 +36,14 @@
       </el-col>
       <el-col :xs="22" :sm="19">
         <div>
-          <el-button @click="addTaste1" type="primary" style="margin-bottom: 20px">
+          <el-button
+            @click="addTaste1"
+            type="primary"
+            style="margin-bottom: 20px"
+          >
             添加口味信息
           </el-button>
 
-        
           <div>
             <el-tag
               v-for="(tag, index) in tasteData.rightData"
@@ -168,11 +171,11 @@ const handleSelect = (e) => {
 };
 const handleClose = () => {};
 const handleTagClose = async (e) => {
-  console.log(e);
   const res = await deleteTasteInfo(e.tasteId);
   if (res.code === 0) {
     getList1();
   }
+  console.log(e);
 };
 
 const addTaste = () => {
@@ -218,12 +221,12 @@ const handleComfirm1 = () => {
   if (!ruleFormRef1.value) return;
   ruleFormRef1.value.validate(async (valid) => {
     if (valid) {
-        tasteData.form1.typeId = tasteData.selected.typeId;
-        const res = await addTasteInfo(tasteData.form1);
-        if (res.code === 0) {
-          tasteData.dialogVisible1 = false;
-          getList1();
-        }
+      tasteData.form1.typeId = tasteData.selected.typeId;
+      const res = await addTasteInfo(tasteData.form1);
+      if (res.code === 0) {
+        tasteData.dialogVisible1 = false;
+        getList1();
+      }
     }
   });
 };
@@ -251,7 +254,6 @@ const deleteTaste = () => {
       getList();
     })
     .catch((e) => {
-      console.log(e);
       ElMessage({
         type: "info",
         message: "取消删除",
