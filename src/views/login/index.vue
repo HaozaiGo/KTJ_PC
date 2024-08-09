@@ -239,7 +239,7 @@ export default {
           this.loading = true;
           const res = await login(this.loginForm);
           // 登录success
-          console.log(res);
+    
           if (res.code === 0) {
             window.localStorage.setItem("token", res.data);
           } else {
@@ -249,11 +249,7 @@ export default {
           getRouterList().then((res) => {
             if (res.code === 0) {
               const route = res.data;
-              // children.forEach((item) => {
-              //   item.children.forEach((item1) => {
-              //     item1.component = "EmptyLayout";
-              //   });
-              // });
+            
               // console.log(route);
               this.store.setRoute(route);
               window.localStorage.setItem("routes", JSON.stringify(route));
@@ -278,7 +274,7 @@ export default {
       if (baseUrl.code === 0) {
         this.store.baseFileUrl = baseUrl.data;
         localStorage.setItem('filePath',baseUrl.data)
-        // console.log(this.store);
+     
       }
     },
   },

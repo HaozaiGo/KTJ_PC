@@ -198,7 +198,6 @@ const handleDelete = async (row) => {
       getList();
     })
     .catch((action) => {
-      console.log(action);
     });
 };
 const handleComfirm = async () => {
