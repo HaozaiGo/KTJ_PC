@@ -167,17 +167,14 @@ export default {
         }
       } else {
         console.log("Phone:", this.phone);
-       
       }
     },
-
     // 获取文件资源地址
     async getBaseUrl() {
       const baseUrl = await getFilePath();
       if (baseUrl.code === 0) {
         this.store.baseFileUrl = baseUrl.data;
         localStorage.setItem('filePath',baseUrl.data)
-     
       }
     },
   },
