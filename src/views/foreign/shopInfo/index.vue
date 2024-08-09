@@ -422,8 +422,6 @@ const tableData = ref({
 const tipsStep = () => {
   const driver = new Driver();
   // console.log(driver);
-
-  // console.log(tableDom.value);
   driver.highlight({
     element: "#create-post",
     // stageBackground: "#ffa0a0",
@@ -540,7 +538,6 @@ const getList = async () => {
   }
 };
 const uploadSuccess = (file, projectId) => {
-  // console.log(file);
   const loadingInstance = ElLoading.service({
     text: "正在上传",
     background: "rgba(0,0,0,.2)",
