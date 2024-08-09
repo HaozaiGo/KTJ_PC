@@ -421,9 +421,9 @@ const tableData = ref({
 });
 const tipsStep = () => {
   const driver = new Driver();
-  console.log(driver);
+  // console.log(driver);
 
-  console.log(tableDom.value);
+  // console.log(tableDom.value);
   driver.highlight({
     element: "#create-post",
     // stageBackground: "#ffa0a0",
@@ -475,7 +475,7 @@ const edit = async (item) => {
 };
 // 删除
 const removeAlbum = async (item) => {
-  console.log(item);
+  // console.log(item);
   const res = await deleteShopAlbums(item);
 };
 //checkbox
