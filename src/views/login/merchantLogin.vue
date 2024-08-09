@@ -167,7 +167,7 @@ export default {
         }
       } else {
         console.log("Phone:", this.phone);
-        console.log("Code:", this.code);
+       
       }
     },
 
@@ -177,7 +177,7 @@ export default {
       if (baseUrl.code === 0) {
         this.store.baseFileUrl = baseUrl.data;
         localStorage.setItem('filePath',baseUrl.data)
-        // console.log(this.store);
+     
       }
     },
   },
