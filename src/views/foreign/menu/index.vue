@@ -356,7 +356,7 @@ class Form1 {
   unit = "";
   tasteNeed = "";
   typeId = "";
-  file = "";
+  file = null;
   coverUrl = "";
 }
 const handleDelMenu = (row) => {
