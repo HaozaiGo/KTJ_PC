@@ -398,7 +398,7 @@ const handleEditMenu = (row) => {
   tasteData.dialogVisible1 = true;
 };
 const getList = async () => {
-  const res = await getTypeList();
+  const res = await getTypeList({storeId:tasteData.form.storeId});
   if (res.code === 0) {
     tasteData.leftData = res.rows;
     tasteData.selected = tasteData.leftData[0];
