@@ -360,7 +360,6 @@ const deleteUser = async (item) => {
 //checkbox
 const handleSelectionChange = (val) => {
   multipleSelection.value = val;
-  // console.log(multipleSelection.value);
 };
 const handleComfirm = () => {
   if (!formRef.value) return;

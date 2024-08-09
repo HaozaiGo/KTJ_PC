@@ -481,7 +481,6 @@ const getList1 = async () => {
       tasteData.rightData = res.rows;
     }
   } catch (e) {
-    console.log(e);
   }
 };
 const getStoreList = async () => {
