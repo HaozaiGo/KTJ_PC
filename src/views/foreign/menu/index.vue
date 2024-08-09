@@ -164,7 +164,6 @@
         </div>
       </el-col>
     </el-row>
-
     <!-- left菜单名 -->
     <el-dialog
       v-model="tasteData.dialogVisible"
@@ -181,13 +180,11 @@
         <el-form-item label="菜式类型" prop="name">
           <el-input v-model="tasteData.form.name"> </el-input>
         </el-form-item>
-
         <!-- test -->
         <!-- <el-form-item>
           <testUpload @input="testArr"></testUpload>
          </el-form-item> -->
       </el-form>
-
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="tasteData.dialogVisible = false">取消</el-button>
