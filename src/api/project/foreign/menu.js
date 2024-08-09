@@ -14,7 +14,6 @@ export function addMenuTypeApi(data) {
     data,
   });
 }
-
 export function deleteMenuTypeApi(data) {
   return request({
     url: `/store/api/store/menu/type/${data.storeId}/${data.typeIds}`,

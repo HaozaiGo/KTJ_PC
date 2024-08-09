@@ -413,7 +413,7 @@ const addMenus = async () => {
   tasteData.dialogVisible1 = true;
 };
 const uploadSuccess = (file) => {
-  console.log(file);
+  // console.log(file);
   tasteData.form1.file = file;
 };
 const handleComfirm = () => {

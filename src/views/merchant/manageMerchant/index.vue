@@ -852,7 +852,7 @@ const comfirmDiscount = async () => {
   getList();
 };
 const setDiscounts = (row) => {
-  console.log(row);
+  // console.log(row);
   Discounts.discount = row.discount * 100;
   Discounts.dialogVisible = true;
   Discounts.storeId = row.storeId;
@@ -932,7 +932,7 @@ const edit = async (item) => {
       ]
     : [];
 
-  console.log(formData.data.logoList);
+  // console.log(formData.data.logoList);
   formData.drawer = true;
 };
 // 删除
@@ -1012,7 +1012,7 @@ const switchFinalChange = async (item) => {
   });
 };
 const merchantPosition = async (e) => {
-  console.log(e);
+  // console.log(e);
   formData.data.latitude = e.latlng.lat;
   formData.data.longitude = e.latlng.lng;
   formData.data.address = e.position;
