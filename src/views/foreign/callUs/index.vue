@@ -96,8 +96,6 @@ export default {
         toType: "platform",
         content: message,
       });
-
-      // console.log(sendMsg);
       // 发送消息
       this.ws.send(encryptMessage(sendMsg));
     },
