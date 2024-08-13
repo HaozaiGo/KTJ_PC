@@ -112,13 +112,23 @@
                         }}</span>
                         <div class="bottom card-header flex-sb">
                           <div class="money">
-                            {{ item.price
-                            }}<span
+                            <span
+                              :style="
+                                item.isSpecial === '1'
+                                  ? 'color:red'
+                                  : 'color:#000'
+                              "
+                            >
+                              {{ item.isSpecial === "1" ? "特价" : "" }}
+                            </span>
+                            {{ item.price || "多规格" }}
+                            <span
                               style="
                                 font-size: 14px;
                                 margin: 0 5px;
                                 display: inline-block;
                               "
+                              v-if="item.price"
                               >¥/{{ item.unit }}</span
                             >
                             <span
@@ -139,7 +149,7 @@
                               >¥</span
                             >
                           </div>
-                          <div>
+                          <div style="white-space: pre;">
                             <el-button
                               text
                               class="button"
@@ -218,26 +228,80 @@
           <el-input v-model="tasteData.form1.name" style="width: 250px">
           </el-input>
         </el-form-item>
-        <el-form-item label="现价" prop="price">
-          <el-input
-            v-model="tasteData.form1.price"
-            style="max-width: 250px"
-            placeholder="输入现价"
-            type="number"
-          >
-            <template #append>¥</template>
-          </el-input>
+        <el-form-item label="是否特价" prop="isSpecial">
+          <el-radio-group v-model="tasteData.form1.isSpecial">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, index) in yesOrNoList"
+              :key="index"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="原价" prop="oldPrice">
-          <el-input
-            v-model="tasteData.form1.oldPrice"
-            style="max-width: 250px"
-            placeholder="输入原价"
-            type="number"
-          >
-            <template #append>¥</template>
-          </el-input>
+        <el-form-item label="含有多个规格" prop="isSpec">
+          <el-radio-group v-model="tasteData.form1.isSpec">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, index) in yesOrNoList"
+              :key="index"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
         </el-form-item>
+        <el-form-item
+          label="设置多个规格"
+          prop="priceDetail"
+          v-if="Number(tasteData.form1.isSpec)"
+        >
+          <el-tabs
+            v-model="tasteData.form1.size"
+            type="border-card"
+            class="demo-tabs"
+            @tab-click="handleClick"
+          >
+            <el-tab-pane
+              :label="item.dictLabel"
+              :name="item.dictValue"
+              v-for="(item, index) in typeSizeOptions"
+              :key="index"
+            >
+              <el-form-item label="现价">
+                <el-input
+                  v-model="tasteData.form1.priceDetail[index].price"
+                  style="max-width: 250px"
+                  placeholder="输入现价"
+                  type="number"
+                >
+                  <template #append>¥</template>
+                </el-input>
+              </el-form-item>
+            </el-tab-pane>
+          </el-tabs>
+        </el-form-item>
+        <div v-else>
+          <el-form-item label="现价" prop="price">
+            <el-input
+              v-model="tasteData.form1.price"
+              style="max-width: 250px"
+              placeholder="输入现价"
+              type="number"
+            >
+              <template #append>¥</template>
+            </el-input>
+          </el-form-item>
+
+          <el-form-item label="原价" prop="oldPrice">
+            <el-input
+              v-model="tasteData.form1.oldPrice"
+              style="max-width: 250px"
+              placeholder="输入原价"
+              type="number"
+            >
+              <template #append>¥</template>
+            </el-input>
+          </el-form-item>
+        </div>
+
         <el-form-item label="单位" prop="name">
           <el-select
             v-model="tasteData.form1.unit"
@@ -301,9 +365,14 @@ defineOptions({
 });
 onMounted(async () => {
   inject("$com")
-    .getStoreDict("bill_store_menu_unit")
+    .getStoreDict("bill_store_menu_unit,sys_yes_no,bill_store_menu_spec")
     .then((res) => {
       unitOptions.value = res.data[0].list;
+      yesOrNoList.value = res.data[1].list;
+      typeSizeOptions.value = res.data[2].list;
+      priceDetailOptions.value = typeSizeOptions.value.map((x) => {
+        return { price: "", size: x.dictValue };
+      });
     });
   await getStoreList();
   getCascaderOptions();
@@ -315,6 +384,9 @@ const rules = {
   name: { required: true, message: "请输入口味名称", trigger: "blur" },
 };
 const filePath = localStorage.getItem("filePath");
+const typeSizeOptions = ref([]); //规格
+const priceDetailOptions = ref([]); //规格
+const yesOrNoList = ref([]);
 const ruleFormRef = ref(null);
 const ruleFormRef1 = ref(null);
 const uploadFileRef = ref();
@@ -342,6 +414,11 @@ const tasteData = reactive({
     typeId: "",
     file: "",
     coverUrl: "",
+    isSpecial: "",
+    isSpec: "",
+    size: "",
+    priceDetail: [],
+    remark: "",
   },
   leftData: [],
   rightData: [],
@@ -353,11 +430,15 @@ class Form1 {
   oldPrice = null;
   price = "";
   storeId = "";
-  unit = "";
+  unit = unitOptions.value[0].dictValue;
   tasteNeed = "";
   typeId = "";
   file = null;
   coverUrl = "";
+  isSpecial = "0";
+  isSpec = "0"; //是否使用规格
+  size = typeSizeOptions.value[0].dictValue;
+  priceDetail = priceDetailOptions;
 }
 const handleDelMenu = (row) => {
   ElMessageBox.confirm("是否确定删除此菜品？", "提醒", {
@@ -379,7 +460,11 @@ const handleDelMenu = (row) => {
       });
     });
 };
-
+const handleChange = (e) => {};
+const handleClick = (e) => {
+  console.log(e);
+};
+const handleClose = (e) => {};
 const getCascaderOptions = async () => {
   const res = await getTasteList();
   if (res.code === 0) {
@@ -395,7 +480,7 @@ const handleEditMenu = (row) => {
   tasteData.dialogVisible1 = true;
 };
 const getList = async () => {
-  const res = await getTypeList({storeId:tasteData.form.storeId});
+  const res = await getTypeList({ storeId: tasteData.form.storeId });
   if (res.code === 0) {
     tasteData.leftData = res.rows;
     tasteData.selected = tasteData.leftData[0];
@@ -411,6 +496,7 @@ const addMenus = async () => {
   tasteData.status1 = "add";
   tasteData.fileList = [];
   tasteData.dialogVisible1 = true;
+  console.log(tasteData.form1);
 };
 const uploadSuccess = (file) => {
   // console.log(file);
@@ -445,6 +531,7 @@ const handleComfirm1 = () => {
   if (!ruleFormRef1.value) return;
   ruleFormRef1.value.validate(async (valid) => {
     if (valid) {
+      tasteData.form1.priceDetail = JSON.stringify(tasteData.form1.priceDetail);
       tasteData.form1.storeId = tasteData.selected.storeId;
       tasteData.form1.typeId = tasteData.selected.typeId;
       const formData = new FormData();
@@ -480,8 +567,7 @@ const getList1 = async () => {
     if (res.code === 0) {
       tasteData.rightData = res.rows;
     }
-  } catch (e) {
-  }
+  } catch (e) {}
 };
 const getStoreList = async () => {
   const res = await getLists();
@@ -530,5 +616,6 @@ const editTaste = () => {
 }
 .money {
   font-size: 20px;
+  white-space: nowrap;
 }
 </style>
