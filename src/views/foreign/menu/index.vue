@@ -149,7 +149,7 @@
                               >¥</span
                             >
                           </div>
-                          <div style="white-space: pre;">
+                          <div style="white-space: pre">
                             <el-button
                               text
                               class="button"
@@ -496,10 +496,10 @@ const addMenus = async () => {
   tasteData.status1 = "add";
   tasteData.fileList = [];
   tasteData.dialogVisible1 = true;
-  console.log(tasteData.form1);
+  // console.log(tasteData.form1);
 };
 const uploadSuccess = (file) => {
-  // console.log(file);
+ 
   tasteData.form1.file = file;
 };
 const handleComfirm = () => {
