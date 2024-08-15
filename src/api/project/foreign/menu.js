@@ -25,8 +25,16 @@ export function editMenuTypeApi(data) {
     url: `/store/api/store/menu/type`,
     method: "put",
     data,
-  })
+  });
 }
+// 菜式详细
+export function getMenusDetail(params) {
+  return request({
+    url: `/store/api/store/menu/${params.storeId}/${params.menuId}`,
+    method: "get",
+  });
+}
+
 // 订单详情
 export function checkOrderDetail(orderId) {
   return request({

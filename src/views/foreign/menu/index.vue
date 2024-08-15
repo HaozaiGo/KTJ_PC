@@ -302,7 +302,7 @@
           </el-form-item>
         </div>
 
-        <el-form-item label="单位" prop="name">
+        <el-form-item label="单位" prop="unit">
           <el-select
             v-model="tasteData.form1.unit"
             placeholder="选择单位"
@@ -317,14 +317,14 @@
           </el-select>
         </el-form-item>
         <el-form-item label="口味选择" prop="tasteNeed">
-          <!-- <el-input v-model="tasteData.form1.tasteNeed"> </el-input> -->
           <el-cascader
-            v-model="tasteData.form1.tasteNeed"
+            v-model="tasteData.form1.tasteNeedNoHandle"
             :options="CascaderOptions"
             @change="handleChange"
             :props="{ multiple: true }"
             style="width: 100%"
             placeholder="选择口味"
+            :show-all-levels="false"
           />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -343,7 +343,7 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref, inject, nextTick } from "vue";
+import { reactive, onMounted, ref, inject } from "vue";
 import { getLists } from "@/api/project/foreign/shopInfo.js";
 import uploadFile from "@/components/uploadFile.vue";
 import {
@@ -356,6 +356,7 @@ import {
   deleteMenuApi,
   editMenuApi,
   getTasteList,
+  getMenusDetail,
 } from "@/api/project/foreign/menu.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 
@@ -370,9 +371,6 @@ onMounted(async () => {
       unitOptions.value = res.data[0].list;
       yesOrNoList.value = res.data[1].list;
       typeSizeOptions.value = res.data[2].list;
-      priceDetailOptions.value = typeSizeOptions.value.map((x) => {
-        return { price: "", size: x.dictValue };
-      });
     });
   await getStoreList();
   getCascaderOptions();
@@ -383,9 +381,12 @@ onMounted(async () => {
 const rules = {
   name: { required: true, message: "请输入口味名称", trigger: "blur" },
 };
+const rules1 = {
+  name: { required: true, message: "请输入菜式名称", trigger: "blur" },
+  price: { required: true, message: "请输入现价", trigger: "blur" },
+};
 const filePath = localStorage.getItem("filePath");
 const typeSizeOptions = ref([]); //规格
-const priceDetailOptions = ref([]); //规格
 const yesOrNoList = ref([]);
 const ruleFormRef = ref(null);
 const ruleFormRef1 = ref(null);
@@ -410,7 +411,8 @@ const tasteData = reactive({
     price: "",
     storeId: "",
     unit: "",
-    tasteNeed: "",
+    tasteNeedNoHandle: [],
+    tasteNeed: [],
     typeId: "",
     file: "",
     coverUrl: "",
@@ -431,14 +433,17 @@ class Form1 {
   price = "";
   storeId = "";
   unit = unitOptions.value[0].dictValue;
-  tasteNeed = "";
+  tasteNeedNoHandle = [];
+  tasteNeed = [];
   typeId = "";
   file = null;
   coverUrl = "";
   isSpecial = "0";
   isSpec = "0"; //是否使用规格
   size = typeSizeOptions.value[0].dictValue;
-  priceDetail = priceDetailOptions;
+  priceDetail = typeSizeOptions.value.map((x) => {
+    return { price: "", size: x.dictValue };
+  });
 }
 const handleDelMenu = (row) => {
   ElMessageBox.confirm("是否确定删除此菜品？", "提醒", {
@@ -460,7 +465,10 @@ const handleDelMenu = (row) => {
       });
     });
 };
-const handleChange = (e) => {};
+const handleChange = (e) => {
+  console.log(e);
+  tasteData.form1.tasteNeed = e.map((x) => x[1]).join(",");
+};
 const handleClick = (e) => {
   console.log(e);
 };
@@ -471,11 +479,25 @@ const getCascaderOptions = async () => {
     CascaderOptions.value = res.data;
   }
 };
-const handleEditMenu = (row) => {
+const handleEditMenu = async (row) => {
   tasteData.status1 = "edit";
-  tasteData.form1 = { ...row };
-  const url = row.coverUrl;
+  // console.log(row);
 
+  const res = await getMenusDetail({
+    menuId: row.menuId,
+    storeId: tasteData.selected.storeId,
+  });
+  res.data.size = typeSizeOptions.value[0].dictValue;
+  res.data.priceDetail = res.data.priceDetail
+    ? JSON.parse(res.data.priceDetail)
+    : typeSizeOptions.value.map((x) => {
+        return { price: "", size: x.dictValue };
+      });
+  res.data.tasteNeedNoHandle = res.data.tasteNeed;
+  tasteData.form1 = { ...res.data };
+  // console.log(tasteData.form1);
+
+  const url = row.coverUrl;
   tasteData.fileList = [{ url: url }];
   tasteData.dialogVisible1 = true;
 };
@@ -499,7 +521,6 @@ const addMenus = async () => {
   // console.log(tasteData.form1);
 };
 const uploadSuccess = (file) => {
- 
   tasteData.form1.file = file;
 };
 const handleComfirm = () => {
@@ -539,6 +560,10 @@ const handleComfirm1 = () => {
       for (let key in tasteData.form1) {
         if (tasteData.form1[key] === null) {
           continue;
+        }
+        if (key === "isSpec" && tasteData.form1[key] === "0") {
+          // 不选规格的情况
+          tasteData.form1.priceDetail = "";
         }
         formData.append(key, tasteData.form1[key]);
       }
