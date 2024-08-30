@@ -5,10 +5,8 @@
       style="text-align: center; font-size: 22px; padding: 1px 0; width: 80mm"
     >
       <div>预结单-{{ tableData.pickupWayLabel }}</div>
-
       <div>{{ tableData.storeName }}</div>
     </div>
-
     <hr />
     <div style="font-size: 20px; font-weight: bold">
       桌号:{{ tableData.tableNo }}
