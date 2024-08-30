@@ -227,7 +227,7 @@ const cardData = ref<CardProp[]>([
 // 图表数据
 const chartData = ref(["BarChart", "PieChart", "RadarChart"]);
 const chartComponent = (item: string) => {
-  return defineAsyncComponent(() => import(`./components/${item}.vue`));
+  // return defineAsyncComponent(() => import(`./components/${item}.vue`));
 };
 const getWeatherApi = async () => {};
 onMounted(() => {

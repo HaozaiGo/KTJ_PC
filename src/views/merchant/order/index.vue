@@ -5,11 +5,13 @@
         v-model="query.orderNo"
         style="width: 200px"
         placeholder="订单编号"
+        @keyup.enter="getList"
       />
       <el-input
         v-model="query.phone"
         style="width: 200px"
         placeholder="买家手机号"
+        @keyup.enter="getList"
       />
 
       <el-date-picker
@@ -21,16 +23,18 @@
       />
 
       <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
-      <div style="margin-top: 10px;">
+      <div style="margin-top: 10px">
         <el-input
           v-model="query.nickName"
           style="width: 200px"
           placeholder="商家名称"
+          @keyup.enter="getList"
         />
         <el-input
           v-model="query.tradeType"
           style="width: 200px"
           placeholder="交易类型"
+          @keyup.enter="getList"
         />
         <el-select
           v-model="query.payStatus"
@@ -58,9 +62,14 @@
         :max-height="tableHeight"
       >
         <el-table-column prop="orderId" label="订单ID" sortable width="180" />
-        <el-table-column prop="orderNo" label="订单编号" sortable  width="150"/>
-        <el-table-column prop="storeName" label="商家名称" sortable  width="150" />
-        <el-table-column prop="amount" label="支付金额" sortable width="120"  />
+        <el-table-column prop="orderNo" label="订单编号" sortable width="150" />
+        <el-table-column
+          prop="storeName"
+          label="商家名称"
+          sortable
+          width="150"
+        />
+        <el-table-column prop="amount" label="支付金额" sortable width="120" />
         <el-table-column
           prop="orderTime"
           label="下单时间"
@@ -74,7 +83,12 @@
           width="150"
         />
         <el-table-column prop="payTime" label="支付时间" sortable width="200" />
-        <el-table-column prop="payType" label="订单支付类型" sortable width="150" />
+        <el-table-column
+          prop="payType"
+          label="订单支付类型"
+          sortable
+          width="150"
+        />
         <el-table-column prop="phone" label="买家手机号" sortable width="150" />
         <el-table-column label="操作" width="220">
           <template #default="scope">

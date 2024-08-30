@@ -5,7 +5,7 @@
         <el-select
           v-model="tasteData.form.storeId"
           placeholder="选择店铺"
-          style="width: 220px; margin-right: 20px"
+          style="max-width: 350px; min-width: 150px; margin-bottom: 20px"
         >
           <el-option
             v-for="item in StoreOptions"
@@ -18,23 +18,28 @@
           size="default"
           split-button
           type="primary"
-          style="margin-bottom: 15px"
+          style="margin-bottom: 15px; margin-right: 15px"
         >
           添加菜式类型
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="addTaste">添加菜式</el-dropdown-item>
+
               <el-dropdown-item @click="deleteTaste">删除菜式</el-dropdown-item>
               <el-dropdown-item @click="editTaste">修改菜式</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        <el-button @click="teaPosition.dialogVisible = true" type="primary">
+          设置茶位
+        </el-button>
 
         <el-menu
           default-active="0"
           class="el-menu-vertical-demo"
           @select="handleSelect"
           @close="handleClose"
+          :style="`height:${tableHeight}px;overflow: auto`"
         >
           <el-menu-item
             :index="String(index)"
@@ -339,6 +344,51 @@
         </div>
       </template>
     </el-dialog>
+    <!-- 茶位 -->
+    <el-dialog
+      v-model="teaPosition.dialogVisible"
+      :title="'添加茶位'"
+      width="500"
+    >
+      <el-form
+        :model="teaPosition.form"
+        label-width="auto"
+        style="max-width: 600px"
+        :rules="rules"
+        ref="teaPositionRef"
+      >
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="teaPosition.form.name" style="max-width: 250px">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="价格" prop="price">
+          <el-input
+            v-model="teaPosition.form.price"
+            style="max-width: 250px"
+            placeholder="输入现价"
+            type="number"
+          >
+            <template #append>¥</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="单位" prop="unit">
+          <el-input
+            v-model="teaPosition.form.unit"
+            style="max-width: 250px"
+            placeholder="位"
+            disabled
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="teaPosition.dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleComfirmTeaPostion">
+            确定
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -357,6 +407,7 @@ import {
   editMenuApi,
   getTasteList,
   getMenusDetail,
+  addTeaPosition,
 } from "@/api/project/foreign/menu.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 
@@ -445,6 +496,29 @@ class Form1 {
     return { price: "", size: x.dictValue };
   });
 }
+const teaPosition = reactive({
+  form: {
+    name: "普通茶位",
+    price: "",
+    storeId: "",
+    unit: "位",
+    isSpec: "0",
+    isSpecial: "0",
+    isTeaPosition: "1",
+  },
+  dialogVisible: false,
+});
+const handleComfirmTeaPostion = async () => {
+  const body = Object.assign({}, teaPosition.form, {
+    // typeId: tasteData.selected.typeId,
+    storeId: tasteData.selected.storeId,
+  });
+  const res = await addTeaPosition(body);
+  if (res.code === 0) {
+    teaPosition.dialogVisible = false;
+    getList();
+  }
+};
 const handleDelMenu = (row) => {
   ElMessageBox.confirm("是否确定删除此菜品？", "提醒", {
     confirmButtonText: "确定",

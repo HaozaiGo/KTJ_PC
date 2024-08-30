@@ -90,3 +90,12 @@ export function getTasteList(params) {
     params,
   });
 }
+
+// 茶位
+export function addTeaPosition(data) {
+  return request({
+    url: `/store/api/store/menu/tea/position`,
+    method: "post",
+    data,
+  });
+}

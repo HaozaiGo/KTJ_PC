@@ -5,11 +5,13 @@
         v-model="query.storeName"
         style="width: 200px"
         placeholder="店铺名称"
+        @keyup.enter="getList"
       />
       <el-input
         v-model="query.phone"
         style="width: 200px"
         placeholder="手机号"
+        @keyup.enter="getList"
       />
 
       <el-date-picker

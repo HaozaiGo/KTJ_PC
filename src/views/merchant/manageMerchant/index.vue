@@ -5,18 +5,21 @@
         v-model="query.name"
         style="width: 200px"
         placeholder="商家名称"
+        @keyup.enter="getList"
       />
       <el-input
         v-model="query.address"
         style="width: 200px"
         placeholder="商家地址"
+        @keyup.enter="getList"
       />
       <el-input
         v-model="query.phone"
         style="width: 200px"
         placeholder="商家电话"
+        @keyup.enter="getList"
       />
-      <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
+      <el-button type="primary" icon="Search" @click="getList" >搜索</el-button>
     </div>
 
     <div>

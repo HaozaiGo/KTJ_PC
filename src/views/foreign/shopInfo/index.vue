@@ -182,27 +182,36 @@
             style="width: 29vw"
           />
         </el-form-item>
-        <el-form-item label="营业开始时间" prop="startTime">
-          <el-time-select
-            v-model="formData.data.startTime"
-            style="width: 200px"
-            class="mr-4"
-            placeholder="营业开始时间"
-            start="00:00"
-            step="00:30"
-            end="24:00"
-          />
-        </el-form-item>
-        <el-form-item label="营业结束时间" prop="endTime">
-          <el-time-select
-            v-model="formData.data.endTime"
-            style="width: 200px"
-            placeholder="营业结束时间"
-            start="00:00"
-            step="00:30"
-            end="24:00"
-          />
-        </el-form-item>
+        <div v-for="(item, idx) in openTimeList" :key="idx" class="flex-c">
+          <el-form-item label="营业开始时间" prop="startTime">
+            <el-time-select
+              v-model="formData.data.startTime[idx]"
+              style="width: 160px"
+              class="mr-4"
+              placeholder="营业开始时间"
+              start="00:00"
+              step="00:30"
+              end="24:00"
+            />
+          </el-form-item>
+          <el-form-item label="营业结束时间" prop="endTime">
+            <el-time-select
+              v-model="formData.data.endTime[idx]"
+              style="width: 160px"
+              placeholder="营业结束时间"
+              start="00:00"
+              step="00:30"
+              end="24:00"
+            />
+          </el-form-item>
+          <el-icon size="28" color="#409efc" @click="handleAddOpenTime" style="margin-right: 10px;cursor: pointer;">
+            <CirclePlusFilled />
+          </el-icon>
+          <el-icon size="28" color="red" @click="handleRemoveOpenTime" style="cursor: pointer;"
+            ><Remove
+          /></el-icon>
+        </div>
+
         <el-form-item label="封面图" prop="coverUrl">
           <UploadFile
             @uploadSuccess="uploadSuccess"
@@ -302,6 +311,7 @@ const tableDom = ref(null);
 const filePath = localStorage.getItem("filePath");
 const multipleSelection = ref([]);
 const FacilityList = ref([]);
+const openTimeList = ref([{}]);
 const query = reactive({
   name: "",
   address: "",
@@ -328,8 +338,8 @@ let formData = reactive({
     facilities: [],
     linkMan: "",
     linkPhone: "",
-    startTime: "",
-    endTime: "",
+    startTime: [],
+    endTime: [],
     latitude: "",
     longitude: "", //经度
     storeId: "",
@@ -435,6 +445,14 @@ const tipsStep = () => {
     },
   });
 };
+const handleAddOpenTime = () => {
+  openTimeList.value.push({});
+};
+const handleRemoveOpenTime = () => {
+  openTimeList.value.pop();
+  formData.data.startTime.pop();
+  formData.data.endTime.pop();
+};
 // 上传相册
 const uploadAlbum = async (item) => {
   formData.dialogVisible = true;
@@ -465,6 +483,9 @@ const edit = async (item) => {
   try {
     formData.data.facilities = formData.data.facilities.split(",");
     formData.data.facilities = formData.data.facilities.map(Number);
+    formData.data.startTime = editData.data.startTime.split(",");
+    formData.data.endTime = editData.data.endTime.split(",");
+    openTimeList.value = editData.data.startTime.split(",").map(() => ({}));
   } catch (e) {
     console.log(e);
   }
