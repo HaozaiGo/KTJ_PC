@@ -41,6 +41,11 @@ a,
   display: flex;
   justify-content: space-between;
 }
+.flex-c {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .flex-sr {
   display: flex;

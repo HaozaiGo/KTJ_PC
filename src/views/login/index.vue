@@ -83,7 +83,7 @@ import router from "@/router/index.ts";
 import { isPassword, getCodeImg } from "@/utils/validate";
 import { getToken, removeToken } from "@/utils/auth.js";
 import { getRouterList, getFavorites } from "@/api/common/router.js";
-import { login,getFilePath } from "@/api/common/user.js";
+import { login,getFilePath_platform } from "@/api/common/user.js";
 import { baseSettings } from "@/stores/counter";
 export default {
   name: "Login",
@@ -270,7 +270,7 @@ export default {
 
     // 获取文件资源地址
     async getBaseUrl() {
-      const baseUrl = await getFilePath();
+      const baseUrl = await getFilePath_platform();
       if (baseUrl.code === 0) {
         this.store.baseFileUrl = baseUrl.data;
         localStorage.setItem('filePath',baseUrl.data)

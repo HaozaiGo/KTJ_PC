@@ -50,6 +50,8 @@
         row-key="id"
         border
         default-expand-all
+        :max-height="tableHeight"
+
       >
         <el-table-column prop="orderNo" label="订单编号" sortable />
         <el-table-column
@@ -294,6 +296,7 @@
 <script setup>
 import printTable from "@/components/printTable/diet.vue";
 import { reactive, onMounted, ref, inject } from "vue";
+import getLodop from "@/utils/LodopFuncs.js";
 import printJS from "print-js";
 import {
   getLists,
@@ -311,6 +314,8 @@ defineOptions({
   name: "foreign-Order",
   isRouter: true,
 });
+const tableHeight = inject("$com").tableHeight();
+
 const printTableDom = ref(null);
 const showPhoneNum = ref(false);
 const query = reactive({
@@ -348,6 +353,8 @@ const state1 = reactive({
   },
   tableData: [], //如果有多条核销的记录
 });
+
+const LODOPOBJ = ref(null);
 // 再次打单
 const printAgain = async (row) => {
   const res1 = await checkNoDetail(row.orderId);
@@ -359,11 +366,56 @@ const printAgain = async (row) => {
   }
 };
 
+// 获取打印机list
+const getPrinterList = async () => {
+  let LODOP = getLodop();
+  console.log("11", LODOP);
+  let count = LODOP.GET_PRINTER_COUNT();
+  let arr = [];
+  for (var i = 0; i < count; i++) {
+    let obj = {};
+    obj.value = LODOP.GET_PRINTER_NAME(i);
+    obj.label = LODOP.GET_PRINTER_NAME(i);
+    arr.push(obj);
+  }
+  console.log("打印机列表", arr);
+  // this.PrintNamelist = arr;
+
+  LODOPOBJ.value = LODOP;
+};
+
 // 出单
 const handleOutBill = async () => {
+  const height =
+    (printTableDom.value.$el.clientHeight /
+      printTableDom.value.$el.clientWidth) *
+      80 +
+    30;
   if (state.normalPrint) {
+    // 打印机打印
+    await getPrinterList();
+
+    LODOPOBJ.value.PRINT_INIT("客单结算单");
+    LODOPOBJ.value.SET_PRINT_PAGESIZE(1, "80mm", height + "mm");
+    // LODOPOBJ.value.SET_SHOW_MODE("LANDSCAPE_DEFROTATED", 1);
+    LODOPOBJ.value.ADD_PRINT_HTM(
+      0,
+      0,
+      "80mm",
+      height + "mm",
+      printTableDom.value.$el.innerHTML
+    );
+
+    // const printer = LODOPOBJ.value.SELECT_PRINTER();
+    LODOPOBJ.value.PREVIEW();
+    // LODOPOBJ.value.SET_PRINTER_INDEX(printer);
+    // LODOPOBJ.value.SET_PREVIEW_WINDOW(0, 1, 1, 760, 540, "自定义标题.开始打印");
+    LODOPOBJ.value.PRINT();
     //普通出单
-    printJS({ printable: printTableDom.value.$el, type: "html" });
+    // printJS({
+    //   printable: printTableDom.value.$el,
+    //   type: "html",
+    // });
   } else {
     if (state.orderDetailData.type === "ONLINE_ORDER_PAY") {
       const res = await waitToChekOrder({

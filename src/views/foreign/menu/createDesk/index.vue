@@ -38,6 +38,7 @@
         border
         default-expand-all
         @selection-change="handleSelectionChange"
+        :max-height="tableHeight"
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="tableNo" label="桌号" sortable />
@@ -111,10 +112,10 @@
       </template>
     </el-dialog>
 
-     <!-- 二维码 -->
-     <el-dialog v-model="ScanCode.dialogVisible" title="桌台二维码" width="500">
+    <!-- 二维码 -->
+    <el-dialog v-model="ScanCode.dialogVisible" title="桌台二维码" width="500">
       <div style="width: 100%; text-align: center">
-        <div style="font-size:20px">{{ ScanCode.tableNo }}</div>
+        <div style="font-size: 20px">{{ ScanCode.tableNo }}</div>
         <el-image
           :src="`${formData.origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
           style="width: 280px; height: 280px"
@@ -157,6 +158,7 @@ defineOptions({
   name: "create-desk",
   isRouter: true,
 });
+const tableHeight = inject("$com").tableHeight();
 const multipleSelection = ref([]);
 const StoreOptions = ref([]);
 const query = reactive({
@@ -164,7 +166,7 @@ const query = reactive({
   pageNum: 1,
 });
 let formData = reactive({
-  origin: inject("$com").baseUrl ,
+  origin: inject("$com").baseUrl,
   data: {
     tableNo: "",
   },
@@ -172,7 +174,7 @@ let formData = reactive({
 const ScanCode = reactive({
   dialogVisible: false,
   tableId: "",
-  tableNo:"",
+  tableNo: "",
 });
 const formRef = ref(null);
 const rules = {

@@ -1,15 +1,29 @@
 <template>
-  <div class="avatarddddd">
+  <div class="avatarddddd flex-c">
+    <el-dropdown
+      placement="bottom"
+      @command="handleCommand"
+      v-if="role === 'merchant'"
+    >
+      <span style="color: #ffffff" class="flex-c">
+        <el-icon size="15"><Shop /></el-icon>
+        {{ storeName || "切换分店" }}
+      </span>
+
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item
+            v-for="(item, idx) in ShopOptions"
+            :key="idx"
+            :command="item"
+            >{{ item.name }}</el-dropdown-item
+          >
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
     <div
       :title="'客服'"
-      style="
-        margin-top: 9px;
-        margin-right: 10px;
-        float: left;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-      "
+      style="float: left; cursor: pointer; display: flex; align-items: center"
       @click="callUs"
       v-if="role === 'merchant'"
     >
@@ -18,14 +32,7 @@
     </div>
     <div
       :title="'退出'"
-      style="
-        margin-top: 9px;
-        margin-right: 10px;
-        float: left;
-        display: flex;
-        cursor: pointer;
-        align-items: center;
-      "
+      style="float: left; display: flex; cursor: pointer; align-items: center"
       @click="logout"
     >
       <el-icon color="#fff"><SwitchButton /></el-icon>
@@ -80,10 +87,13 @@
 
 <script>
 import { rules } from "@/utils/rules";
+import { gerShopOption } from "@/api/project/foreign/employee.js";
 export default {
   name: "Avatar",
   data() {
     return {
+      ShopOptions: [],
+      storeName: "",
       formLabelWidth: "80px",
       resetPasswdFormVisible: false,
       myInfoDialog: false,
@@ -102,9 +112,40 @@ export default {
   computed: {},
   mounted() {
     this.role = window.localStorage.getItem("role");
-    // console.log(this.role);
+    if (this.role === "merchant") {
+      //商家端才有的切换商家店铺
+      this.getShopOption();
+    }
   },
   methods: {
+    handleCommand(e) {
+      console.log(e);
+      localStorage.setItem(
+        "storeId",
+        JSON.stringify({ storeId: e.storeId, name: e.name })
+      );
+      this.storeName = e.name;
+    },
+    async getShopOption() {
+      const res = await gerShopOption();
+      if (res.code === 0) {
+        this.ShopOptions = res.data;
+
+        const storageStoreId = localStorage.getItem("storeId");
+        if (storageStoreId) {
+          this.storeName = JSON.parse(storageStoreId).name;
+        } else {
+          localStorage.setItem(
+            "storeId",
+            JSON.stringify({
+              storeId: res.data[0].storeId,
+              name: res.data[0].name,
+            })
+          );
+        }
+      }
+    },
+
     callUs() {
       this.$router.push("/foreign/callUs");
     },
@@ -140,48 +181,18 @@ export default {
         }
       });
     },
-    onError(file, fileList) {},
-    onSuccess(file, fileList) {
-      if (file.code === 200) {
-        this.uploadName = file.data;
-        this.downloadAvatar(file.data.fileId);
-        let data = {
-          userId: parseInt(localStorage.getItem("user_id")),
-          userName: this.infoData.userName,
-          avatar: "/system/file/download/" + file.data.fileId,
-        };
-        this.uploadAvatar(data);
-        this.$message.success("上传成功！");
-      } else {
-        this.$message.error("上传失败！");
-        this.fileList = [];
-      }
-    },
-    // 上传方法
-    // handleRemove(file, fileList) {
-    // },
-    handlePreview(file) {},
-    handleExceed(files, fileList) {
-      this.$message.warning(
-        `当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${
-          files.length + fileList.length
-        } 个文件`
-      );
-    },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`);
-    },
-    beforeAvatarUpload(file, fileList) {},
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .avatarddddd {
   padding-bottom: 8px;
   padding-left: 10px;
+  > * {
+    margin-top: 9px;
+    margin-right: 10px;
+  }
 }
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;

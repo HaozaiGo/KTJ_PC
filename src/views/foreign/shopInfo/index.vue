@@ -319,7 +319,7 @@ const query = reactive({
 });
 const innerDrawer = ref(false);
 let formData = reactive({
-  origin: inject("$com").baseUrl + "/api",
+  origin: inject("$com").baseUrl ,
   drawer: false,
   innerDrawer: false,
   dialogVisible: false,

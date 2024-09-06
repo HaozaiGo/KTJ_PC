@@ -428,6 +428,20 @@
             >
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="支付下单模式">
+          <el-radio-group
+            v-model="formData.settingForm.scanPayOrderType"
+            class="ml-4"
+          >
+            <el-radio
+              v-for="(item, index) in formData.scanPayOrderTypeOption"
+              :key="index"
+              :value="item.dictValue"
+            >
+              {{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="创建时间">
           <el-input v-model="formData.settingForm.createTime" disabled />
         </el-form-item>
@@ -727,6 +741,7 @@ class settingFormData {
   wxMchId = ""; //微信商户号
   wxPayStatus = ""; //是否开通微信支付
   wxShareStatus = ""; //是否开通分账模式
+  scanPayOrderType= "";
 }
 let formData = reactive({
   origin: inject("$com").baseUrl + "/api",
@@ -741,6 +756,7 @@ let formData = reactive({
   options: [],
   wxPayStatusOption: [],
   wxShareStatusOption: [],
+  scanPayOrderTypeOption:[], //商家下单模式
   settingForm: new settingFormData(), //配置
   checkData: {}, //查看商家资料
 });
@@ -935,7 +951,6 @@ const edit = async (item) => {
       ]
     : [];
 
-  // console.log(formData.data.logoList);
   formData.drawer = true;
 };
 // 删除
@@ -961,9 +976,7 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val;
 };
 const handleComfirm = () => {
-  // if (formData.state === "check") {
-  //   formData.drawer = false;
-  // }
+
   if (!formRef.value) return;
   formRef.value.validate(async (valid) => {
     if (valid) {
@@ -1086,12 +1099,13 @@ const getOption = async () => {
 
 const getWxPayStatusOption = () => {
   inject("$com")
-    .getDict("bill_status,bill_open_status")
+    .getDict("bill_status,bill_open_status,bill_scan_pay_order_type")
     .then((res) => {
       formData.wxPayStatusOption = res.data[0].list;
       formData.settingForm.wxPayStatus = res.data[0].list[0].dictValue;
       formData.wxShareStatusOption = res.data[1].list;
       formData.settingForm.wxShareStatus = res.data[1].list[0].dictValue;
+      formData.scanPayOrderTypeOption = res.data[2].list;
     });
 };
 

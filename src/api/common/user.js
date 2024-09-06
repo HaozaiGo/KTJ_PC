@@ -88,10 +88,17 @@ export function getPublicKey(data) {
   });
 }
 
-// 获取文件资源地址
+// 获取文件资源地址 store
 export function getFilePath() {
   return request({
     url: "/store/api/store/cos",
+    method: "get",
+  });
+}
+
+export function getFilePath_platform() {
+  return request({
+    url: "/api/bill/cos",
     method: "get",
   });
 }
