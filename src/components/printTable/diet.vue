@@ -142,10 +142,13 @@ export default {
       `${this.baseUrl}/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`
     );
     if (this.needScanImg) {
-      getQrCodePay({orderId:this.tableData.orderId}).then((res) => {
-        console.log(res,'---');
-        // let blob = new Blob([data]);
-        // let url = window.URL.createObjectURL(blob);
+      getQrCodePay({ orderId: this.tableData.orderId }).then(({ data }) => {
+        let blob = new Blob([data]);
+        let url = window.URL.createObjectURL(blob);
+        console.log(blob);
+        console.log(data);
+        console.log(url);
+        
       });
     }
   },
