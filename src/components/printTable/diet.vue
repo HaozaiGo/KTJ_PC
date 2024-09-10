@@ -149,9 +149,7 @@ export default {
         console.log(res);
         // let blob = new Blob([data]);
         // let url = window.URL.createObjectURL(blob);
-
       });
-
     }
   },
   methods: {},
