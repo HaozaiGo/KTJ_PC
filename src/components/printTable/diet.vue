@@ -111,7 +111,12 @@
         ref="imgScan"
         style="width: 40mm; height: 40mm"
       /> -->
-      <img :src="imgSrc" alt="" ref="imgScan" style="width: 40mm; height: 40mm">
+      <img
+        :src="imgSrc"
+        alt=""
+        ref="imgScan"
+        style="width: 40mm; height: 40mm"
+      />
     </div>
     <p>打印时间：{{ time }}</p>
   </div>
@@ -125,7 +130,7 @@ export default {
     return {
       time: "",
       baseUrl: common.baseUrl,
-      imgSrc:"",
+      imgSrc: "",
     };
   },
   props: {
@@ -147,18 +152,21 @@ export default {
       axios({
         method: "get",
         url: `https://bdncn.cn/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`,
-        responseType: 'blob',
+        responseType: "blob",
       }).then(function (response) {
         console.log(response);
-       
-        const blob = new Blob([response.data], { type: response.data.type })
+
+        const blob = new Blob([response.data], { type: response.data.type });
         let url = window.URL.createObjectURL(blob);
         console.log(url);
-        that.imgSrc = url;
+
+        const img = document.createElement("img");
+        img.src = url;
+        document.body.appendChild(img);
+        // that.imgSrc = url;
         // that.$refs.imgScan.src = url;
         // response.data.pipe(fs.createWriteStream("ada_lovelace.jpg"));
       });
-      
     }
   },
   methods: {},
