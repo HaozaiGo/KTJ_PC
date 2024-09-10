@@ -111,12 +111,12 @@
         ref="imgScan"
         style="width: 40mm; height: 40mm"
       /> -->
-      <img
+      <!-- <img
         :src="imgSrc"
         alt=""
         ref="imgScan"
         style="width: 40mm; height: 40mm"
-      />
+      /> -->
     </div>
     <p>打印时间：{{ time }}</p>
   </div>
