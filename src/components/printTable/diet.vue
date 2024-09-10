@@ -158,13 +158,7 @@ export default {
         // that.$refs.imgScan.src = url;
         // response.data.pipe(fs.createWriteStream("ada_lovelace.jpg"));
       });
-      // getQrCodePay({ orderId: this.tableData.orderId }).then(({ data }) => {
-      //   let blob = new Blob([data]);
-      //   let url = window.URL.createObjectURL(blob);
-      //   console.log(blob);
-      //   console.log(data);
-      //   console.log(url);
-      // });
+      
     }
   },
   methods: {},
