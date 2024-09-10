@@ -61,7 +61,7 @@ export default {
       this.staffId = window.localStorage.getItem("staffId");
       // 连接websocket
       this.ws = new WebSocket(
-        `${this.socketUrl}/ws/cs/message/point/store/${this.staffId}`
+        `${this.socketUrl}/api/ws/cs/message/point/store/${this.staffId}`
       );
 
       // 监听消息

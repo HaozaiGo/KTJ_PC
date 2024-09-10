@@ -125,31 +125,160 @@
         </div>
       </div>
     </el-drawer>
+
+    <!-- 核销订单详情 -->
+    <el-dialog v-model="state1.dialogVisible" title="查看订单" width="1000">
+      <div style="text-align: center">
+        <el-form
+          ref="ruleFormRef"
+          :model="state1.form"
+          label-width="100px"
+          inline
+        >
+          <el-form-item label="台号" prop="tableNo">
+            <el-select
+              v-model="state1.form.tableNo"
+              placeholder="Select"
+              style="width: 250px"
+              clearable
+              filterable
+              allow-create
+            >
+              <el-option
+                v-for="item in state1.tableNoOptions"
+                :key="item.tableNo"
+                :label="item.tableNo"
+                :value="item.tableNo"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-checkbox v-model="state1.form.checked">暂无空位</el-checkbox>
+          </el-form-item>
+          <div style="text-align: left; margin-left: 290px">
+            人数：{{ state1.orderDetailData.peopleQty }}人
+          </div>
+        </el-form>
+
+        <div style="font-size: 25px">菜品</div>
+
+        <el-table
+          :data="state1.orderDetailData.menuList"
+          stripe
+          style="width: 100%"
+          :max-height="tableHeight - 300"
+        >
+          <el-table-column prop="name" label="品名" />
+          <el-table-column prop="unit" label="规格" width="150" />
+          <el-table-column prop="qty" label="数量" width="150" />
+          <el-table-column prop="price" label="单价" width="150" />
+          <el-table-column prop="amount" label="小计" width="150" />
+        </el-table>
+
+        <div style="font-size: 16px; font-weight: bold; margin-top: 20px">
+          合计：¥{{ state1.orderDetailData.billAmount }} &ensp;&ensp;
+          优惠后实收：¥{{ state1.orderDetailData.amount }}
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="state1.dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleOutBill"> 出单 </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <!-- <audio ref="audioPlay" :src="audioSrc" /> -->
+
+    <printTable
+      v-if="state.showPrintTable"
+      ref="printTableDom"
+      :tableData="state.printerData"
+      style="
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        transform: translate(-80mm, -80mm);
+        opacity: 0;
+      "
+    ></printTable>
+
+    <KitchenTable
+      v-if="state.showPrintTable"
+      ref="kitchenTableDom"
+      :tableData="state.printerData"
+      style="
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        transform: translate(-80mm, -80mm);
+        opacity: 0;
+      "
+    >
+    </KitchenTable>
   </div>
 </template>
 <script>
 import { getFavorites } from "@/api/common/router.js";
 import { Avatar } from "@/layouts/components/index.js";
 import router from "@/router/index.ts";
+import common from "@/utils/common";
+import { ElNotification } from "element-plus";
+import getLodop from "@/utils/LodopFuncs.js";
+import printTable from "@/components/printTable/diet.vue";
+import KitchenTable from "@/components/printTable/kitchen.vue";
+
+import {
+  getDeskList,
+  checkNoDetail,
+  offlineCheckOrder,
+} from "@/api/project/foreign/order.js";
+
 export default {
   name: "NavBar",
   components: {
     Avatar,
+    printTable,
+    KitchenTable,
   },
   data() {
     return {
+      state1: {
+        dialogVisible: false, //核销订单详情
+        tableNoOptions: [],
+        form: {
+          tableNo: "",
+          checked: false,
+        },
+        orderDetailData: {
+          peopleQty: null,
+          billAmount: null,
+          amount: null,
+          menuList: [],
+        },
+      },
+      // 打印机数据
+      state: {
+        showPrintTable: false,
+        printerData: {},
+      },
+
       //audioSrc: "", //MP3地址
       showCollection: false,
       dialogVisible: false, //告警设置
       item: [],
-      index: 999,
       height: 0,
-      WindoWwidth: window.innerWidth,
       themeColor:
         window.localStorage.getItem("ThemeStyle") == "false" ? "#000" : "#fff",
       collection: [],
       role: "",
+      orderLists: [],
+      storeId: "",
+      socketData: {}, //点击的socket数据
+      printerMethod: [], //打单方式
+      printerOption: [], //打印机全部型号
+      tableHeight: common.tableHeight(),
+      notifiactions: [],
     };
   },
   computed: {},
@@ -162,7 +291,194 @@ export default {
   created() {
     this.role = window.localStorage.getItem("role");
   },
+  mounted() {
+    this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+    common.getStoreDict("bill_print_method").then((res) => {
+      this.printerMethod = res.data[0].list;
+    });
+    setTimeout(() => {
+      var agent = navigator.userAgent.toLowerCase();
+      var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+      if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
+        console.log("这是windows32位系统");
+        this.getPrinterOption();
+      }
+      if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
+        console.log("这是windows64位系统");
+        this.getPrinterOption();
+      }
+      if (isMac) {
+        console.log("这是mac系统");
+      }
+      this.getOrderListSocket();
+      this.getTableNoList();
+    }, 1000);
+  },
   methods: {
+    getPrinterOption() {
+      let LODOP = getLodop();
+
+      let count = LODOP.GET_PRINTER_COUNT();
+      let arr = [];
+      for (var i = 0; i < count; i++) {
+        let obj = {};
+        obj.value = LODOP.GET_PRINTER_NAME(i);
+        obj.label = LODOP.GET_PRINTER_NAME(i);
+        arr.push(obj);
+      }
+
+      this.printerOption = arr;
+      console.log("打印机列表", arr);
+    },
+    async handleOutBill() {
+      const body = {
+        method:
+          this.socketData.method === "新单"
+            ? this.printerMethod[0].dictValue
+            : this.printerMethod[1].dictValue,
+        orderId: this.state1.orderDetailData.orderId,
+        storeId: this.state1.orderDetailData.storeId,
+        tableNo: this.state1.orderDetailData.tableNo,
+      };
+      const res = await offlineCheckOrder(body);
+      if (res.code === 0) {
+        const printerArr = res.data;
+        for (let i = 0; i < printerArr.length; i++) {
+          await this.asyncEvent(printerArr[i]);
+        }
+      }
+    },
+
+    async asyncEvent(ele) {
+      return new Promise((resolve) => {
+        setTimeout(
+          (e) => {
+            console.log(e);
+            this.state.printerData = Object.assign(
+              {},
+              this.state1.orderDetailData,
+              e
+            );
+            this.handlePrint(e);
+            resolve(e);
+          },
+          10,
+          ele
+        );
+      });
+    },
+
+    // 打印方法执行
+    handlePrint(data) {
+      this.state.showPrintTable = true;
+      const res = this.printerOption.find((x) => x.label === data.printerModel);
+
+      // 找到匹配的打印机
+      if (res) {
+        this.$nextTick(() => {
+          let LODOP = getLodop();
+          const height =
+            (this.$refs.printTableDom.$el.clientHeight /
+              this.$refs.printTableDom.$el.clientWidth) *
+              80 +
+            10;
+          console.log(height);
+
+          const printerHtml =
+            data.printerType === "KITCHEN"
+              ? this.$refs.kitchenTableDom.$el.innerHTML
+              : this.$refs.printTableDom.$el.innerHTML;
+
+          LODOP.PRINT_INIT(data.printerModel);
+          LODOP.SET_PRINT_PAGESIZE(1, "80mm", height + "mm", "");
+          LODOP.SET_PRINTER_INDEX(data.printerModel);
+          LODOP.SET_SHOW_MODE("LANDSCAPE_DEFROTATED", 1);
+          LODOP.ADD_PRINT_HTM(0, 0, "80mm", height + "mm", printerHtml);
+          // LODOP.PREVIEW();
+          LODOP.PRINT();
+          this.state.showPrintTable = false;
+          debugger;
+        });
+      }
+    },
+
+    //获取台号
+    async getTableNoList() {
+      const res = await getDeskList({ storeId: this.storeId });
+      if (res.code === 0) {
+        this.state1.tableNoOptions = res.rows;
+      }
+    },
+
+    // 开启订单socket
+
+    getOrderListSocket() {
+      // 连接websocket
+      const url = common.socketUrl;
+
+      var that = this;
+      var ws = new WebSocket(
+        `${url}/mini/api/ws/order/handle/monitor/${this.storeId}`
+      );
+      // console.log(ws);
+      // 监听消息
+
+      ws.onmessage = function (event) {
+        console.log(event);
+        try {
+          const data = JSON.parse(event.data);
+          that.orderLists.push(data);
+          // console.log(that.orderLists);
+          let notifiaction = ElNotification({
+            title: `订单号：${data.orderNo}`,
+            message: `<div class="flex-sb"> <div>桌号：${data.tableNo} 人数：${data.peopleQty}</div><button style="padding:5px 10px;
+  border-radius: 5px;
+  background-color: rgb(64, 158, 255);
+  color: #fff;
+  margin-left: 10px;
+  cursor: pointer;" >去处理</button></div> `,
+            position: "bottom-right",
+            dangerouslyUseHTMLString: true,
+            showClose: false,
+            onClick: function (e) {
+              that.state1.dialogVisible = true;
+              that.getOrderDetail(data);
+              //关闭当前实例
+              const v = that.notifiactions.splice(
+                that.notifiactions.indexOf(notifiaction),
+                1
+              );
+              v[0].close();
+            },
+            duration: 0,
+          });
+          that.notifiactions.push(notifiaction);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      // 重连
+      ws.onclose = function (event) {
+        console.log("重连");
+        that.getOrderListSocket();
+      };
+      ws.onerror = function (event) {
+        console.log("error");
+        that.getOrderListSocket();
+      };
+    },
+
+    // 获取订单详细
+    async getOrderDetail(data) {
+      // console.log(data.orderId);
+      this.socketData = data;
+      const res = await checkNoDetail(data.orderId);
+      if (res.code === 0) {
+        this.state1.form.tableNo = res.data.tableNo;
+        this.state1.orderDetailData = res.data;
+      }
+    },
+
     handleShowBigView() {
       this.$router.push("/SystemView");
     },
@@ -193,7 +509,7 @@ export default {
   },
 };
 </script>
-<style lang="scss" >
+<style lang="scss" scoped>
 .auth {
   color: red;
   cursor: pointer;

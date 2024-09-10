@@ -83,7 +83,7 @@ const getUserListApi = async () => {
 const getUserListSocket = () => {
   // 连接websocket
   const url = socketUrl.value;
-  var ws = new WebSocket(`${url}/ws/cs/room/user`);
+  var ws = new WebSocket(`${url}/api/ws/cs/room/user`);
   // console.log(ws);
   // 监听消息
   ws.onmessage = function (event) {
@@ -113,7 +113,7 @@ const getUserListSocket = () => {
 const getStoreListSocket = () => {
   // 连接websocket
   const url = socketUrl.value;
-  var ws = new WebSocket(`${url}/ws/cs/room/store`);
+  var ws = new WebSocket(`${url}/api/ws/cs/room/store`);
   // 监听消息
   ws.onmessage = function (event) {
     console.log(event);

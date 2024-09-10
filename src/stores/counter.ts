@@ -27,7 +27,6 @@ export const baseSettings = defineStore('baseSettings', {
     header: settings.header, //自定义 header
     tagsBar: settings.tagsBar, //多标签页
     baseFileUrl: "", //文件上传地址
-
   }),
   getters: {
     double: (state) => state.OverallHeight * 2,
@@ -49,7 +48,8 @@ export const baseSettings = defineStore('baseSettings', {
       console.log(route);
 
       this.routes = this.routes.concat(route)
-    }
+    },
+ 
 
   },
 })

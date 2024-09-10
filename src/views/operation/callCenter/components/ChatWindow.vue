@@ -86,7 +86,7 @@ export default {
       const url = common.socketUrl;
       var that = this;
       this.ws = new WebSocket(
-        `${url}/ws/cs/message/${this.type}/${
+        `${url}/api/ws/cs/message/${this.type}/${
           this.type === "user"
             ? this.selectedUser.customerId
             : this.selectedUser.staffId

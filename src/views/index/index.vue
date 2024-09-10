@@ -113,7 +113,7 @@ defineOptions({
 
 import { useUserStore } from "@/stores/modules/user";
 import { useTransition, TransitionPresets } from "@vueuse/core";
-import { ref, computed, defineAsyncComponent, onMounted } from "vue";
+import { ref, computed, defineAsyncComponent, onMounted, inject } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const userStore = useUserStore();
@@ -243,6 +243,7 @@ const chartData = ref(["BarChart", "PieChart", "RadarChart"]);
 const chartComponent = (item: string) => {
   return defineAsyncComponent(() => import(`./components/${item}.vue`));
 };
+
 onMounted(() => {
   if (window.localStorage.getItem("routes") === null) {
     // 返回登录

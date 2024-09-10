@@ -51,7 +51,6 @@
         border
         default-expand-all
         :max-height="tableHeight"
-
       >
         <el-table-column prop="orderNo" label="订单编号" sortable />
         <el-table-column
@@ -84,9 +83,7 @@
               link
               type="primary"
               size="small"
-              v-if="
-                scope.row.orderStatus === 'FINISH' && activeName === 'FINISH'
-              "
+              v-if="scope.row.orderStatus === 'FINISH'"
               @click="printAgain(scope.row)"
               >再次打单</el-button
             >
@@ -167,7 +164,12 @@
     </el-dialog>
 
     <!-- 核销订单详情 -->
-    <el-dialog v-model="state1.dialogVisible" title="查看订单" width="1000">
+    <el-dialog
+      v-model="state1.dialogVisible"
+      title="查看订单"
+      width="1000"
+      align-center
+    >
       <div style="text-align: center">
         <el-form
           ref="ruleFormRef"
@@ -278,10 +280,58 @@
       </el-table>
     </el-dialog>
 
+    <!-- 自定义出单方式 -->
+    <el-dialog
+      v-model="printerWay.dialogVisible"
+      title="自定义打单方式"
+      width="500"
+      align-center
+    >
+      <el-form>
+        <el-form-item label="指定打印机">
+          <el-select
+            v-model="printerWay.form.printerId"
+            placeholder="打印机型号"
+            style="width: 300px"
+          >
+            <el-option
+              v-for="item in printerWay.printerLists"
+              :key="item.printerId"
+              :label="item.printerName"
+              :value="item.printerId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="打印方式">
+          <el-radio-group v-model="printerWay.form.method">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, idx) in methodOption"
+              :key="idx"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="底部二维码">
+          <el-radio-group v-model="printerWay.form.needScan">
+            <el-radio value="1">结账二维码</el-radio>
+            <el-radio value="0">不需要二维码</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="printerWay.dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleCustom"> 确定 </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <printTable
       v-if="state.showPrintTable"
       ref="printTableDom"
       :tableData="state.orderDetailData"
+      :needScanImg="printerWay.needScanImg"
       style="
         position: fixed;
         left: 0;
@@ -290,12 +340,28 @@
         opacity: 0;
       "
     ></printTable>
+
+    <KitchenTable
+      v-if="state.showPrintTable"
+      ref="kitchenTableDom"
+      :tableData="state.orderDetailData"
+      style="
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        transform: translate(-80mm, -80mm);
+        opacity: 0;
+      "
+    >
+    </KitchenTable>
   </div>
 </template>
 
 <script setup>
 import printTable from "@/components/printTable/diet.vue";
-import { reactive, onMounted, ref, inject } from "vue";
+import KitchenTable from "@/components/printTable/kitchen.vue";
+
+import { reactive, onMounted, ref, inject, nextTick } from "vue";
 import getLodop from "@/utils/LodopFuncs.js";
 import printJS from "print-js";
 import {
@@ -307,6 +373,8 @@ import {
   getDeskList,
   waitToChekOrder,
   normalCheckOrder,
+  customPrint,
+  getSysPrinterLists,
 } from "@/api/project/foreign/order.js";
 
 import { ElMessage } from "element-plus";
@@ -317,6 +385,7 @@ defineOptions({
 const tableHeight = inject("$com").tableHeight();
 
 const printTableDom = ref(null);
+const kitchenTableDom = ref(null);
 const showPhoneNum = ref(false);
 const query = reactive({
   orderNo: "",
@@ -329,6 +398,7 @@ const query = reactive({
   storeId: "",
 });
 const StoreOptions = ref([]);
+const methodOption = ref([]);
 const activeName = ref("");
 const tableData = ref({
   row: [],
@@ -353,15 +423,26 @@ const state1 = reactive({
   },
   tableData: [], //如果有多条核销的记录
 });
-
+const printerWay = reactive({
+  dialogVisible: false,
+  printerLists: [], //配置了的打印机
+  needScanImg: false,
+  form: {
+    printerId: "",
+    needScan: "0",
+    method: "",
+  },
+});
+const printerOption = ref([]);
 const LODOPOBJ = ref(null);
 // 再次打单
 const printAgain = async (row) => {
   const res1 = await checkNoDetail(row.orderId);
   if (res1.code === 0) {
     state.orderDetailData = res1.data;
-    state.showPrintTable = true;
-    state.normalPrint = true; //开启普通打印
+    state1.form.tableNo = res1.data.tableNo; //回显台号
+   
+    state.normalPrint = true; //开启普通打印 -- 再次重复打单
     state1.dialogVisible = true;
   }
 };
@@ -369,7 +450,6 @@ const printAgain = async (row) => {
 // 获取打印机list
 const getPrinterList = async () => {
   let LODOP = getLodop();
-  console.log("11", LODOP);
   let count = LODOP.GET_PRINTER_COUNT();
   let arr = [];
   for (var i = 0; i < count; i++) {
@@ -378,53 +458,63 @@ const getPrinterList = async () => {
     obj.label = LODOP.GET_PRINTER_NAME(i);
     arr.push(obj);
   }
+  printerOption.value = arr;
   console.log("打印机列表", arr);
-  // this.PrintNamelist = arr;
-
   LODOPOBJ.value = LODOP;
+};
+//自定义打单
+const handleCustom = async () => {
+  console.log(state.orderDetailData);
+
+  const body = {
+    orderId: state.orderDetailData.orderId,
+    printerId: printerWay.form.printerId,
+    storeId: state.orderDetailData.storeId,
+    method: printerWay.form.method,
+  };
+  const res = await customPrint(body);
+  if (res.code === 0) {
+    console.log(printerWay.form.needScan);
+    
+    if (printerWay.form.needScan === "1") {
+      // 支付结账 有二维码
+      printerWay.needScanImg = true;
+      state.showPrintTable = true;
+    }
+    handlePrint(res.data);
+  }
+};
+// 获取已经配置的打印机
+const getPrinterSysList = async () => {
+  const res = await getSysPrinterLists({
+    storeId: state.orderDetailData.storeId,
+  });
+  if (res.code === 0) {
+    printerWay.printerLists = res.rows;
+    printerWay.form.printerId = res.rows[0].printerId;
+  }
 };
 
 // 出单
 const handleOutBill = async () => {
-  const height =
-    (printTableDom.value.$el.clientHeight /
-      printTableDom.value.$el.clientWidth) *
-      80 +
-    30;
+  // 自定义打单
   if (state.normalPrint) {
-    // 打印机打印
-    await getPrinterList();
-
-    LODOPOBJ.value.PRINT_INIT("客单结算单");
-    LODOPOBJ.value.SET_PRINT_PAGESIZE(1, "80mm", height + "mm");
-    // LODOPOBJ.value.SET_SHOW_MODE("LANDSCAPE_DEFROTATED", 1);
-    LODOPOBJ.value.ADD_PRINT_HTM(
-      0,
-      0,
-      "80mm",
-      height + "mm",
-      printTableDom.value.$el.innerHTML
-    );
-
-    // const printer = LODOPOBJ.value.SELECT_PRINTER();
-    LODOPOBJ.value.PREVIEW();
-    // LODOPOBJ.value.SET_PRINTER_INDEX(printer);
-    // LODOPOBJ.value.SET_PREVIEW_WINDOW(0, 1, 1, 760, 540, "自定义标题.开始打印");
-    LODOPOBJ.value.PRINT();
-    //普通出单
-    // printJS({
-    //   printable: printTableDom.value.$el,
-    //   type: "html",
-    // });
+    getPrinterSysList();
+    printerWay.dialogVisible = true;
   } else {
     if (state.orderDetailData.type === "ONLINE_ORDER_PAY") {
+      // 线上核销出单
       const res = await waitToChekOrder({
         orderId: state.orderDetailData.orderId,
         storeId: state.orderDetailData.storeId,
         tableNo: state1.form.tableNo,
+        method: "ALL",
       });
       if (res.code === 0) {
-        printJS({ printable: printTableDom.value.$el, type: "html" });
+        const printerArr = res.data;
+        for (let i = 0; i < printerArr.length; i++) {
+          await asyncEvent(printerArr[i]);
+        }
       }
     } else {
       const res = await normalCheckOrder({
@@ -435,6 +525,53 @@ const handleOutBill = async () => {
         printJS({ printable: printTableDom.value.$el, type: "html" });
       }
     }
+  }
+};
+const asyncEvent = async (ele) => {
+  return new Promise((resolve) => {
+    setTimeout(
+      (e) => {
+        console.log(e);
+        state.orderDetailData = Object.assign({}, state.orderDetailData, e);
+        handlePrint(e);
+        resolve(e);
+      },
+      10,
+      ele
+    );
+  });
+};
+// 打印方法执行
+const handlePrint = async (data) => {
+  console.log(data);
+
+  state.showPrintTable = true;
+  const res = printerOption.value.find((x) => x.label === data.printerModel);
+  await nextTick();
+  // 找到匹配的打印机
+  if (res && data.orderMenuList.length > 0) {
+    let LODOP = getLodop();
+    const height =
+      (printTableDom.value.$el.clientHeight /
+        printTableDom.value.$el.clientWidth) *
+        80 +
+      10;
+    console.log(height);
+
+    const printerHtml =
+      data.printerType === "KITCHEN"
+        ? kitchenTableDom.value.$el.innerHTML
+        : printTableDom.value.$el.innerHTML;
+
+    LODOP.PRINT_INIT(data.printerModel);
+    LODOP.SET_PRINT_PAGESIZE(1, "80mm", height + "mm", "");
+    LODOP.SET_PRINTER_INDEX(data.printerModel);
+    LODOP.SET_SHOW_MODE("LANDSCAPE_DEFROTATED", 1);
+    LODOP.ADD_PRINT_HTM(0, 0, "80mm", height + "mm", printerHtml);
+    LODOP.PREVIEW();
+    LODOP.PRINT();
+    state.showPrintTable = false;
+    // debugger;
   }
 };
 
@@ -468,6 +605,7 @@ const confirmCheckCode = async (row) => {
       const res1 = await checkNoDetail(res.data[0].orderId);
       if (res1.code === 0) {
         state.orderDetailData = res1.data;
+        state1.form.tableNo = res1.data.tableNo;
         state.showPrintTable = true;
 
         state1.dialogVisible = true;
@@ -527,11 +665,29 @@ const getStoreList = async () => {
   }
 };
 onMounted(async () => {
+  setTimeout(() => {
+    var agent = navigator.userAgent.toLowerCase();
+    var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+    if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
+      console.log("这是windows32位系统");
+      getPrinterList();
+    }
+    if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
+      console.log("这是windows64位系统");
+      getPrinterList();
+    }
+    if (isMac) {
+      console.log("这是mac系统");
+    }
+  });
+
   inject("$com")
-    .getStoreDict("bill_store_order_status")
+    .getStoreDict("bill_store_order_status,bill_print_method")
     .then((res) => {
       state.billOrderTypeOptions = res.data[0].list;
       activeName.value = state.billOrderTypeOptions[0].dictValue;
+      methodOption.value = res.data[1].list;
+      printerWay.form.method = res.data[1].list[0].dictValue;
       getStoreList();
       getList();
     });

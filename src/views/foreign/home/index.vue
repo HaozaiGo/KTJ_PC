@@ -111,13 +111,13 @@ defineOptions({
 });
 import { useUserStore } from "@/stores/modules/user";
 import { useTransition, TransitionPresets } from "@vueuse/core";
-import { ref, computed, defineAsyncComponent, onMounted } from "vue";
+import { ref, computed, defineAsyncComponent, onMounted, inject } from "vue";
 import { getWeather } from "@/api/common/util";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const userStore = useUserStore();
 const date: Date = new Date();
-
+const socketUrl = ref(null);
 const greetings = computed(() => {
   const hours = date.getHours();
   if (hours >= 6 && hours < 8) {
@@ -230,10 +230,11 @@ const chartComponent = (item: string) => {
   // return defineAsyncComponent(() => import(`./components/${item}.vue`));
 };
 const getWeatherApi = async () => {};
+
 onMounted(() => {
-  if(window.localStorage.getItem('routes') === null){
+  if (window.localStorage.getItem("routes") === null) {
     // 返回登录
-    router.replace('/signup');
+    router.replace("/signup");
   }
   getWeatherApi();
 });

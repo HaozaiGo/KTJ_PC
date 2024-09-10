@@ -65,3 +65,38 @@ export function normalCheckOrder(data) {
     data,
   });
 }
+
+// 打单时 线下打单 右下角 后付款
+export function offlineCheckOrder(data) {
+  return request({
+    url: "/store/api/store/order/store/pay/only/print",
+    method: "post",
+    data,
+  });
+}
+
+// 自定义打单
+export function customPrint(data) {
+  return request({
+    url: `/store/api/store/order/store/pay/custom/print`,
+    method: "post",
+    data,
+  });
+}
+export function getSysPrinterLists(params) {
+  return request({
+    url: "/store/api/store/printer/list",
+    method: "get",
+    params,
+  });
+}
+// 获取二维码支付 文件流
+
+export function getQrCodePay(params) {
+  return request({
+    url: "/store/api/store/order/store/pay/qrcode/mini",
+    method: "get",
+    responseType: "blob",
+    params,
+  });
+}
