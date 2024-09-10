@@ -105,12 +105,13 @@
       >
     </div>
     <div v-if="needScanImg" style="width: 80mm; text-align: center">
-      <el-image
+      <!-- <el-image
         :src="`https://bdncn.cn/store/api/store/order/store/pay/qrcode/mini?orderId=${tableData.orderId}`"
         alt=""
         ref="imgScan"
         style="width: 40mm; height: 40mm"
-      />
+      /> -->
+      <img :src="imgSrc" alt="" ref="imgScan" style="width: 40mm; height: 40mm">
     </div>
     <p>打印时间：{{ time }}</p>
   </div>
@@ -118,11 +119,13 @@
 <script>
 import { getQrCodePay } from "@/api/project/foreign/order";
 import common from "@/utils/common";
+import axios from "axios";
 export default {
   data() {
     return {
       time: "",
       baseUrl: common.baseUrl,
+      imgSrc:"",
     };
   },
   props: {
@@ -138,18 +141,30 @@ export default {
   mounted() {
     console.log(this.tableData);
     this.time = new Date().toLocaleString();
-    console.log(
-      `${this.baseUrl}/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`
-    );
+
     if (this.needScanImg) {
-      getQrCodePay({ orderId: this.tableData.orderId }).then(({ data }) => {
-        let blob = new Blob([data]);
+      var that = this;
+      axios({
+        method: "get",
+        url: `https://bdncn.cn/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`,
+        responseType: 'blob',
+      }).then(function (response) {
+        console.log(response);
+       
+        const blob = new Blob([response.data], { type: response.data.type })
         let url = window.URL.createObjectURL(blob);
-        console.log(blob);
-        console.log(data);
         console.log(url);
-        
+        that.imgSrc = url;
+        // that.$refs.imgScan.src = url;
+        // response.data.pipe(fs.createWriteStream("ada_lovelace.jpg"));
       });
+      // getQrCodePay({ orderId: this.tableData.orderId }).then(({ data }) => {
+      //   let blob = new Blob([data]);
+      //   let url = window.URL.createObjectURL(blob);
+      //   console.log(blob);
+      //   console.log(data);
+      //   console.log(url);
+      // });
     }
   },
   methods: {},

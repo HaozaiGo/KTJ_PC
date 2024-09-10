@@ -4,8 +4,8 @@
 import request from "@/config/request.js";
 
 const commonMethod = {
-  baseUrl: window.origin,
-  //baseUrl:"http://124.223.101.232",
+  // baseUrl: window.origin,
+  baseUrl:"http://124.223.101.232",
   //baseUrl:"http://192.168.1.59",
   //socketUrl:"ws://192.168.1.59",
   socketUrl: 'wss://bdncn.cn',
