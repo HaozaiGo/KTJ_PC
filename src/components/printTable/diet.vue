@@ -112,11 +112,9 @@
         style="width: 40mm; height: 40mm"
       />
     </div>
-
     <p>打印时间：{{ time }}</p>
   </div>
 </template>
-
 <script>
 import { getQrCodePay } from "@/api/project/foreign/order";
 import common from "@/utils/common";
