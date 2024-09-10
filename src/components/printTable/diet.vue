@@ -143,7 +143,7 @@ export default {
     );
     if (this.needScanImg) {
       getQrCodePay({orderId:this.tableData.orderId}).then((res) => {
-        console.log(res,'------');
+        console.log(res,'---');
         // let blob = new Blob([data]);
         // let url = window.URL.createObjectURL(blob);
       });
