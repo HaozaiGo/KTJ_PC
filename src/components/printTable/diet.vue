@@ -143,7 +143,6 @@ export default {
     console.log(
       `${this.baseUrl}/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`
     );
-
     if (this.needScanImg) {
       getQrCodePay({orderId:this.tableData.orderId}).then((res) => {
         console.log(res);

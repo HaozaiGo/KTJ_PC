@@ -8,7 +8,6 @@ export function getStoreAllMenuLists(params) {
     params,
   });
 }
-
 export function getLists(params) {
   return request({
     url: "/store/api/store/printer/list",
@@ -16,7 +15,6 @@ export function getLists(params) {
     params,
   });
 }
-
 export function addPrinterApi(data) {
   return request({
     url: "/store/api/store/printer",
