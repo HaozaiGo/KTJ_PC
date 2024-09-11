@@ -594,9 +594,9 @@ const handleOutBill = async () => {
       // 先付
       const body = {
         method: "ALL",
-        orderId: state1.orderDetailData.orderId,
-        storeId: state1.orderDetailData.storeId,
-        tableNo: state1.orderDetailData.tableNo,
+        orderId: state.orderDetailData.orderId,
+        storeId: state.orderDetailData.storeId,
+        tableNo: state.orderDetailData.tableNo,
       };
 
       const res = await beforePayCheckOrder(body);
@@ -611,9 +611,9 @@ const handleOutBill = async () => {
       // 后付
       const body = {
         method: "ALL",
-        orderId: state1.orderDetailData.orderId,
-        storeId: state1.orderDetailData.storeId,
-        tableNo: state1.orderDetailData.tableNo,
+        orderId: state.orderDetailData.orderId,
+        storeId: state.orderDetailData.storeId,
+        tableNo: state.orderDetailData.tableNo,
       };
       const res = await offlineCheckOrder(body);
       if (res.code === 0) {
