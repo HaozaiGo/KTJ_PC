@@ -2,17 +2,19 @@
   <div class="content">
     <div class="search">
       <el-select
-        v-model="query.storeId"
-        placeholder="选择店铺"
+        v-model="query.tableNo"
+        placeholder="台号"
         style="width: 200px"
+        clearable
       >
         <el-option
-          v-for="item in StoreOptions"
-          :key="item.storeId"
-          :label="item.name"
-          :value="item.storeId"
+          v-for="item in state1.tableNoOptions"
+          :key="item.tableNo"
+          :label="item.tableNo"
+          :value="item.tableNo"
         />
       </el-select>
+
       <el-input
         v-model="query.orderNo"
         style="width: 200px"
@@ -29,7 +31,13 @@
         value-format="YYYY-MM-DD"
       />
 
-      <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
+      <el-button
+        type="primary"
+        icon="Search"
+        @click="getList"
+        style="margin-left: 15px"
+        >搜索</el-button
+      >
       <el-button type="primary" icon="Checked" @click="checkCode"
         >核销</el-button
       >
@@ -53,6 +61,9 @@
         :max-height="tableHeight"
       >
         <el-table-column prop="orderNo" label="订单编号" sortable />
+        <el-table-column prop="tableNo" label="台号" sortable />
+        <el-table-column prop="typeLabel" label="订单类型" sortable />
+
         <el-table-column
           prop="orderTime"
           label="下单时间"
@@ -79,6 +90,29 @@
               @click="orderDetail(scope.row)"
               >订单详情</el-button
             >
+
+            <el-button
+              link
+              type="primary"
+              size="small"
+              v-if="
+                scope.row.type === 'SCAN_ORDER_PAY' ||
+                scope.row.type === 'SCAN_ORDER_UNDER'
+              "
+              @click="printAll(scope.row)"
+              >打单</el-button
+            >
+            <el-button
+              link
+              type="primary"
+              size="small"
+              v-if="
+                scope.row.type === 'SCAN_ORDER_PAY' ||
+                scope.row.type === 'SCAN_ORDER_UNDER'
+              "
+              @click="printAgain(scope.row)"
+              >结账打单</el-button
+            >
             <el-button
               link
               type="primary"
@@ -96,7 +130,7 @@
         style="float: right"
         @current-change="changePageSize"
       />
-      <img src="" alt="">
+      <img src="" alt="" />
     </div>
 
     <el-dialog v-model="state.dialogVisible1" title="查看订单状态" width="1000">
@@ -294,6 +328,7 @@
             v-model="printerWay.form.printerId"
             placeholder="打印机型号"
             style="width: 300px"
+            @change="switchPrinter"
           >
             <el-option
               v-for="item in printerWay.printerLists"
@@ -303,7 +338,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="打印方式">
+        <el-form-item label="打印方式" v-show="!printerWay.hiddenWay">
           <el-radio-group v-model="printerWay.form.method">
             <el-radio
               :value="item.dictValue"
@@ -313,7 +348,7 @@
             >
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="底部二维码">
+        <el-form-item label="底部二维码" v-show="!printerWay.hiddenWay">
           <el-radio-group v-model="printerWay.form.needScan">
             <el-radio value="1">结账二维码</el-radio>
             <el-radio value="0">不需要二维码</el-radio>
@@ -333,6 +368,7 @@
       ref="printTableDom"
       :tableData="state.orderDetailData"
       :needScanImg="printerWay.needScanImg"
+      :imgSrc="printerWay.imgSrc"
       style="
         position: fixed;
         left: 0;
@@ -364,27 +400,26 @@ import KitchenTable from "@/components/printTable/kitchen.vue";
 
 import { reactive, onMounted, ref, inject, nextTick } from "vue";
 import getLodop from "@/utils/LodopFuncs.js";
-import printJS from "print-js";
 import {
   getLists,
   checkOrderDetail,
-  getStoreLists,
   confirmOrderNo,
   checkNoDetail,
   getDeskList,
   waitToChekOrder,
-  normalCheckOrder,
   customPrint,
   getSysPrinterLists,
+  beforePayCheckOrder,
+  offlineCheckOrder,
 } from "@/api/project/foreign/order.js";
-
+import { getQrCodePayImg } from "@/api/project/foreign/order";
 import { ElMessage } from "element-plus";
 defineOptions({
   name: "foreign-Order",
   isRouter: true,
 });
 const tableHeight = inject("$com").tableHeight();
-
+const filePath = localStorage.getItem("filePath");
 const printTableDom = ref(null);
 const kitchenTableDom = ref(null);
 const showPhoneNum = ref(false);
@@ -397,8 +432,8 @@ const query = reactive({
   payStatus: "",
   pageNum: 1,
   storeId: "",
+  tableNo: "",
 });
-const StoreOptions = ref([]);
 const methodOption = ref([]);
 const activeName = ref("");
 const tableData = ref({
@@ -428,6 +463,8 @@ const printerWay = reactive({
   dialogVisible: false,
   printerLists: [], //配置了的打印机
   needScanImg: false,
+  hiddenWay: false, //隐藏打印方式
+  imgSrc: "", //二维码图片
   form: {
     printerId: "",
     needScan: "0",
@@ -436,14 +473,34 @@ const printerWay = reactive({
 });
 const printerOption = ref([]);
 const LODOPOBJ = ref(null);
+const switchPrinter = (e) => {
+  printerWay.hiddenWay = false;
+  const find = printerWay.printerLists.find((x) => {
+    return x.printerId === e;
+  });
+  console.log(find);
+  if (find.printerType === "KITCHEN") {
+    printerWay.hiddenWay = true;
+  }
+};
 // 再次打单
 const printAgain = async (row) => {
   const res1 = await checkNoDetail(row.orderId);
   if (res1.code === 0) {
     state.orderDetailData = res1.data;
     state1.form.tableNo = res1.data.tableNo; //回显台号
-   
     state.normalPrint = true; //开启普通打印 -- 再次重复打单
+    state1.dialogVisible = true;
+  }
+};
+
+// 全流程先付 后付打单
+const printAll = async (row) => {
+  const res = await checkNoDetail(row.orderId);
+  if (res.code === 0) {
+    state.orderDetailData = res.data;
+    state1.form.tableNo = res.data.tableNo; //回显台号
+    state.normalPrint = false;
     state1.dialogVisible = true;
   }
 };
@@ -476,13 +533,29 @@ const handleCustom = async () => {
   const res = await customPrint(body);
   if (res.code === 0) {
     console.log(printerWay.form.needScan);
-    
+
     if (printerWay.form.needScan === "1") {
       // 支付结账 有二维码
       printerWay.needScanImg = true;
-      state.showPrintTable = true;
+      const res = await getQrCodePayImg({
+        orderId: state.orderDetailData.orderId,
+      });
+      if (res.code === 0) {
+        printerWay.imgSrc = filePath + res.data;
+        console.log(printerWay.imgSrc);
+      }
+    } else {
+      printerWay.needScanImg = false;
     }
-    handlePrint(res.data);
+
+    setTimeout(() => {
+      state.orderDetailData = Object.assign(
+        {},
+        state.orderDetailData,
+        res.data
+      );
+      handlePrint(state.orderDetailData);
+    }, 2000);
   }
 };
 // 获取已经配置的打印机
@@ -517,13 +590,37 @@ const handleOutBill = async () => {
           await asyncEvent(printerArr[i]);
         }
       }
-    } else {
-      const res = await normalCheckOrder({
-        orderId: state.orderDetailData.orderId,
-        storeId: state.orderDetailData.storeId,
-      });
+    } else if (state.orderDetailData.type === "SCAN_ORDER_PAY") {
+      // 先付
+      const body = {
+        method: "ALL",
+        orderId: state1.orderDetailData.orderId,
+        storeId: state1.orderDetailData.storeId,
+        tableNo: state1.orderDetailData.tableNo,
+      };
+
+      const res = await beforePayCheckOrder(body);
       if (res.code === 0) {
-        printJS({ printable: printTableDom.value.$el, type: "html" });
+        const printerArr = res.data;
+        for (let i = 0; i < printerArr.length; i++) {
+          await asyncEvent(printerArr[i]);
+        }
+        // printJS({ printable: printTableDom.value.$el, type: "html" });
+      }
+    } else if (state.orderDetailData.type === "SCAN_ORDER_UNDER") {
+      // 后付
+      const body = {
+        method: "ALL",
+        orderId: state1.orderDetailData.orderId,
+        storeId: state1.orderDetailData.storeId,
+        tableNo: state1.orderDetailData.tableNo,
+      };
+      const res = await offlineCheckOrder(body);
+      if (res.code === 0) {
+        const printerArr = res.data;
+        for (let i = 0; i < printerArr.length; i++) {
+          await asyncEvent(printerArr[i]);
+        }
       }
     }
   }
@@ -553,10 +650,14 @@ const handlePrint = async (data) => {
   if (res && data.orderMenuList.length > 0) {
     let LODOP = getLodop();
     const height =
-      (printTableDom.value.$el.clientHeight /
-        printTableDom.value.$el.clientWidth) *
-        80 +
-      10;
+      data.printerType === "KITCHEN"
+        ? (kitchenTableDom.value.$el.clientHeight /
+            kitchenTableDom.value.$el.clientWidth) *
+          80
+        : (printTableDom.value.$el.clientHeight /
+            printTableDom.value.$el.clientWidth) *
+            80 +
+          10;
     console.log(height);
 
     const printerHtml =
@@ -569,7 +670,7 @@ const handlePrint = async (data) => {
     LODOP.SET_PRINTER_INDEX(data.printerModel);
     LODOP.SET_SHOW_MODE("LANDSCAPE_DEFROTATED", 1);
     LODOP.ADD_PRINT_HTM(0, 0, "80mm", height + "mm", printerHtml);
-    LODOP.PREVIEW();
+    // LODOP.PREVIEW();
     LODOP.PRINT();
     state.showPrintTable = false;
     // debugger;
@@ -657,14 +758,11 @@ const handleClick = (e) => {
     console.log(e);
   }
 };
-const getStoreList = async () => {
-  const res = await getStoreLists();
-  if (res.code === 0) {
-    StoreOptions.value = res.rows;
-    query.storeId = res.rows[0].storeId;
-    getTableNoList();
-  }
+const getStoreId = async () => {
+  const storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+  query.storeId = storeId;
 };
+
 onMounted(async () => {
   setTimeout(() => {
     var agent = navigator.userAgent.toLowerCase();
@@ -689,8 +787,9 @@ onMounted(async () => {
       activeName.value = state.billOrderTypeOptions[0].dictValue;
       methodOption.value = res.data[1].list;
       printerWay.form.method = res.data[1].list[0].dictValue;
-      getStoreList();
+      getStoreId();
       getList();
+      getTableNoList();
     });
 });
 </script>

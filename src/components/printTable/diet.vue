@@ -105,32 +105,21 @@
       >
     </div>
     <div v-if="needScanImg" style="width: 80mm; text-align: center">
-      <!-- <el-image
-        :src="`https://bdncn.cn/store/api/store/order/store/pay/qrcode/mini?orderId=${tableData.orderId}`"
-        alt=""
-        ref="imgScan"
-        style="width: 40mm; height: 40mm"
-      /> -->
-      <!-- <img
-        :src="imgSrc"
-        alt=""
-        ref="imgScan"
-        style="width: 40mm; height: 40mm"
-      /> -->
+      <img :src="imgSrc" alt="" id="imgId" style="width: 40mm; height: 40mm" />
     </div>
     <p>打印时间：{{ time }}</p>
   </div>
 </template>
 <script>
-import { getQrCodePay } from "@/api/project/foreign/order";
 import common from "@/utils/common";
-import axios from "axios";
+
 export default {
   data() {
     return {
       time: "",
       baseUrl: common.baseUrl,
-      imgSrc: "",
+
+      filePath: localStorage.getItem("filePath"),
     };
   },
   props: {
@@ -142,32 +131,40 @@ export default {
       type: Boolean,
       default: false,
     },
+    imgSrc: {
+      type: String,
+    },
+  },
+  created() {
+    // if (this.needScanImg) {
+    //   getQrCodePayImg({ orderId: this.tableData.orderId }).then((res) => {
+    //     // console.log(res);
+    //     if (res.code === 0) {
+    //       this.imgSrc = this.filePath + res.data;
+    //       console.log(this.imgSrc);
+    //     }
+    //   });
+    //   // var that = this;
+    //   // axios({
+    //   //   method: "get",
+    //   //   url: `https://bdncn.cn/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`,
+    //   //   responseType: "blob",
+    //   // }).then(
+    //   //   function (response) {
+    //   //     const blob = new Blob([response.data], { type: response.data.type });
+    //   //     const imgURL = URL.createObjectURL(blob); // 将 Blob 转化为可用的 URL
+    //   //     console.log(imgURL);
+
+    //   //     document.getElementById("imgId").src = imgURL;
+    //   //   }
+    //   // );
+    // }
   },
   mounted() {
     console.log(this.tableData);
+    // console.log(this.imgSrc);
+    
     this.time = new Date().toLocaleString();
-
-    if (this.needScanImg) {
-      var that = this;
-      axios({
-        method: "get",
-        url: `https://bdncn.cn/store/api/store/order/store/pay/qrcode/mini?orderId=${this.tableData.orderId}`,
-        responseType: "blob",
-      }).then(function (response) {
-        console.log(response);
-
-        const blob = new Blob([response.data], { type: response.data.type });
-        let url = window.URL.createObjectURL(blob);
-        console.log(url);
-
-        const img = document.createElement("img");
-        img.src = url;
-        document.body.appendChild(img);
-        // that.imgSrc = url;
-        // that.$refs.imgScan.src = url;
-        // response.data.pipe(fs.createWriteStream("ada_lovelace.jpg"));
-      });
-    }
   },
   methods: {},
 };

@@ -188,7 +188,9 @@
       </template>
     </el-dialog>
 
-    <!-- <audio ref="audioPlay" :src="audioSrc" /> -->
+    <audio ref="audioPlay" src="/newOrder.MP3">
+      Your browser does not support the <code>audio</code> element.
+    </audio>
 
     <printTable
       v-if="state.showPrintTable"
@@ -232,6 +234,7 @@ import {
   getDeskList,
   checkNoDetail,
   offlineCheckOrder,
+  beforePayCheckOrder,
 } from "@/api/project/foreign/order.js";
 
 export default {
@@ -272,7 +275,7 @@ export default {
         window.localStorage.getItem("ThemeStyle") == "false" ? "#000" : "#fff",
       collection: [],
       role: "",
-      orderLists: [],
+      orderLists: [], //socket过来的订单数量
       storeId: "",
       socketData: {}, //点击的socket数据
       printerMethod: [], //打单方式
@@ -310,8 +313,10 @@ export default {
       if (isMac) {
         console.log("这是mac系统");
       }
-      this.getOrderListSocket();
-      this.getTableNoList();
+      if (this.role === "merchant") {
+        this.getOrderListSocket();
+        this.getTableNoList();
+      }
     }, 1000);
   },
   methods: {
@@ -340,7 +345,14 @@ export default {
         storeId: this.state1.orderDetailData.storeId,
         tableNo: this.state1.orderDetailData.tableNo,
       };
-      const res = await offlineCheckOrder(body);
+      var res;
+      if (this.state1.orderDetailData.type === "SCAN_ORDER_UNDER") {
+        //后付
+        res = await offlineCheckOrder(body);
+      } else {
+        //前付
+        res = await beforePayCheckOrder(body);
+      }
       if (res.code === 0) {
         const printerArr = res.data;
         for (let i = 0; i < printerArr.length; i++) {
@@ -397,7 +409,7 @@ export default {
           // LODOP.PREVIEW();
           LODOP.PRINT();
           this.state.showPrintTable = false;
-          debugger;
+          // debugger;
         });
       }
     },
@@ -411,14 +423,13 @@ export default {
     },
 
     // 开启订单socket
-
     getOrderListSocket() {
       // 连接websocket
       const url = common.socketUrl;
 
       var that = this;
       var ws = new WebSocket(
-        `${url}/mini/api/ws/order/handle/monitor/${this.storeId}`
+        `${url}/store/api/ws/order/handle/monitor/${this.storeId}`
       );
       // console.log(ws);
       // 监听消息
@@ -428,15 +439,19 @@ export default {
         try {
           const data = JSON.parse(event.data);
           that.orderLists.push(data);
+          that.$refs.audioPlay.play();
           // console.log(that.orderLists);
           let notifiaction = ElNotification({
             title: `订单号：${data.orderNo}`,
-            message: `<div class="flex-sb"> <div>桌号：${data.tableNo} 人数：${data.peopleQty}</div><button style="padding:5px 10px;
+            message: `
+            <p>订单数：${that.orderLists.length}</p>
+            <div class="flex-sb"> <div>桌号：${data.tableNo} 人数：${data.peopleQty}</div><button style="padding:5px 10px;
   border-radius: 5px;
   background-color: rgb(64, 158, 255);
   color: #fff;
-  margin-left: 10px;
-  cursor: pointer;" >去处理</button></div> `,
+  margin-left: 20px;
+  cursor: pointer;" >去处理</button></div>
+  `,
             position: "bottom-right",
             dangerouslyUseHTMLString: true,
             showClose: false,

@@ -60,6 +60,11 @@
           v-model="password"
           @keyup.enter="login"
         />
+        <el-checkbox
+          v-model="remeber"
+          label="记住账号"
+          style="margin-bottom: 10px"
+        />
         <button @click="login">登录</button>
       </div>
       <div v-else>
@@ -117,7 +122,7 @@ export default {
       password: "",
       phone: "",
       code: "",
-
+      remeber: false,
       state: {
         loading: false,
         LoginForm: {
@@ -127,8 +132,25 @@ export default {
       },
     };
   },
+  mounted() {
+    const account = localStorage.getItem("account");
+    if (account) {
+      this.account = account;
+      this.remeber = true;
+    }
+  },
   methods: {
+    //记住账号
+    rememberAccount() {
+      if (this.remeber) {
+        localStorage.setItem("account", this.account);
+      }else{
+        localStorage.removeItem("account");
+      }
+    },
+
     async login() {
+      this.rememberAccount();
       if (this.isAccountLogin) {
         console.log("Account:", this.account);
         console.log("Password:", this.password);
@@ -174,7 +196,7 @@ export default {
       const baseUrl = await getFilePath();
       if (baseUrl.code === 0) {
         this.store.baseFileUrl = baseUrl.data;
-        localStorage.setItem('filePath',baseUrl.data)
+        localStorage.setItem("filePath", baseUrl.data);
       }
     },
   },

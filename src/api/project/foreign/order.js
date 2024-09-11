@@ -57,14 +57,7 @@ export function waitToChekOrder(data) {
     data,
   });
 }
-// 打单时更新订单（准备好可以分账）状态 普通打单
-export function normalCheckOrder(data) {
-  return request({
-    url: "/store/api/store/order/store/pay/print",
-    method: "post",
-    data,
-  });
-}
+
 
 // 打单时 线下打单 右下角 后付款
 export function offlineCheckOrder(data) {
@@ -74,6 +67,15 @@ export function offlineCheckOrder(data) {
     data,
   });
 }
+// 先付款  先付款 打单
+export function beforePayCheckOrder(data) {
+  return request({
+    url: "/store/api/store/order/store/pay/print",
+    method: "post",
+    data,
+  });
+}
+
 
 // 自定义打单
 export function customPrint(data) {
@@ -90,13 +92,12 @@ export function getSysPrinterLists(params) {
     params,
   });
 }
-// 获取二维码支付 文件流
+// 获取二维码支付 文件流图片
 
-export function getQrCodePay(params) {
+export function getQrCodePayImg(params) {
   return request({
-    url: "/store/api/store/order/store/pay/qrcode/mini",
+    url: "/store/api/store/order/store/pay/qrcode/mini/server",
     method: "get",
-    responseType: "blob",
     params,
   });
 }
