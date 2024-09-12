@@ -152,6 +152,7 @@ export default {
     logout() {
       window.localStorage.removeItem("token");
       window.localStorage.removeItem("routes");
+      this.$emit("logout")
       if (this.role === "platform") {
         this.$router.replace(`/login`);
       } else {

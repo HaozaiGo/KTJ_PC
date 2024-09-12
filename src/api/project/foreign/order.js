@@ -58,7 +58,6 @@ export function waitToChekOrder(data) {
   });
 }
 
-
 // 打单时 线下打单 右下角 后付款
 export function offlineCheckOrder(data) {
   return request({
@@ -75,7 +74,6 @@ export function beforePayCheckOrder(data) {
     data,
   });
 }
-
 
 // 自定义打单
 export function customPrint(data) {
@@ -99,5 +97,22 @@ export function getQrCodePayImg(params) {
     url: "/store/api/store/order/store/pay/qrcode/mini/server",
     method: "get",
     params,
+  });
+}
+
+// 删除扫码点餐后付款的订单
+export function deleteOrderApi(params) {
+  return request({
+    url: `/store/api/store/order/store/pay/del/after/${params.storeId}/${params.orderIds}`,
+    method: "DELETE",
+  });
+}
+
+// 删除订单中的菜品
+export function deleteOrderInsideMenu(data) {
+  return request({
+    url: `/store/api/store/order/store/pay/del/menu`,
+    method: "post",
+    data,
   });
 }

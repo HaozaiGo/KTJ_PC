@@ -58,7 +58,7 @@
         row-key="id"
         border
         default-expand-all
-        :max-height="tableHeight"
+        :max-height="tableHeight - 30"
       >
         <el-table-column prop="orderNo" label="订单编号" sortable />
         <el-table-column prop="tableNo" label="台号" sortable />
@@ -83,13 +83,13 @@
 
         <el-table-column label="操作" width="220">
           <template #default="scope">
-            <el-button
+            <!-- <el-button
               link
               type="primary"
               size="small"
               @click="orderDetail(scope.row)"
               >订单详情</el-button
-            >
+            > -->
 
             <el-button
               link
@@ -120,6 +120,13 @@
               v-if="scope.row.orderStatus === 'FINISH'"
               @click="printAgain(scope.row)"
               >再次打单</el-button
+            >
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="deleteOrder(scope.row)"
+              >删除订单</el-button
             >
           </template>
         </el-table-column>
@@ -243,12 +250,24 @@
           :data="state.orderDetailData.menuList"
           stripe
           style="width: 100%"
+          :max-height="tableHeight - 50"
         >
           <el-table-column prop="name" label="品名" />
           <el-table-column prop="unit" label="规格" width="150" />
           <el-table-column prop="qty" label="数量" width="150" />
           <el-table-column prop="price" label="单价" width="150" />
           <el-table-column prop="amount" label="小计" width="150" />
+          <el-table-column label="操作" width="110">
+            <template #default="scope">
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="deleteMenu(scope.row)"
+                >删除菜品</el-button
+              >
+            </template>
+          </el-table-column>
         </el-table>
 
         <div style="font-size: 16px; font-weight: bold; margin-top: 20px">
@@ -411,9 +430,11 @@ import {
   getSysPrinterLists,
   beforePayCheckOrder,
   offlineCheckOrder,
+  deleteOrderApi,
+  deleteOrderInsideMenu,
 } from "@/api/project/foreign/order.js";
 import { getQrCodePayImg } from "@/api/project/foreign/order";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 defineOptions({
   name: "foreign-Order",
   isRouter: true,
@@ -473,6 +494,60 @@ const printerWay = reactive({
 });
 const printerOption = ref([]);
 const LODOPOBJ = ref(null);
+const deleteOrder = (item) => {
+  ElMessageBox.confirm(
+    `确定删除台号：${item.tableNo}单号为${item.orderNo}的订单？`,
+    "提示",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }
+  )
+    .then(async () => {
+      const res = await deleteOrderApi({
+        storeId: item.storeId,
+        orderIds: item.orderId,
+      });
+      getList();
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "取消删除",
+      });
+    });
+};
+
+// 删除菜品
+const deleteMenu = (item) => {
+  console.log(item);
+  const delArr = [item]
+  ElMessageBox.confirm(`确定删除${item.name}？`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      const res = await deleteOrderInsideMenu({
+        itemList: delArr,
+        storeId: state.orderDetailData.storeId,
+        orderId: item.orderId,
+      });
+      const res1 = await checkNoDetail(item.orderId);
+      if (res1.code === 0) {
+        state.orderDetailData = res1.data;
+      }
+      getList();
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "取消删除",
+      });
+    });
+};
+
 const switchPrinter = (e) => {
   printerWay.hiddenWay = false;
   const find = printerWay.printerLists.find((x) => {
@@ -673,6 +748,7 @@ const handlePrint = async (data) => {
     // LODOP.PREVIEW();
     LODOP.PRINT();
     state.showPrintTable = false;
+    state1.dialogVisible = false;
     // debugger;
   }
 };

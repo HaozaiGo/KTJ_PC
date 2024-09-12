@@ -89,7 +89,7 @@
 
             <span style="color: #fff">收藏</span>
           </div> -->
-          <avatar />
+          <avatar @logout="logout" />
         </div>
       </el-col>
     </el-row>
@@ -282,6 +282,8 @@ export default {
       printerOption: [], //打印机全部型号
       tableHeight: common.tableHeight(),
       notifiactions: [],
+      wsClose: false,
+      ws: null,
     };
   },
   computed: {},
@@ -296,9 +298,12 @@ export default {
   },
   mounted() {
     this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
-    common.getStoreDict("bill_print_method").then((res) => {
-      this.printerMethod = res.data[0].list;
-    });
+    if (this.role === "merchant") {
+      common.getStoreDict("bill_print_method").then((res) => {
+        this.printerMethod = res.data[0].list;
+      });
+    }
+
     setTimeout(() => {
       var agent = navigator.userAgent.toLowerCase();
       var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
@@ -320,6 +325,11 @@ export default {
     }, 1000);
   },
   methods: {
+    logout() {
+      this.wsClose = true;
+
+      this.ws.close();
+    },
     getPrinterOption() {
       let LODOP = getLodop();
 
@@ -428,13 +438,13 @@ export default {
       const url = common.socketUrl;
 
       var that = this;
-      var ws = new WebSocket(
+      this.ws = new WebSocket(
         `${url}/store/api/ws/order/handle/monitor/${this.storeId}`
       );
       // console.log(ws);
       // 监听消息
 
-      ws.onmessage = function (event) {
+      this.ws.onmessage = function (event) {
         console.log(event);
         try {
           const data = JSON.parse(event.data);
@@ -473,11 +483,15 @@ export default {
         }
       };
       // 重连
-      ws.onclose = function (event) {
-        console.log("重连");
-        that.getOrderListSocket();
+      this.ws.onclose = function (event) {
+        if (!that.wsClose) {
+          console.log("重连");
+          that.getOrderListSocket();
+        } else {
+          console.log("正常关闭");
+        }
       };
-      ws.onerror = function (event) {
+      this.ws.onerror = function (event) {
         console.log("error");
         that.getOrderListSocket();
       };

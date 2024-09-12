@@ -104,7 +104,7 @@
         >{{ tableData.amount }}</span
       >
     </div>
-    <div v-if="needScanImg" style="width: 80mm; text-align: center">
+    <div v-if="needScanImg" style="width: 70mm; text-align: center">
       <img :src="imgSrc" alt="" id="imgId" style="width: 40mm; height: 40mm" />
     </div>
     <p>打印时间：{{ time }}</p>

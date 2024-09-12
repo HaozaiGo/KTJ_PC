@@ -228,7 +228,7 @@ import {
   editEmployee,
   EmployeePassword,
   gerShopOption,
-  setStatus
+  setStatus,
 } from "@/api/project/foreign/employee.js";
 
 import { getDeptList, getRoles } from "@/api/common/user.js";
@@ -332,6 +332,8 @@ const edit = (item) => {
 };
 // 删除
 const deleteUser = async (item) => {
+  console.log(item);
+
   ElMessageBox.confirm("确定删除所选数据?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -347,7 +349,10 @@ const deleteUser = async (item) => {
         });
         getList();
       } else {
-        const res = await deleteEmployee(item.staffId);
+        const res = await deleteEmployee({
+          staffIds: item.staffId,
+          storeId: query.storeId,
+        });
         if (res.code === 0) {
           getList();
         }

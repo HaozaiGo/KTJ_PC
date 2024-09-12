@@ -576,7 +576,10 @@ const handleEditMenu = async (row) => {
   tasteData.dialogVisible1 = true;
 };
 const getList = async () => {
-  const res = await getTypeList({ storeId: tasteData.form.storeId });
+  const res = await getTypeList({
+    storeId: tasteData.form.storeId,
+    pageSize: 50,
+  });
   if (res.code === 0) {
     tasteData.leftData = res.rows;
     tasteData.selected = tasteData.leftData[0];
@@ -662,6 +665,7 @@ const getList1 = async () => {
     const res = await getMenusList({
       typeId: tasteData.selected.typeId,
       storeId: tasteData.selected.storeId,
+      pageSize: 50,
     });
     if (res.code === 0) {
       tasteData.rightData = res.rows;
