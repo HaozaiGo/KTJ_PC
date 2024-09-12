@@ -547,7 +547,6 @@ const deleteMenu = (item) => {
       });
     });
 };
-
 const switchPrinter = (e) => {
   printerWay.hiddenWay = false;
   const find = printerWay.printerLists.find((x) => {
@@ -568,7 +567,6 @@ const printAgain = async (row) => {
     state1.dialogVisible = true;
   }
 };
-
 // 全流程先付 后付打单
 const printAll = async (row) => {
   const res = await checkNoDetail(row.orderId);
@@ -579,7 +577,6 @@ const printAll = async (row) => {
     state1.dialogVisible = true;
   }
 };
-
 // 获取打印机list
 const getPrinterList = async () => {
   let LODOP = getLodop();
