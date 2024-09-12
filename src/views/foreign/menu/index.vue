@@ -569,8 +569,7 @@ const handleEditMenu = async (row) => {
       });
   res.data.tasteNeedNoHandle = res.data.tasteNeed;
   tasteData.form1 = { ...res.data };
-  // console.log(tasteData.form1);
-
+  // console.log(tasteData.form1)
   const url = row.coverUrl;
   tasteData.fileList = [{ url: url }];
   tasteData.dialogVisible1 = true;

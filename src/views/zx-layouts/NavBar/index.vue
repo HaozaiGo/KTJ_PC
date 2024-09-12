@@ -303,7 +303,6 @@ export default {
         this.printerMethod = res.data[0].list;
       });
     }
-
     setTimeout(() => {
       var agent = navigator.userAgent.toLowerCase();
       var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
