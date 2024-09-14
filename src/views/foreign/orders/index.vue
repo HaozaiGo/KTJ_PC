@@ -63,7 +63,6 @@
         <el-table-column prop="orderNo" label="订单编号" sortable />
         <el-table-column prop="tableNo" label="台号" sortable />
         <el-table-column prop="typeLabel" label="订单类型" sortable />
-
         <el-table-column
           prop="orderTime"
           label="下单时间"

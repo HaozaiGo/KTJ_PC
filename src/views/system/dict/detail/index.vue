@@ -360,7 +360,6 @@ onMounted(async () => {
     .then((res) => {
       statusList.value = res.data[0].list;
       isDefaultOptions = res.data[1].list;
-      
     });
 });
 </script>
