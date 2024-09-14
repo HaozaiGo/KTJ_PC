@@ -233,26 +233,51 @@
           <el-input v-model="tasteData.form1.name" style="width: 250px">
           </el-input>
         </el-form-item>
-        <el-form-item label="是否特价" prop="isSpecial">
-          <el-radio-group v-model="tasteData.form1.isSpecial">
-            <el-radio
-              :value="item.dictValue"
-              v-for="(item, index) in yesOrNoList"
-              :key="index"
-              >{{ item.dictLabel }}</el-radio
-            >
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="含有多个规格" prop="isSpec">
-          <el-radio-group v-model="tasteData.form1.isSpec">
-            <el-radio
-              :value="item.dictValue"
-              v-for="(item, index) in yesOrNoList"
-              :key="index"
-              >{{ item.dictLabel }}</el-radio
-            >
-          </el-radio-group>
-        </el-form-item>
+        <div class="flex" >
+          <el-form-item label="是否特价" prop="isSpecial">
+            <el-radio-group v-model="tasteData.form1.isSpecial">
+              <el-radio
+                :value="item.dictValue"
+                v-for="(item, index) in yesOrNoList"
+                :key="index"
+                >{{ item.dictLabel }}</el-radio
+              >
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="是否由商家落单" style="margin-left: 15px;">
+            <el-radio-group v-model="tasteData.form1.isOnlyShow">
+              <el-radio
+                :value="item.dictValue"
+                v-for="(item, index) in yesOrNoList"
+                :key="index"
+                >{{ item.dictLabel }}</el-radio
+              >
+            </el-radio-group>
+          </el-form-item>
+        </div>
+        <div class="flex" >
+          <el-form-item label="含有多个规格" prop="isSpec">
+            <el-radio-group v-model="tasteData.form1.isSpec">
+              <el-radio
+                :value="item.dictValue"
+                v-for="(item, index) in yesOrNoList"
+                :key="index"
+                >{{ item.dictLabel }}</el-radio
+              >
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="是否售罄" style="margin-left: 15px;">
+            <el-radio-group v-model="tasteData.form1.salesStatus">
+              <el-radio
+                :value="item.dictValue"
+                v-for="(item, index) in yesOrNoList"
+                :key="index"
+                >{{ item.dictLabel }}</el-radio
+              >
+            </el-radio-group>
+          </el-form-item>
+        </div>
+
         <el-form-item
           label="设置多个规格"
           prop="priceDetail"
@@ -472,6 +497,8 @@ const tasteData = reactive({
     size: "",
     priceDetail: [],
     remark: "",
+    isOnlyShow: "",
+    salesStatus: "",
   },
   leftData: [],
   rightData: [],
@@ -491,6 +518,8 @@ class Form1 {
   coverUrl = "";
   isSpecial = "0";
   isSpec = "0"; //是否使用规格
+  isOnlyShow = "0";
+  salesStatus = "0";
   size = typeSizeOptions.value[0].dictValue;
   priceDetail = typeSizeOptions.value.map((x) => {
     return { price: "", size: x.dictValue };

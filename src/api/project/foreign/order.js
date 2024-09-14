@@ -108,11 +108,31 @@ export function deleteOrderApi(params) {
   });
 }
 
-// 删除订单中的菜品
-export function deleteOrderInsideMenu(data) {
+//添加订单菜品
+export function AddOrderInsideMenu(data) {
   return request({
-    url: `/store/api/store/order/store/pay/del/menu`,
+    url: `/store/api/store/order/menu/item`,
     method: "post",
     data,
   });
 }
+
+// 修改订单菜品
+export function updateOrderInsideMenu(data) {
+  return request({
+    url: `/store/api/store/order/menu/item`,
+    method: "put",
+    data,
+  });
+}
+
+// 删除订单中的菜品
+export function deleteOrderInsideMenu(data) {
+  return request({
+    url: `/store/api/store/order/menu/item`,
+    method: "DELETE",
+    data,
+  });
+}
+
+

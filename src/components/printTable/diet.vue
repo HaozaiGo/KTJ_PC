@@ -48,7 +48,12 @@
       </thead>
       <tbody align="center" valign="center">
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
-          <td style="width: 22mm">{{ item.name }}</td>
+          <td style="width: 22mm">
+            {{ item.name }} <br />
+            <span style="font-size: 12px">
+              {{ item.tasteNeed }}
+            </span>
+          </td>
           <td style="width: 10mm">{{ item.unit }}</td>
           <td style="width: 10mm">{{ item.qty }}</td>
           <td style="width: 12mm">{{ item.price }}</td>
@@ -154,7 +159,6 @@ export default {
     //   //     const blob = new Blob([response.data], { type: response.data.type });
     //   //     const imgURL = URL.createObjectURL(blob); // 将 Blob 转化为可用的 URL
     //   //     console.log(imgURL);
-
     //   //     document.getElementById("imgId").src = imgURL;
     //   //   }
     //   // );
@@ -163,7 +167,7 @@ export default {
   mounted() {
     console.log(this.tableData);
     // console.log(this.imgSrc);
-    
+
     this.time = new Date().toLocaleString();
   },
   methods: {},

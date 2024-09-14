@@ -126,6 +126,7 @@
               type="primary"
               size="small"
               @click="deleteOrder(scope.row)"
+              v-if="scope.row.orderStatus != 'FINISH'"
               >删除订单</el-button
             >
           </template>
@@ -245,6 +246,7 @@
         </el-form>
 
         <div style="font-size: 25px">菜品</div>
+        <el-button type="primary" @click="addMenu">追加菜品</el-button>
 
         <el-table
           :data="state.orderDetailData.menuList"
@@ -252,13 +254,57 @@
           style="width: 100%"
           :max-height="tableHeight - 50"
         >
-          <el-table-column prop="name" label="品名" />
-          <el-table-column prop="unit" label="规格" width="150" />
-          <el-table-column prop="qty" label="数量" width="150" />
+          <el-table-column prop="name" label="品名">
+            <template #default="scope">
+              <div style="display: flex; align-items: center">
+                <el-icon
+                  size="20"
+                  color="red"
+                  style="cursor: pointer"
+                  v-if="state.editMenuIdx === scope.$index"
+                  @click="deleteMenu(scope.row)"
+                  ><Remove
+                /></el-icon>
+                <span style="margin-left: 10px">{{ scope.row.name }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="unit" label="规格" width="100" />
+          <el-table-column prop="qty" label="数量" width="110">
+            <template #default="scope">
+              <div style="display: flex; align-items: center">
+                <el-icon
+                  size="20"
+                  color="red"
+                  style="cursor: pointer"
+                  v-if="state.editMenuIdx === scope.$index"
+                  @click="updateMenu(scope.row, 'del')"
+                  ><Remove
+                /></el-icon>
+                <span style="margin: 0px 10px">{{ scope.row.qty }}</span>
+                <el-icon
+                  size="20"
+                  color="#408bfb"
+                  style="cursor: pointer"
+                  v-if="state.editMenuIdx === scope.$index"
+                  @click="updateMenu(scope.row, 'add')"
+                  ><CirclePlus
+                /></el-icon>
+              </div>
+            </template>
+          </el-table-column>
+
           <el-table-column prop="price" label="单价" width="150" />
           <el-table-column prop="amount" label="小计" width="150" />
-          <el-table-column label="操作" width="110">
+          <el-table-column label="操作" width="270">
             <template #default="scope">
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="editMenu(scope)"
+                >修改菜品</el-button
+              >
               <el-button
                 link
                 type="primary"
@@ -266,6 +312,13 @@
                 @click="deleteMenu(scope.row)"
                 >删除菜品</el-button
               >
+              <!-- <el-button
+                link
+                type="primary"
+                size="small"
+                @click="deleteMenu(scope.row)"
+                >退款</el-button
+              > -->
             </template>
           </el-table-column>
         </el-table>
@@ -431,14 +484,21 @@ import {
   beforePayCheckOrder,
   offlineCheckOrder,
   deleteOrderApi,
+  AddOrderInsideMenu,
+  updateOrderInsideMenu,
   deleteOrderInsideMenu,
 } from "@/api/project/foreign/order.js";
 import { getQrCodePayImg } from "@/api/project/foreign/order";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { useRouter, useRoute } from "vue-router";
+
 defineOptions({
   name: "foreign-Order",
   isRouter: true,
 });
+
+const route = useRoute();
+const router = useRouter();
 const tableHeight = inject("$com").tableHeight();
 const filePath = localStorage.getItem("filePath");
 const printTableDom = ref(null);
@@ -467,6 +527,8 @@ const state = reactive({
   orderDetailData: {}, //核销单详细
   showPrintTable: false,
   normalPrint: false,
+  editMenuIdx: null, //修改的菜品idx
+  addMenuData: {}, //追加的菜品
 });
 const state1 = reactive({
   dialogVisible: false,
@@ -519,23 +581,66 @@ const deleteOrder = (item) => {
     });
 };
 
+const editMenu = (item) => {
+  console.log(item.$index);
+  state.editMenuIdx = item.$index;
+};
+
+// 加菜
+const addMenu = () => {
+  router.push({
+    path: `/foreign/orders/addMenu`,
+    query: { orderId: state.orderDetailData.orderId },
+  });
+};
+
+//更新菜品
+const updateMenu = async (item, type) => {
+  console.log(item);
+
+  if (type === "add") {
+    item.qty++;
+    const body = Object.assign({}, item, {
+      storeId: state.orderDetailData.storeId,
+    });
+    const res = await updateOrderInsideMenu(body);
+    showOrderDetail(state.orderDetailData.orderId);
+  } else {
+    if (item.qty > 1) {
+      item.qty--;
+      const body = Object.assign({}, item, {
+        storeId: state.orderDetailData.storeId,
+      });
+      const res = await updateOrderInsideMenu(body);
+      showOrderDetail(state.orderDetailData.orderId);
+    } else {
+      deleteMenu(item);
+    }
+  }
+};
+
 // 删除菜品
 const deleteMenu = (item) => {
   console.log(item);
-  const delArr = [item]
+  const delArr = [item];
   ElMessageBox.confirm(`确定删除${item.name}？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(async () => {
-      const res = await deleteOrderInsideMenu({
-        itemList: delArr,
+      const body = Object.assign({}, item, {
         storeId: state.orderDetailData.storeId,
-        orderId: item.orderId,
+        orderId: state.orderDetailData.orderId,
       });
-      const res1 = await checkNoDetail(item.orderId);
+      const res = await deleteOrderInsideMenu(body);
+
+      const res1 = await checkNoDetail(state.orderDetailData.orderId);
       if (res1.code === 0) {
+        ElMessage({
+          type: "success",
+          message: "删除成功",
+        });
         state.orderDetailData = res1.data;
       }
       getList();
@@ -559,23 +664,24 @@ const switchPrinter = (e) => {
 };
 // 再次打单
 const printAgain = async (row) => {
-  const res1 = await checkNoDetail(row.orderId);
-  if (res1.code === 0) {
-    state.orderDetailData = res1.data;
-    state1.form.tableNo = res1.data.tableNo; //回显台号
-    state.normalPrint = true; //开启普通打印 -- 再次重复打单
-    state1.dialogVisible = true;
-  }
+  showOrderDetail(row.orderId);
+  state.normalPrint = true; //开启普通打印 -- 再次重复打单
 };
-// 全流程先付 后付打单
-const printAll = async (row) => {
-  const res = await checkNoDetail(row.orderId);
+
+//显示订单详情
+const showOrderDetail = async (id) => {
+  const res = await checkNoDetail(id);
   if (res.code === 0) {
     state.orderDetailData = res.data;
     state1.form.tableNo = res.data.tableNo; //回显台号
-    state.normalPrint = false;
     state1.dialogVisible = true;
   }
+};
+
+// 全流程先付 后付打单
+const printAll = async (row) => {
+  showOrderDetail(row.orderId);
+  state.normalPrint = false;
 };
 // 获取打印机list
 const getPrinterList = async () => {
@@ -728,8 +834,7 @@ const handlePrint = async (data) => {
           80
         : (printTableDom.value.$el.clientHeight /
             printTableDom.value.$el.clientWidth) *
-            80 +
-          10;
+          80;
     console.log(height);
 
     const printerHtml =
@@ -777,14 +882,8 @@ const confirmCheckCode = async (row) => {
       // 如果有多条核销单
       state1.dialogVisible2 = true;
     } else {
-      const res1 = await checkNoDetail(res.data[0].orderId);
-      if (res1.code === 0) {
-        state.orderDetailData = res1.data;
-        state1.form.tableNo = res1.data.tableNo;
-        state.showPrintTable = true;
-
-        state1.dialogVisible = true;
-      }
+      showOrderDetail(res.data[0].orderId);
+      state.showPrintTable = true;
     }
   } else {
     state1.code = "";
@@ -835,8 +934,24 @@ const getStoreId = async () => {
   const storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
   query.storeId = storeId;
 };
+// 新增订单里面的菜品
+const addOrderMenus = async (row) => {
+  const body = Object.assign({}, row, {
+    storeId: state.orderDetailData.storeId,
+    orderId: state.orderDetailData.orderId,
+  });
+
+  const res = await AddOrderInsideMenu(body);
+  if (res.code === 0) {
+    showOrderDetail(state.orderDetailData.orderId);
+  }
+};
 
 onMounted(async () => {
+  console.log(route.query.orderId);
+
+  console.log(route.query.addMenu);
+
   setTimeout(() => {
     var agent = navigator.userAgent.toLowerCase();
     var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
@@ -851,11 +966,11 @@ onMounted(async () => {
     if (isMac) {
       console.log("这是mac系统");
     }
-  });
+  }, 100);
 
   inject("$com")
     .getStoreDict("bill_store_order_status,bill_print_method")
-    .then((res) => {
+    .then(async (res) => {
       state.billOrderTypeOptions = res.data[0].list;
       activeName.value = state.billOrderTypeOptions[0].dictValue;
       methodOption.value = res.data[1].list;
@@ -863,6 +978,17 @@ onMounted(async () => {
       getStoreId();
       getList();
       getTableNoList();
+
+      if (route.query.addMenu) {
+        await showOrderDetail(route.query.orderId);
+        state1.dialogVisible = true;
+        state.addMenuData = JSON.parse(route.query.addMenu);
+        console.log(state.orderDetailData.menuList);
+        console.log(state.addMenuData);
+
+        addOrderMenus(state.addMenuData);
+        // state.orderDetailData.menuList.push(state.addMenuData);
+      }
     });
 });
 </script>

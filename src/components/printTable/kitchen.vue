@@ -5,10 +5,17 @@
       style="text-align: center; font-size: 22px; padding: 1px 0; width: 80mm"
     >
       <div>厨房单</div>
-      <div>{{ tableData.storeName }}</div>
+      <!-- <div>{{ tableData.storeName }}</div> -->
     </div>
 
-    <div style="width: 80mm; height: 0px; border-top: 2px dashed #000;margin: 1mm 0;"></div>
+    <div
+      style="
+        width: 80mm;
+        height: 0px;
+        border-top: 2px dashed #000;
+        margin: 1mm 0;
+      "
+    ></div>
     <div style="font-size: 20px; font-weight: bold">
       桌号:{{ tableData.tableNo }}
     </div>
@@ -20,8 +27,14 @@
 
       <span style="font-size: 13px"> {{ tableData.orderNo }}</span>
     </div>
-    <div style="width: 80mm; height: 0px; border-top: 2px dashed #000;margin: 1mm 0;"></div>
-
+    <div
+      style="
+        width: 80mm;
+        height: 0px;
+        border-top: 2px dashed #000;
+        margin: 1mm 0;
+      "
+    ></div>
 
     <table style="min-width: 69mm">
       <thead>
@@ -33,9 +46,15 @@
           <th style="width: 12mm">小计</th> -->
         </tr>
       </thead>
-      <tbody align="center" valign="center">
+      <tbody align="center">
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
-          <td style="width: 22mm">{{ item.name }}</td>
+          <td style="width: 22mm">
+            {{ item.name }}
+            <br />
+            <span style="font-size: 12px">
+              {{ item.tasteNeed }}
+            </span>
+          </td>
           <td style="width: 10mm">{{ item.unit }}</td>
           <td style="width: 10mm">{{ item.qty }}</td>
           <!-- <td style="width: 12mm">{{ item.price }}</td>
@@ -44,7 +63,14 @@
       </tbody>
     </table>
 
-    <div style="width: 80mm; height: 0px; border-top: 2px dashed #000;margin: 1mm 0;"></div>
+    <div
+      style="
+        width: 80mm;
+        height: 0px;
+        border-top: 2px dashed #000;
+        margin: 1mm 0;
+      "
+    ></div>
     <!-- <div class="flex-sb" style="width: 80mm">
       <span style="display: inline-block; white-space: nowrap; flex: 1;width: 55mm;"
         >消费原价合计：</span
