@@ -110,7 +110,7 @@
                 scope.row.type === 'SCAN_ORDER_UNDER'
               "
               @click="printAgain(scope.row)"
-              >结账打单</el-button
+              >结账</el-button
             >
             <el-button
               link
@@ -409,7 +409,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="打印方式" v-show="!printerWay.hiddenWay">
+        <el-form-item label="打印方式">
           <el-radio-group v-model="printerWay.form.method">
             <el-radio
               :value="item.dictValue"
@@ -419,7 +419,7 @@
             >
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="底部二维码" v-show="!printerWay.hiddenWay">
+        <el-form-item label="底部二维码" v-show="false">
           <el-radio-group v-model="printerWay.form.needScan">
             <el-radio value="1">结账二维码</el-radio>
             <el-radio value="0">不需要二维码</el-radio>
@@ -545,7 +545,6 @@ const printerWay = reactive({
   dialogVisible: false,
   printerLists: [], //配置了的打印机
   needScanImg: false,
-  hiddenWay: false, //隐藏打印方式
   imgSrc: "", //二维码图片
   form: {
     printerId: "",
@@ -621,7 +620,6 @@ const updateMenu = async (item, type) => {
 // 删除菜品
 const deleteMenu = (item) => {
   console.log(item);
-  const delArr = [item];
   ElMessageBox.confirm(`确定删除${item.name}？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -652,13 +650,13 @@ const deleteMenu = (item) => {
     });
 };
 const switchPrinter = (e) => {
-  printerWay.hiddenWay = false;
+  printerWay.needScanImg = true;
   const find = printerWay.printerLists.find((x) => {
     return x.printerId === e;
   });
   console.log(find);
   if (find.printerType === "KITCHEN") {
-    printerWay.hiddenWay = true;
+    printerWay.needScanImg = false;
   }
 };
 // 再次打单
@@ -710,19 +708,13 @@ const handleCustom = async () => {
   const res = await customPrint(body);
   if (res.code === 0) {
     console.log(printerWay.form.needScan);
-
-    if (printerWay.form.needScan === "1") {
-      // 支付结账 有二维码
-      printerWay.needScanImg = true;
-      const res = await getQrCodePayImg({
-        orderId: state.orderDetailData.orderId,
-      });
-      if (res.code === 0) {
-        printerWay.imgSrc = filePath + res.data;
-        console.log(printerWay.imgSrc);
-      }
-    } else {
-      printerWay.needScanImg = false;
+    // 支付结账 有二维码
+    printerWay.needScanImg = true;
+    const res1 = await getQrCodePayImg({
+      orderId: state.orderDetailData.orderId,
+    });
+    if (res1.code === 0) {
+      printerWay.imgSrc = filePath + res1.data;
     }
 
     setTimeout(() => {
@@ -764,7 +756,10 @@ const handleOutBill = async () => {
       if (res.code === 0) {
         const printerArr = res.data;
         for (let i = 0; i < printerArr.length; i++) {
-          await asyncEvent(printerArr[i]);
+          const obj = Object.assign({}, printerArr[i], {
+            tableNo: state1.form.tableNo,
+          });
+          await asyncEvent(obj);
         }
       }
     } else if (state.orderDetailData.type === "SCAN_ORDER_PAY") {
@@ -822,6 +817,8 @@ const handlePrint = async (data) => {
 
   state.showPrintTable = true;
   const res = printerOption.value.find((x) => x.label === data.printerModel);
+  // console.log("-------找到打印机", res);
+
   await nextTick();
   // 找到匹配的打印机
   if (res && data.orderMenuList.length > 0) {
@@ -884,6 +881,13 @@ const confirmCheckCode = async (row) => {
       showOrderDetail(res.data[0].orderId);
       state.showPrintTable = true;
     }
+  } else if (res.code === 0) {
+    ElMessage({
+      message: "核销成功！",
+      type: "success",
+    });
+    state1.code = "";
+    state1.dialogVisible1 = false;
   } else {
     state1.code = "";
     ElMessage({

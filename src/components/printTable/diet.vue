@@ -134,7 +134,7 @@ export default {
     },
     needScanImg: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     imgSrc: {
       type: String,
