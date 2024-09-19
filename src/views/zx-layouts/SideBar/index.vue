@@ -202,6 +202,9 @@ const handleClickMenu = (item: any, children: any, idx: Number) => {
 </script>
 
 <style lang="scss" scoped>
+:deep(.el-menu){
+  border-right: none !important;
+}
 .sideBar_container {
   top: $base-nav-bar-height;
   position: fixed;
@@ -209,6 +212,7 @@ const handleClickMenu = (item: any, children: any, idx: Number) => {
   width: $base-left-menu-width;
   height: calc(100vh - $base-nav-bar-height);
   overflow-y: scroll;
+  border-right: 1px solid #dcdfe6;
 }
 .sideBar_container::-webkit-scrollbar {
   width: 0 !important;

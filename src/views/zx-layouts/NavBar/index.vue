@@ -297,7 +297,11 @@ export default {
     this.role = window.localStorage.getItem("role");
   },
   mounted() {
-    this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+    try {
+      this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+    } catch (err) {
+      console.log(err);
+    }
     if (this.role === "merchant") {
       common.getStoreDict("bill_print_method").then((res) => {
         this.printerMethod = res.data[0].list;
@@ -325,9 +329,13 @@ export default {
   },
   methods: {
     logout() {
-      this.wsClose = true;
+      try {
+        this.wsClose = true;
 
-      this.ws.close();
+        this.ws.close();
+      } catch (err) {
+        console.log(err);
+      }
     },
     getPrinterOption() {
       let LODOP = getLodop();

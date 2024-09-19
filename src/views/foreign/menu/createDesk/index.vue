@@ -1,107 +1,117 @@
 <template>
   <div class="content">
-    <div class="search">
-      <el-select
-        v-model="query.storeId"
-        placeholder="选择店铺"
-        style="width: 220px; margin-right: 20px"
-      >
-        <el-option
-          v-for="item in StoreOptions"
-          :key="item.storeId"
-          :label="item.name"
-          :value="item.storeId"
-        />
-      </el-select>
-
-      <el-button type="primary" icon="Search" @click="getList">搜索</el-button>
+    <div class="tabs flex-sb">
+      <div class="left flex">
+        <div
+          v-for="(item, idx) in TabsList"
+          :key="idx"
+          class="tabSty flex-c"
+          @click="tabChange(item, idx)"
+          :class="{ tabActiveSty: idx === TabIdx }"
+        >
+          {{ item.name }}
+        </div>
+      </div>
+      <div class="right flex-c">
+        <div class="flex-c">
+          <div
+            v-for="(item1, idx1) in statusOptions"
+            :key="idx1"
+            class="flex-c"
+            style="margin-right: 8px"
+          >
+            <span
+              class="statusTips"
+              :class="[getTableClass(item1.color)]"
+            ></span>
+            <span class="statusName"> {{ item1.name }}</span>
+          </div>
+        </div>
+        <div class="tabSty flex-c" @click="linkToManagement">桌台管理</div>
+      </div>
     </div>
 
-    <div>
-      <el-button type="primary" icon="Plus" round size="small" @click="add"
-        >新增</el-button
-      >
-
-      <el-button
-        type="danger"
-        icon="Delete"
-        round
-        size="small"
-        :disabled="multipleSelection.length === 0"
-        @click="deleteUser"
-        >删除</el-button
-      >
-      <el-table
-        :data="tableData.row"
-        style="width: 100%; margin: 10px 0"
-        row-key="id"
-        border
-        default-expand-all
-        @selection-change="handleSelectionChange"
-        :max-height="tableHeight"
-      >
-        <el-table-column type="selection" width="45" />
-        <el-table-column prop="tableNo" label="桌号" sortable />
-
-        <el-table-column prop="createBy" label="创建人" sortable />
-
-        <el-table-column prop="createTime" label="创建时间" sortable />
-        <el-table-column label="操作" width="220">
-          <template #default="scope">
-            <el-button
-              link
-              type="primary"
-              size="small"
-              @click="edit(scope.row)"
-            >
-              修改
-            </el-button>
-            <el-button
-              link
-              type="primary"
-              size="small"
-              @click="deleteUser(scope.row)"
-              >删除</el-button
-            >
-            <el-button
-              link
-              type="primary"
-              size="small"
-              @click="showScanCode(scope.row)"
-            >
-              生成二维码
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination
-        layout="prev, pager, next"
-        :total="tableData.total"
-        style="float: right"
-        @current-change="changePageSize"
-      />
+    <div class="container" :style="`height:${tableHeight + 30}px`">
+      <div class="grid">
+        <div
+          v-for="(table, index) in tableData.row"
+          :key="index"
+          :class="['table', getTableClass(table.state)]"
+          @click="handleShowDeskStatus(table, index)"
+        >
+          <p style="font-size: 24px">{{ table.tableNo }}</p>
+          <p v-if="table.choosedArrivePersonNum">
+            <el-icon><Avatar /></el-icon>{{ table.choosedArrivePersonNum }}人
+          </p>
+        </div>
+      </div>
     </div>
 
     <el-dialog
       v-model="dialogVisible"
-      :title="state === 'add' ? '添加桌号' : '编辑桌号'"
-      width="700"
+      :title="'桌台管理'"
+      width="600"
       align-center
     >
       <el-form
-        :inline="true"
         :model="formData.data"
         class="demo-form-inline"
         label-width="80px"
         :rules="rules"
         ref="formRef"
       >
-        <el-form-item label="桌号名称" prop="tableNo">
-          <el-input
-            v-model="formData.data.tableNo"
-            placeholder="输入桌号名称"
-            clearable
-          />
+        <el-form-item label="人数" prop="tableNo">
+          <div class="flex-sr" style="flex-wrap: wrap; width: 100%">
+            <div
+              v-for="(item, idx) in arrivePerson"
+              :key="idx"
+              class="arriveBox"
+              @click="chooseArrivePerson(item, idx)"
+              :class="{ activeSty: choosedIdx === idx }"
+            >
+              <text
+                style="font-size: 20px; font-weight: bold; color: #ffffff"
+                :style="
+                  idx === arrivePerson.length - 1
+                    ? 'font-size:20px;line-height:35px'
+                    : ''
+                "
+              >
+                {{ item }}
+              </text>
+            </div>
+            <input
+              type="number"
+              v-model="tableData.form.choosedArrivePersonNum"
+              class="arriveBox"
+              style="
+                height: 58px;
+                color: #000;
+                font-size: 21px;
+                color: #ffffff;
+                font-weight: bold;
+                border: none;
+              "
+              v-if="showInput"
+              focus
+            />
+          </div>
+        </el-form-item>
+        <el-form-item label="桌台状态">
+          <div
+            v-for="(item1, idx1) in statusOptions"
+            :key="idx1"
+            class="flex-c"
+            style="margin-right: 8px; cursor: pointer"
+            @click="changeTableStatus(item1, idx1)"
+            :style="idx1 === tableData.form.idx ? ' color:#5ea5dd' : ''"
+          >
+            <span
+              class="statusTips"
+              :class="[getTableClass(item1.color)]"
+            ></span>
+            <span class="statusName"> {{ item1.name }}</span>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -111,191 +121,230 @@
         </div>
       </template>
     </el-dialog>
-
-    <!-- 二维码 -->
-    <el-dialog v-model="ScanCode.dialogVisible" title="桌台二维码" width="500">
-      <div style="width: 100%; text-align: center">
-        <div style="font-size: 20px">{{ ScanCode.tableNo }}</div>
-        <el-image
-          :src="`${formData.origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
-          style="width: 280px; height: 280px"
-        />
-      </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="ScanCode.dialogVisible = false">取消</el-button>
-          <a
-            :href="`${formData.origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
-            download="桌台二维码.png"
-            target="_blank"
-            style="
-              color: #409eff;
-              font-size: 12px;
-              margin-left: 13px;
-              padding: 8px 15px;
-              border: 1px solid #ccc;
-              border-radius: 5px;
-            "
-            >下载</a
-          >
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted, ref, toRefs, inject } from "vue";
-import {
-  getLists,
-  getStoreListsApi,
-  addDesk,
-  editDesk,
-  deleteDesk,
-} from "@/api/project/foreign/createDesk.js";
+import { reactive, onMounted, ref, inject, onUnmounted } from "vue";
+import { getLists } from "@/api/project/foreign/createDesk.js";
 import { ElMessageBox, ElMessage } from "element-plus";
+import { useRouter } from "vue-router";
+const router = useRouter();
 defineOptions({
   name: "create-desk",
   isRouter: true,
 });
+const arrivePerson = ref([1, 2, 3, 4, 5, 6, 7, "更多"]);
+const TabsList = ref([
+  { name: "全部", val: 0 },
+  { name: "大厅", val: 1 },
+  { name: "外摆", val: 0 },
+  { name: "房间", val: 0 },
+]);
+const TabIdx = ref(0);
+const statusOptions = ref([
+  { name: "待下单", color: "reserved" },
+  { name: "空桌台", color: "available" },
+  { name: "待结账", color: "waitPay" },
+  { name: "已预订", color: "booking" },
+  { name: "待清桌", color: "cleaning" },
+]);
 const tableHeight = inject("$com").tableHeight();
-const multipleSelection = ref([]);
-const StoreOptions = ref([]);
 const query = reactive({
-  storeId: "",
+  storeId: JSON.parse(localStorage.getItem("storeId")).storeId,
   pageNum: 1,
+  pageSize: 999,
 });
+
 let formData = reactive({
   origin: inject("$com").baseUrl,
   data: {
     tableNo: "",
   },
 });
-const ScanCode = reactive({
-  dialogVisible: false,
-  tableId: "",
-  tableNo: "",
-});
-const formRef = ref(null);
-const rules = {
-  tableNo: [
-    {
-      required: true,
-      message: "请输入桌号名称",
-      trigger: "change",
-    },
-  ],
-};
 
+const formRef = ref(null);
 const dialogVisible = ref(false);
+const choosedIdx = ref(null);
+const showInput = ref(false); //人数自定义
 const state = ref("add");
-const tableData = ref({
+const tableData = reactive({
   row: [],
   total: 0,
+  form: { choosedArrivePersonNum: null, idx: null, color: "", name: "" },
+  choosedDesk: {},
 });
-const showScanCode = (row) => {
-  ScanCode.dialogVisible = true;
-  ScanCode.tableId = row.tableId;
-  ScanCode.tableNo = row.tableNo;
+const tabChange = (item, idx) => {
+  TabIdx.value = idx
 };
-const add = () => {
-  formData = reactive({
-    data: {
-      status: "1",
-    },
-  });
-  state.value = "add";
-  dialogVisible.value = true;
-};
-// 编辑
-const edit = (item) => {
-  formData.data = { ...item };
-  state.value = "edit";
-  dialogVisible.value = true;
-};
-// 删除
-const deleteUser = async (item) => {
-  ElMessageBox.confirm("确定删除所选数据?", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  })
-    .then(async () => {
-      if (multipleSelection.value.length >= 1) {
-        const tableIds = multipleSelection.value.map((x) => x.tableId);
 
-        const res = await deleteDesk({
-          tableIds: tableIds.toString(),
-          storeId: query.storeId,
-        });
-        getList();
-      } else {
-        const res = await deleteDesk({
-          tableIds: item.tableId,
-          storeId: query.storeId,
-        });
-        if (res.code === 0) {
-          getList();
-        }
-      }
-    })
-    .catch((action) => {
-      console.log(action);
-    });
-};
-//checkbox
-const handleSelectionChange = (val) => {
-  multipleSelection.value = val;
-  console.log(multipleSelection.value);
-};
-const getStoreList = async () => {
-  const res = await getStoreListsApi();
-  if (res.code === 0) {
-    StoreOptions.value = res.rows;
-    query.storeId = res.rows[0].storeId;
-    getList();
+const getTableClass = (status) => {
+  switch (status) {
+    case "waitPay":
+      return "waitPay"; // 红色
+    case "reserved":
+      return "reserved"; // 绿色
+    case "cleaning":
+      return "cleaning"; // 棕色
+    case "booking":
+      return "booking";
+    default:
+      return "available"; // 默认白色
   }
 };
-const handleComfirm = () => {
-  if (!formRef.value) return;
-  formRef.value.validate(async (valid) => {
-    if (valid) {
-      if (state.value === "add") {
-        const body = Object.assign({ storeId: query.storeId }, formData.data);
-        await addDesk(body);
-      } else {
-        const body = Object.assign({ storeId: query.storeId }, formData.data);
+const handleShowDeskStatus = (item) => {
+  dialogVisible.value = true;
+  tableData.form = {
+    choosedArrivePersonNum: null,
+    idx: null,
+    color: "",
+    name: "",
+  };
+  choosedIdx.value = null;
+  tableData.choosedDesk = item;
+};
+//选择人数
+const chooseArrivePerson = (item, idx) => {
+  choosedIdx.value = idx;
+  if (item === "更多") {
+    arrivePerson.value.pop();
+    showInput.value = true;
+  } else {
+    tableData.form.choosedArrivePersonNum = item;
+  }
+};
+const changeTableStatus = (item, idx) => {
+  tableData.form.state = item.color;
+  tableData.form.name = item.name;
+  tableData.form.idx = idx;
+};
 
-        await editDesk(body);
-      }
-      getList();
-      dialogVisible.value = false;
-    }
-  });
+const handleComfirm = () => {
+  tableData.choosedDesk = Object.assign(
+    {},
+    tableData.choosedDesk,
+    tableData.form
+  );
+  console.log(tableData.choosedDesk);
+
+  if (tableData.choosedDesk.state) {
+    const idx = tableData.row.findIndex(
+      (x) => x.tableId === tableData.choosedDesk.tableId
+    );
+    tableData.row.splice(idx, 1, tableData.choosedDesk);
+    dialogVisible.value = false;
+  }
+};
+const linkToManagement = () => {
+  router.push({ name: "desk-Management" });
 };
 
 const getList = async () => {
   const res = await getLists(query);
   if (res.code === 0) {
-    tableData.value.row = res.rows;
-    tableData.value.total = res.total;
+    tableData.row = res.rows;
+    console.log(tableData.row);
+
+    tableData.total = res.total;
   }
 };
-const changePageSize = (e) => {
-  query.pageNum = e;
-  getList();
-};
 onMounted(async () => {
-  await getStoreList();
+  if (localStorage.getItem("tableStore")) {
+    tableData.row = JSON.parse(localStorage.getItem("tableStore"));
+  } else {
+    getList();
+  }
+});
+onUnmounted(() => {
+  //放入缓存
+  localStorage.setItem("tableStore", JSON.stringify(tableData.row));
 });
 </script>
 
-<style lang="scss" scoped>
-.demo-form-inline .el-input {
-  --el-input-width: 200px;
+<style scoped>
+.container {
+  padding: 20px;
+  overflow-y: scroll;
+  margin-top: 20px;
 }
 
-.demo-form-inline .el-select {
-  --el-select-width: 200px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  min-width: 150px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.available {
+  background-color: white;
+}
+
+.waitPay {
+  background-color: #f65f30;
+}
+
+.reserved {
+  background-color: #95af7d;
+}
+.booking {
+  background-color: #b0a07e;
+}
+
+.cleaning {
+  background-color: #b8e8f2;
+}
+.tabSty {
+  width: 7vw;
+  margin: 0 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  height: 40px;
+  color: #ffffff;
+  background-color: #a2a19c;
+  cursor: pointer;
+}
+.statusTips {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.arriveBox {
+  padding: 10px 0;
+  border: 1px solid #a18d6c;
+  background-color: #a18d6c;
+  width: calc((100% / 4) - 40px);
+  border-radius: 16px;
+  text-align: center;
+  margin: 10px;
+  cursor: pointer;
+}
+.activeSty {
+  background-color: #8b6244 !important;
+  border: 1px solid #ffffff !important;
+  color: #000 !important;
+}
+.tabActiveSty{
+  color: #ffffff !important;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #53482e !important;
+
 }
 </style>

@@ -36,3 +36,17 @@ export function deleteDesk(data){
    
   })
 }
+export function getTabLists(params){
+  return request({
+    url: "/store/api/store/table/type/list",
+    method: "get",
+    params,
+  });
+}
+export function addTab(data){
+  return request({
+    url: "/store/api/store/table/type",
+    method: "post",
+    data,
+  })
+}
