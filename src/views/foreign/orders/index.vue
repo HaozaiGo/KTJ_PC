@@ -724,7 +724,8 @@ const handleCustom = async () => {
         res.data
       );
       handlePrint(state.orderDetailData);
-    }, 2000);
+      printerWay.dialogVisible = false;
+    }, 1000);
   }
 };
 // 获取已经配置的打印机
@@ -830,7 +831,7 @@ const handlePrint = async (data) => {
           80
         : (printTableDom.value.$el.clientHeight /
             printTableDom.value.$el.clientWidth) *
-          80;
+          80 - 20;
     console.log(height);
 
     const printerHtml =

@@ -27,7 +27,7 @@
         round
         size="small"
         @click="handleManageDesk"
-        >管理桌号类型</el-button
+        >管理桌台类型</el-button
       >
       <el-button
         type="danger"
@@ -49,6 +49,7 @@
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="tableNo" label="桌号" sortable />
+        <el-table-column prop="typeName" label="桌台类型" sortable />
 
         <el-table-column prop="createBy" label="创建人" sortable />
 
@@ -96,7 +97,6 @@
       align-center
     >
       <el-form
-        :inline="true"
         :model="formData.data"
         class="demo-form-inline"
         label-width="80px"
@@ -108,7 +108,19 @@
             v-model="formData.data.tableNo"
             placeholder="输入桌号名称"
             clearable
+            style="width: 300px"
           />
+        </el-form-item>
+        <el-form-item label="桌号类型">
+          <el-select v-model="formData.data.typeId" style="width: 300px">
+            <el-option
+              v-for="(item, index) in typeIdList"
+              :key="index"
+              :label="item.typeName"
+              :value="item.typeId"
+            >
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -134,22 +146,26 @@
         @edit="handleTabsEdit"
       >
         <el-tab-pane
-          v-for="item in manageDesk.editableTabs"
+          v-for="(item, index) in manageDesk.editableTabs"
           :key="item.name"
           :label="item.title"
           :name="item.name"
         >
-          名称<el-input
-            v-model="
-              manageDesk.editableTabs[manageDesk.editableTabsValue].tabName
-            "
+          名称:<el-input
+            v-model="item.tabName"
             placeholder="请输入桌台类型"
+            @change="handleTabsEditName(item, index)"
+            style="width: 200px"
           ></el-input>
+          <el-button style="margin-left: 10px" @click="handleAdd(item, index)"
+            >新增</el-button
+          >
+          <el-button @click="handleEdit(item, index)">修改</el-button>
+          <el-button @click="handleDel(item, index)">删除</el-button>
         </el-tab-pane>
       </el-tabs>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="handleComfirmTab()" type="primary">确定</el-button>
           <el-button @click="manageDesk.dialogVisible = false">
             取消
           </el-button>
@@ -162,7 +178,7 @@
       <div style="width: 100%; text-align: center">
         <div style="font-size: 20px">{{ ScanCode.tableNo }}</div>
         <el-image
-          :src="`${formData.origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
+          :src="`${origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
           style="width: 280px; height: 280px"
         />
       </div>
@@ -170,7 +186,7 @@
         <div class="dialog-footer">
           <el-button @click="ScanCode.dialogVisible = false">取消</el-button>
           <a
-            :href="`${formData.origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
+            :href="`${origin}/store/api/store/table/qrcode/mini?tableId=${ScanCode.tableId}`"
             download="桌台二维码.png"
             target="_blank"
             style="
@@ -199,19 +215,23 @@ import {
   deleteDesk,
   getTabLists,
   addTab,
+  deleteTab,
+  editTab,
 } from "@/api/project/foreign/createDesk.js";
 import { ElMessageBox, ElMessage } from "element-plus";
 defineOptions({
   name: "desk-Management",
   isRouter: true,
 });
-let tabIndex = 0;
 const tableHeight = inject("$com").tableHeight();
 const multipleSelection = ref([]);
 const StoreOptions = ref([]);
+const typeIdList = ref([]);
+const origin = inject("$com").baseUrl;
 const manageDesk = reactive({
   dialogVisible: false,
-  editableTabsValue: "0",
+  editableTabsValue: 0,
+  originTabs: [], //原始数据
   editableTabs: [
     {
       title: "新桌台类型",
@@ -225,9 +245,9 @@ const query = reactive({
   pageNum: 1,
 });
 let formData = reactive({
-  origin: inject("$com").baseUrl,
   data: {
     tableNo: "",
+    typeId: "",
   },
 });
 const ScanCode = reactive({
@@ -261,6 +281,7 @@ const add = () => {
   formData = reactive({
     data: {
       status: "1",
+      typeId: typeIdList.value.length > 0 ? typeIdList.value[0].typeId : "",
     },
   });
   state.value = "add";
@@ -332,14 +353,6 @@ const handleComfirm = () => {
     }
   });
 };
-const handleComfirmTab = async () => {
-  console.log(manageDesk.editableTabs[manageDesk.editableTabsValue]);
-
-  // const res = await addTab({
-  //   storeId: query.storeId,
-  //   tabName: manageDesk.editableTabs[manageDesk.editableTabsValue].tabName,
-  // });
-};
 
 const getList = async () => {
   const res = await getLists(query);
@@ -362,21 +375,79 @@ const handleManageDesk = () => {
 const getTabList = async () => {
   const res = await getTabLists({ storeId: query.storeId });
   if (res.code === 0) {
-    manageDesk.editableTabs = res.rows;
+    const resArr = res.rows.map((item, index) => {
+      item.title = item.typeName;
+    });
+    console.log(resArr);
+
+    manageDesk.originTabs = res.rows;
+    manageDesk.editableTabs = manageDesk.originTabs.slice(0);
   }
 };
 
-const handleTabsEdit = (e) => {
-  const newTabName = `${++tabIndex}`;
-  manageDesk.editableTabs.push({
-    title: "新桌台类型",
-    name: newTabName,
-    tabName: "",
+const handleAdd = async (item, index) => {
+  const res = await addTab({
+    storeId: query.storeId,
+    typeName: item.tabName,
   });
-  manageDesk.editableTabsValue = newTabName;
+  if (res.code === 0) {
+    getTabList();
+  }
 };
+const handleEdit = async (item, index) => {
+  console.log(item);
+
+  const res = await editTab({
+    storeId: item.storeId,
+    typeId: item.typeId,
+    typeName: item.tabName,
+  });
+  if (res.code === 0) {
+    getTabList();
+  }
+};
+const handleDel = (item, index) => {
+  console.log(item);
+  ElMessageBox.confirm("确定删除所选台号类型?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      const res = await deleteTab(item.typeId);
+      getTabList();
+    })
+    .catch((action) => {
+      console.log(action);
+    });
+};
+
+const handleTabsEdit = async (e) => {
+  if (e) {
+    // 删除
+  } else {
+    const newTabName = `${++manageDesk.originTabs.length}`;
+    manageDesk.editableTabs.push({
+      title: "新桌台类型",
+      name: newTabName,
+      tabName: "",
+    });
+    console.log(manageDesk.editableTabs);
+
+    manageDesk.editableTabsValue = newTabName;
+  }
+};
+const getTabListFirst = async () => {
+  const res = await getTabLists({ storeId: query.storeId });
+  if (res.code === 0) {
+    typeIdList.value = res.rows;
+  }
+};
+
+const handleTabsEditName = (item, idx) => {};
 onMounted(async () => {
   await getStoreList();
+  getTabListFirst();
 });
 </script>
 

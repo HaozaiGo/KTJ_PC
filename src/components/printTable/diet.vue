@@ -2,7 +2,7 @@
 <template>
   <div>
     <div
-      style="text-align: center; font-size: 22px; padding: 1px 0; width: 80mm"
+      style="text-align: center; font-size: 22px; padding: 1px 0; width:100%"
     >
       <div>客单-{{ tableData.pickupWayLabel }}</div>
       <div>{{ tableData.storeName }}</div>
@@ -46,7 +46,7 @@
           <th style="width: 12mm">小计</th>
         </tr>
       </thead>
-      <tbody align="center" valign="center">
+      <tbody >
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
           <td style="width: 22mm">
             {{ item.name }} <br />
@@ -54,10 +54,10 @@
               {{ item.tasteNeed }}
             </span>
           </td>
-          <td style="width: 10mm">{{ item.unit }}</td>
-          <td style="width: 10mm">{{ item.qty }}</td>
-          <td style="width: 12mm">{{ item.price }}</td>
-          <td style="width: 12mm">{{ item.amount }}</td>
+          <td style="width: 10mm" align="center">{{ item.unit }}</td>
+          <td style="width: 10mm" align="center">{{ item.qty }}</td>
+          <td style="width: 12mm" align="center">{{ item.price }}</td>
+          <td style="width: 12mm" align="center">{{ item.amount }}</td>
         </tr>
       </tbody>
     </table>
@@ -94,8 +94,8 @@
           display: inline-block;
           font-weight: bold;
           font-size: 20px;
-          width: 55mm;
-          flex: 1;
+          width: 50mm;
+        
         "
         >优惠后应收：</span
       >
@@ -110,7 +110,7 @@
       >
     </div>
     <div v-if="needScanImg" style="width: 70mm; text-align: center">
-      <img :src="imgSrc" alt="" id="imgId" style="width: 40mm; height: 40mm" />
+      <img :src="imgSrc" alt="" id="imgId" style="width: 40mm; height: 40mm;margin-top: 10mm;" />
     </div>
     <p>打印时间：{{ time }}</p>
   </div>

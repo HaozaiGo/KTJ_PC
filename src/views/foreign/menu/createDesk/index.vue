@@ -9,7 +9,7 @@
           @click="tabChange(item, idx)"
           :class="{ tabActiveSty: idx === TabIdx }"
         >
-          {{ item.name }}
+          {{ item.typeName }}
         </div>
       </div>
       <div class="right flex-c">
@@ -126,7 +126,7 @@
 
 <script setup>
 import { reactive, onMounted, ref, inject, onUnmounted } from "vue";
-import { getLists } from "@/api/project/foreign/createDesk.js";
+import { getLists, getTabLists } from "@/api/project/foreign/createDesk.js";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -154,6 +154,7 @@ const query = reactive({
   storeId: JSON.parse(localStorage.getItem("storeId")).storeId,
   pageNum: 1,
   pageSize: 999,
+  typeId: "",
 });
 
 let formData = reactive({
@@ -175,7 +176,9 @@ const tableData = reactive({
   choosedDesk: {},
 });
 const tabChange = (item, idx) => {
-  TabIdx.value = idx
+  TabIdx.value = idx;
+  query.typeId = item.typeId;
+  getList();
 };
 
 const getTableClass = (status) => {
@@ -243,17 +246,25 @@ const getList = async () => {
   const res = await getLists(query);
   if (res.code === 0) {
     tableData.row = res.rows;
+    //从缓存中取数据
+    if (res.rows.length > 0 && localStorage.getItem("tableStore")) {
+      tableData.row = JSON.parse(localStorage.getItem("tableStore"));
+    }
     console.log(tableData.row);
 
     tableData.total = res.total;
   }
 };
-onMounted(async () => {
-  if (localStorage.getItem("tableStore")) {
-    tableData.row = JSON.parse(localStorage.getItem("tableStore"));
-  } else {
-    getList();
+
+const getTabList = async () => {
+  const res = await getTabLists({ storeId: query.storeId });
+  if (res.code === 0) {
+    TabsList.value = res.rows;
   }
+};
+onMounted(async () => {
+  getTabList();
+  getList();
 });
 onUnmounted(() => {
   //放入缓存
@@ -340,11 +351,10 @@ onUnmounted(() => {
   border: 1px solid #ffffff !important;
   color: #000 !important;
 }
-.tabActiveSty{
+.tabActiveSty {
   color: #ffffff !important;
   font-size: 18px;
   font-weight: bold;
   background-color: #53482e !important;
-
 }
 </style>

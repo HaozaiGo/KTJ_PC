@@ -46,7 +46,7 @@
           <th style="width: 12mm">小计</th> -->
         </tr>
       </thead>
-      <tbody align="center">
+      <tbody>
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
           <td style="width: 22mm">
             {{ item.name }}
@@ -55,8 +55,8 @@
               {{ item.tasteNeed }}
             </span>
           </td>
-          <td style="width: 10mm">{{ item.unit }}</td>
-          <td style="width: 10mm">{{ item.qty }}</td>
+          <td style="width: 10mm" align="center">{{ item.unit }}</td>
+          <td style="width: 10mm" align="center">{{ item.qty }}</td>
           <!-- <td style="width: 12mm">{{ item.price }}</td>
           <td style="width: 12mm">{{ item.amount }}</td> -->
         </tr>
