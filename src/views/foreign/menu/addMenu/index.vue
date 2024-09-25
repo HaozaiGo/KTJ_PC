@@ -366,7 +366,7 @@ const placeOrderOnly = async (way) => {
 
     // 后付 全部机一起打单
     const body1 = {
-      method: "ALL",
+      method: "PART",
       orderId: orderId.value,
       storeId: propsData.data.storeId,
       tableNo: propsData.data.tableNo,
