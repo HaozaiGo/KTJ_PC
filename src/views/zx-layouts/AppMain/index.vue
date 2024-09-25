@@ -2,19 +2,22 @@
 
 <template>
   <section class="app-main-container">
-  
     <transition mode="out-in" name="fade-transform" v-if="!show">
       <keep-alive>
         <router-view
           class="app-main-height"
           :key="key"
           v-if="this.$route.meta.keepAlive"
-          :style="{ height: baseSettings.OverallHeight  + 'px' }"
+          :style="{ height: baseSettings.OverallHeight + 'px' }"
         />
       </keep-alive>
     </transition>
     <transition mode="out-in" name="fade-transform">
-      <router-view :key="key" v-if="!this.$route.meta.keepAlive"  :style="{ height: baseSettings.OverallHeight + 'px' }"></router-view>
+      <router-view
+        :key="key"
+        v-if="!this.$route.meta.keepAlive"
+        :style="{ height: baseSettings.OverallHeight + 'px' }"
+      ></router-view>
     </transition>
 
     <!-- <footer v-if="footerCopyright" class="footer-copyright">
@@ -30,7 +33,7 @@
 
 // import GithubCorner from "@/components/GithubCorner";
 import settings from "@/config/settings.js";
-import {baseSettings} from '@/stores/counter'
+import { baseSettings } from "@/stores/counter";
 
 export default {
   name: "AppMain",
@@ -46,7 +49,7 @@ export default {
       fullYear: new Date().getFullYear(),
       title: settings.title,
       routerView: true,
-      baseSettings:baseSettings()
+      baseSettings: baseSettings(),
     };
   },
   computed: {
@@ -56,7 +59,7 @@ export default {
     //   device: "settings/device",
     //   skeleton: "settings/skeleton",
     // }),
-  
+
     cachedRoutes() {
       const cachedRoutesArr = [];
       this.visitedRoutes.forEach((item) => {
@@ -100,7 +103,6 @@ export default {
   },
   mounted() {
     this.handleSkeleton();
-   
   },
   methods: {
     handleSkeleton() {
@@ -118,7 +120,8 @@ export default {
   position: relative;
   width: 100%;
   overflow: hidden;
-  height: calc(100vh - $base-nav-bar-height - $base-tags-bar-height);
+  // height: calc(100vh - $base-nav-bar-height - $base-tags-bar-height);
+  height: calc(100vh - $base-nav-bar-height);
 
   .app-main-height {
     min-height: $base-app-main-height;

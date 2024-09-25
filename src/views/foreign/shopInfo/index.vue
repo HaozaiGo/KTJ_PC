@@ -430,20 +430,20 @@ const tableData = ref({
   total: 0,
 });
 const tipsStep = () => {
-  const driver = new Driver();
+  // const driver = new Driver();
   // console.log(driver);
-  driver.highlight({
-    element: "#create-post",
-    // stageBackground: "#ffa0a0",
-    popover: {
-      title: "温馨提示",
-      description: "这是本站的首页",
-      position: "top",
-      closeBtnText: "关闭",
-      nextBtnText: "下一步",
-      // className: "first-step",
-    },
-  });
+  // driver.highlight({
+  //   element: "#create-post",
+  //   // stageBackground: "#ffa0a0",
+  //   popover: {
+  //     title: "温馨提示",
+  //     description: "这是本站的首页",
+  //     position: "top",
+  //     closeBtnText: "关闭",
+  //     nextBtnText: "下一步",
+  //     // className: "first-step",
+  //   },
+  // });
 };
 const handleAddOpenTime = () => {
   openTimeList.value.push({});
@@ -590,7 +590,7 @@ const changePageSize = (e) => {
 onMounted(async () => {
   getFacilityOption();
   getList();
-  tipsStep();
+  // tipsStep();
 });
 </script>
 

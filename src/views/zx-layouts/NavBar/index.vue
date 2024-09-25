@@ -433,7 +433,7 @@ export default {
 
     //获取台号
     async getTableNoList() {
-      const res = await getDeskList({ storeId: this.storeId });
+      const res = await getDeskList({ storeId: this.storeId, pageSize: 999 });
       if (res.code === 0) {
         this.state1.tableNoOptions = res.rows;
       }

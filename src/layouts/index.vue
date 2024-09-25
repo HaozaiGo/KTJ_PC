@@ -69,7 +69,7 @@ export default {
     TopBar,
     NavBar,
     SideBar,
-    TagsBar,
+    
     AppMain,
   },
   mixins: [Media],

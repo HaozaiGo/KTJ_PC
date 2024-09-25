@@ -25,13 +25,14 @@ a,
   }
 }
 
-.nav-bar-container{
+.nav-bar-container {
   background-image: url("./img/shuidian/top1.png") !important;
   background-position: right;
   background-repeat: no-repeat;
   background-size: 100%;
 
 }
+
 .flex {
   display: flex;
   align-items: center;
@@ -41,6 +42,7 @@ a,
   display: flex;
   justify-content: space-between;
 }
+
 .flex-c {
   display: flex;
   align-items: center;
@@ -60,15 +62,26 @@ a,
   overflow: hidden;
 }
 
-.content{
+.content {
   background-color: #ffffff;
   padding: 10px 20px;
 }
 
-.center{
+.center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  
+}
+
+.rel {
+  position: relative;
+}
+.whiteBg{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(227, 222, 221, 0.6);
 }

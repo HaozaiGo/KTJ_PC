@@ -8,7 +8,7 @@ const commonMethod = {
   //baseUrl:"http://124.223.101.232",
   //baseUrl:"http://192.168.1.59",
   //socketUrl:"ws://192.168.1.59",
-  socketUrl: 'wss://bdncn.cn',
+   socketUrl: 'wss://bdncn.cn',
   role: window.localStorage.getItem("role") || "visitor",
   // 字典
   getDict(dictType: string) {

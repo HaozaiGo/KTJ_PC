@@ -165,7 +165,7 @@ export default {
     // }
   },
   mounted() {
-    console.log(this.tableData);
+    // console.log(this.tableData);
     // console.log(this.imgSrc);
 
     this.time = new Date().toLocaleString();

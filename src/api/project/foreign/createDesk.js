@@ -64,3 +64,31 @@ export function editTab(data) {
     data,
   });
 }
+
+
+// 查询当前台是否已经开单
+export function checkHasOrder(params) {
+  return request({
+    url: "/store/api/store/order/store/pay/query/unPay/order",
+    method: "get",
+    params,
+  });
+}
+
+//修改台状态---变为待下单
+export function changeTableStatusToWait(data) {
+  return request({
+    url: "/store/api/store/table/edit/wait/under/status",
+    method: "post",
+    data,
+  });
+}
+
+// 清台
+export function clearTable(data) {
+  return request({
+    url: "/store/api/store/table/edit/status/check",
+    method: "post",
+    data,
+  });
+}

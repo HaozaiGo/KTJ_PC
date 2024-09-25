@@ -16,10 +16,12 @@
         <span>首页</span>
       </el-menu-item>
 
-      <el-sub-menu
+      <component
         v-for="(item, index) in data"
         :index="String(index + 1)"
         :key="index"
+        :is="item?.children ? 'el-sub-menu' : 'el-menu-item'"
+        @click="handleClickMenuFirst(item, index)"
       >
         <template #title>
           <el-icon>
@@ -69,7 +71,7 @@
             </template>
           </el-menu-item>
         </component> -->
-      </el-sub-menu>
+      </component>
     </el-menu>
   </div>
 </template>
@@ -77,7 +79,7 @@
 import { reactive, toRefs, onBeforeMount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
-const data = JSON.parse(localStorage.getItem("routes"));
+const data = JSON.parse(localStorage.getItem("routes") || "{}");
 const data1 = reactive({
   routes: [
     {
@@ -176,12 +178,21 @@ onMounted(() => {
 const handleBackToHome = () => {
   if (role.value === "platform") {
     router.push({ path: "/Index" });
-  }else{
+  } else {
     router.push({ path: "/home" });
   }
 };
 const handleOpen = () => {};
 const handleClose = () => {};
+const handleClickMenuFirst = (item: any, index: Number) => {
+  if (item.children) {
+    console.log("有children");
+  } else {
+    console.log(item, index);
+    const menuRouter = item.path  + item.component;
+    router.push({ path: menuRouter });
+  }
+};
 const handleClickRoute = (item: any, children: any, menu: any) => {
   console.log(item, children, menu);
 
@@ -202,7 +213,7 @@ const handleClickMenu = (item: any, children: any, idx: Number) => {
 </script>
 
 <style lang="scss" scoped>
-:deep(.el-menu){
+:deep(.el-menu) {
   border-right: none !important;
 }
 .sideBar_container {

@@ -135,4 +135,29 @@ export function deleteOrderInsideMenu(data) {
   });
 }
 
+// 扫码点餐下单（后付，只下单）（body）
+export function underOrderAfterPay(data) {
+  return request({
+    url: `/store/api/store/order/store/pay/under/order`,
+    method: "post",
+    data,
+  });
+}
+
+// 后付修改订单菜品
+export function afterPayChangeOrder(data) {
+  return request({
+    url: `/store/api/store/order/store/pay/edit/menu`,
+    method: "post",
+    data,
+  });
+}
+
+// 查询商家茶位信息
+export function getTeaInfo(storeId) {
+  return request({
+    url: `/store/api/store/menu/position/${storeId}`,
+    method: "get",
+  });
+}
 

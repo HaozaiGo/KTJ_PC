@@ -831,7 +831,8 @@ const handlePrint = async (data) => {
           80
         : (printTableDom.value.$el.clientHeight /
             printTableDom.value.$el.clientWidth) *
-          80 - 20;
+            80 -
+          20;
     console.log(height);
 
     const printerHtml =
@@ -907,7 +908,7 @@ const getList = async () => {
 };
 //获取台号
 const getTableNoList = async () => {
-  const res = await getDeskList({ storeId: query.storeId });
+  const res = await getDeskList({ storeId: query.storeId, pageSize: 999 });
   if (res.code === 0) {
     state1.tableNoOptions = res.rows;
   }
