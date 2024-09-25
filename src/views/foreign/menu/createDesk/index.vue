@@ -51,6 +51,7 @@
           v-model="showInSize"
           :deskItem="tableData.choosedDesk"
           :canClearDesk="canClearDesk"
+          @clearDesk="clearDesk"
         ></clickInSize>
       </div>
     </div>
@@ -236,7 +237,11 @@ const openSocket = () => {
     openSocket();
   };
 };
-
+//清台
+const clearDesk=()=>{
+  showInSize.value = false;
+  getList();
+};
 const getTabList = async () => {
   const res = await getTabLists({ storeId: query.storeId });
   if (res.code === 0) {

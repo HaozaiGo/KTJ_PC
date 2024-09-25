@@ -186,6 +186,8 @@ const printerWay = reactive({
   needScanImg: true,
   imgSrc: "",
 });
+
+const emit = defineEmits([ "clearDesk" ]);
 const lodopPrint = ref(null);
 const filePath = localStorage.getItem("filePath");
 const methodOption = ref([]);
@@ -315,6 +317,8 @@ const handleClearDesk = async()=>{
   })
   if(res.code === 0 && res.data.length === 0){
     ElMessage.success("清台成功!")
+    
+    emit("clearDesk")
   }
 };
 

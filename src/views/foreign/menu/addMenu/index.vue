@@ -14,7 +14,7 @@
       <!-- Order List -->
       <div class="order-list" :style="`height: ${tableHeight - 50}px;`">
         <div v-for="(item, index) in orderList" :key="index" class="order-item">
-          <div>
+          <div style="flex: 1;">
             <span class="item-name">{{ item.name }}</span>
             <p style="font-size: 13px; color: #aeaaaa">{{ item.tasteNeed }}</p>
           </div>
@@ -47,7 +47,7 @@
         <span style="font-size: 15px; display: inline-block; margin-right: 20px"
           >共{{ totalItems }}项
         </span>
-        ¥{{ totalPrice }}
+        ¥{{ Number(totalPrice).toFixed(2) }}
       </div>
 
       <!-- Bottom Buttons -->
@@ -661,6 +661,12 @@ const handleClick = (e) => {
   background-color: #ffffff;
   border-top-right-radius: 15px;
   border-top-left-radius: 15px;
+  overflow: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+}
+::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
 }
 
 .order-item {
@@ -688,6 +694,8 @@ const handleClick = (e) => {
 
 .item-price {
   margin-left: 10px;
+  width: 32px;
+  white-space: nowrap;
 }
 
 .total {
