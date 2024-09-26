@@ -314,7 +314,6 @@ const tasteData = reactive({
   rightData: [], //子菜单
   finalChoose: {},
 });
-
 // 先查询是否已经下单，订单是否存在
 const hadOrder = async () => {
   const res = await checkHasOrder({
@@ -524,7 +523,7 @@ const getList1 = async () => {
 };
 
 const handleClick1 = async (item) => {
-  console.log("-----", item);
+  // console.log("-----", item);
 
   tasteNeed.tasteItem = item;
   const res = await getMenusDetail({
@@ -578,8 +577,7 @@ const handleFinish = (item) => {
 };
 
 const handleClick = (e) => {
-  console.log(e.index);
-
+  // console.log(e.index);
   tasteData.selected = tasteData.leftData[e.index];
   getList1();
 };
