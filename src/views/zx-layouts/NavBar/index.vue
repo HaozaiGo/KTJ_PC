@@ -403,12 +403,10 @@ export default {
         );
       });
     },
-
     // 打印方法执行
     handlePrint(data) {
       this.state.showPrintTable = true;
       const res = this.printerOption.find((x) => x.label === data.printerModel);
-
       // 找到匹配的打印机
       if (res) {
         this.$nextTick(() => {

@@ -102,7 +102,6 @@ const asyncEvent = async (ele) => {
     );
   });
 };
-
 // 打印方法执行
 const handlePrint = async (data) => {
   state.orderDetailData = Object.assign({}, data);
