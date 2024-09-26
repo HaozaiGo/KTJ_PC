@@ -125,7 +125,7 @@
               type="primary"
               size="small"
               @click="deleteOrder(scope.row)"
-              v-if="scope.row.orderStatus != 'FINISH'"
+              v-if="scope.row.type === 'SCAN_ORDER_UNDER' && scope.row.payStatus ==='0'"
               >删除订单</el-button
             >
           </template>

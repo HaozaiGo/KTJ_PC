@@ -105,8 +105,6 @@ const asyncEvent = async (ele) => {
 
 // 打印方法执行
 const handlePrint = async (data) => {
-  console.log(data);
-  
   state.orderDetailData = Object.assign({}, data);
   state.showPrintTable = true;
   const res = printerOption.value.find((x) => x.label === data.printerModel);
@@ -122,7 +120,8 @@ const handlePrint = async (data) => {
           80
         : (printTableDom.value.$el.clientHeight /
             printTableDom.value.$el.clientWidth) *
-          80;
+            80 +
+          5;
     console.log(height);
 
     const printerHtml =

@@ -40,11 +40,21 @@
           class="row2"
           @click="handleClickBox('pay')"
           :class="{ active: clickBoxState === 'pay' }"
-          :style="props.canClearDesk?'border-bottom-right-radius: 0px;border-right:1px solid #000':'border-bottom-right-radius: 10px;'"
+          :style="
+            props.canClearDesk
+              ? 'border-bottom-right-radius: 0px;border-right:1px solid #000'
+              : 'border-bottom-right-radius: 10px;'
+          "
         >
           结账
         </div>
-        <div v-if="props.canClearDesk" class="row2Clear" @click="handleClearDesk">清台</div>
+        <div
+          v-if="props.canClearDesk"
+          class="row2Clear"
+          @click="handleClearDesk"
+        >
+          清台
+        </div>
       </div>
     </div>
     <!-- 结账 -->
@@ -133,13 +143,13 @@
             style="width: 300px"
             @change="switchPrinter"
           >
-            <el-option value="" label="全部"></el-option>
             <el-option
               v-for="item in printerWay.printerLists"
               :key="item.printerId"
               :label="item.printerName"
               :value="item.printerId"
             />
+            <el-option value="all" label="全部"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="打印方式">
@@ -167,7 +177,7 @@
 
 <script setup>
 import lodopPrinter from "@/components/printTable/lodopPrinter.vue";
-import { checkHasOrder,clearTable } from "@/api/project/foreign/createDesk.js";
+import { checkHasOrder, clearTable } from "@/api/project/foreign/createDesk.js";
 import { ref, onMounted, reactive, inject } from "vue";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
@@ -187,7 +197,7 @@ const printerWay = reactive({
   imgSrc: "",
 });
 
-const emit = defineEmits([ "clearDesk" ]);
+const emit = defineEmits(["clearDesk"]);
 const lodopPrint = ref(null);
 const filePath = localStorage.getItem("filePath");
 const methodOption = ref([]);
@@ -245,12 +255,15 @@ const getPrinterSysList = async () => {
 };
 const handleConfirm = () => {
   getPrinterSysList();
-  printerWay.form.printerId = "";
+
   printerWay.dialogVisible = true;
 };
 
 //自定义打单
 const handleCustom = async () => {
+  if (printerWay.form.printerId == "") {
+    return ElMessage.error("请选择打印机!");
+  }
   // 二维码
   const res1 = await getQrCodePayImg({
     orderId: orderId.value,
@@ -259,30 +272,7 @@ const handleCustom = async () => {
     printerWay.imgSrc = filePath + res1.data;
   }
 
-  if (printerWay.form.printerId != "") {
-    const body = {
-      orderId: orderId.value,
-      printerId: printerWay.form.printerId,
-      storeId: props.deskItem.storeId,
-      method: printerWay.form.method,
-    };
-    const res = await customPrint(body);
-    if (res.code === 0) {
-      setTimeout(() => {
-        const orderDetailData = Object.assign(
-          {},
-          orderDetail.value.data,
-          res.data
-        );
-
-        // console.log("--------", orderDetailData);
-
-        lodopPrint.value.handlePrint(orderDetailData);
-        printerWay.dialogVisible = false;
-        drawer.value = false;
-      }, 1000);
-    }
-  } else {
+  if (printerWay.form.printerId == "all") {
     // 全部机一起打单
     const body = {
       method: "ALL",
@@ -305,20 +295,41 @@ const handleCustom = async () => {
     }
     printerWay.dialogVisible = false;
     drawer.value = false;
+  } else {
+    const body = {
+      orderId: orderId.value,
+      printerId: printerWay.form.printerId,
+      storeId: props.deskItem.storeId,
+      method: printerWay.form.method,
+    };
+    const res = await customPrint(body);
+    if (res.code === 0) {
+      setTimeout(() => {
+        const orderDetailData = Object.assign(
+          {},
+          orderDetail.value.data,
+          res.data
+        );
+        // console.log("--------", orderDetailData);
+        lodopPrint.value.handlePrint(orderDetailData);
+        printerWay.dialogVisible = false;
+        drawer.value = false;
+      }, 500);
+    }
   }
 };
 
-const handleClearDesk = async()=>{
-
+const handleClearDesk = async () => {
   const res = await clearTable({
-    storeId:props.deskItem.storeId,
-    tableNo:props.deskItem.tableNo,
-    realStatus:"FREE_TIME"
-  })
-  if(res.code === 0 && res.data.length === 0){
-    ElMessage.success("清台成功!")
-    
-    emit("clearDesk")
+    storeId: props.deskItem.storeId,
+    tableNo: props.deskItem.tableNo,
+    realStatus: "FREE_TIME",
+    peopleQty: 0,
+  });
+  if (res.code === 0 && res.data.length === 0) {
+    ElMessage.success("清台成功!");
+
+    emit("clearDesk");
   }
 };
 
@@ -372,11 +383,11 @@ onMounted(() => {
   font-weight: bold;
   letter-spacing: 2px;
   border-bottom-left-radius: 10px;
-  
+
   background-color: #ffffff;
   flex: 1;
 }
-.row2Clear{
+.row2Clear {
   flex: 1;
   font-size: 22px;
   border-top: 1px solid #000;

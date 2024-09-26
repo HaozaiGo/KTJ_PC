@@ -110,7 +110,7 @@
           font-size: 22px;
           margin-right: 10mm;
         "
-        >{{ totalPrice }}</span
+        >{{ Number(totalPrice).toFixed(2) }}</span
       >
     </div>
     <div v-if="needScanImg" style="width: 70mm; text-align: center">

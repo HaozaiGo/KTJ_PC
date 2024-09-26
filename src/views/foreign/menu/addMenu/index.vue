@@ -52,8 +52,13 @@
 
       <!-- Bottom Buttons -->
       <div class="actions">
-        <el-popover :visible="visible0" placement="top" :width="180" v-if="false">
-          <p style="text-align: center; margin: 10px 0px 20px 0px" >
+        <el-popover
+          :visible="visible0"
+          placement="top"
+          :width="180"
+          v-if="false"
+        >
+          <p style="text-align: center; margin: 10px 0px 20px 0px">
             请选择就餐方式
           </p>
           <div style="text-align: right; margin: 0">
@@ -415,6 +420,7 @@ const placeOrderOnly = async (way) => {
     };
     const res = await underOrderAfterPay(body);
     if (res.code === 0) {
+      orderId.value = res.data.orderId;
       ElMessage({
         message: "下单成功！",
         type: "success",
@@ -539,25 +545,36 @@ const handleClick1 = async (item) => {
   }
 
   // 追加到左边的orderList
-  const itemList = Object.assign({}, item, { qty: 1, menuId: "" });
-  orderList.value.unshift(itemList);
+  const idx = orderList.value.findIndex((x) => x.name === item.name);
+  if (idx != -1) {
+    orderList.value[idx].qty++;
+  } else {
+    const itemList = Object.assign({}, item, { qty: 1, menuId: "" });
+    orderList.value.unshift(itemList);
+  }
 };
 
 // 完成加餐并跳转
 const handleFinish = (item) => {
   console.log(item);
-  const res = item.tasteNeed.split(" ");
-  const price = res[1].split("元")[0];
+  try {
+    const res = item.tasteNeed.split(" ");
+    const price = res[1].split("元")[0];
 
-  // 追加到左边的orderList
-  const obj = Object.assign({}, item, {
-    price: price,
-    qty: 1,
-    menuId: "",
-  });
-  orderList.value.unshift(obj);
-  tasteNeed.showCover = false;
-  console.log(orderList.value);
+    // 追加到左边的orderList
+    const obj = Object.assign({}, item, {
+      price: price,
+      qty: 1,
+      menuId: "",
+    });
+    orderList.value.unshift(obj);
+    tasteNeed.showCover = false;
+  } catch (err) {
+    ElMessage({
+      message: "请至少选择一个规格",
+      type: "error",
+    });
+  }
 };
 
 const handleClick = (e) => {
