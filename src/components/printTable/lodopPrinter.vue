@@ -5,6 +5,7 @@
       ref="printTableDom"
       :tableData="state.orderDetailData"
       :needScanImg="needScanImg"
+      :needBottomPrice="needBottomPrice"
       :imgSrc="imgSrc"
       style="
         position: fixed;
@@ -40,6 +41,10 @@ const printTableDom = ref(null);
 const LODOPOBJ = ref(null);
 const props = defineProps({
   needScanImg: {
+    default: true,
+    type: Boolean,
+  },
+  needBottomPrice: {
     default: true,
     type: Boolean,
   },
@@ -100,6 +105,8 @@ const asyncEvent = async (ele) => {
 
 // 打印方法执行
 const handlePrint = async (data) => {
+  console.log(data);
+  
   state.orderDetailData = Object.assign({}, data);
   state.showPrintTable = true;
   const res = printerOption.value.find((x) => x.label === data.printerModel);
@@ -115,8 +122,7 @@ const handlePrint = async (data) => {
           80
         : (printTableDom.value.$el.clientHeight /
             printTableDom.value.$el.clientWidth) *
-            80 -
-          20;
+          80;
     console.log(height);
 
     const printerHtml =
@@ -138,7 +144,7 @@ const handlePrint = async (data) => {
 
 defineExpose({
   handlePrint,
-  asyncEvent
+  asyncEvent,
 });
 </script>
 

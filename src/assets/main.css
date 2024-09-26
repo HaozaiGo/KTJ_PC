@@ -77,11 +77,23 @@ a,
 .rel {
   position: relative;
 }
-.whiteBg{
+
+.whiteBg {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(227, 222, 221, 0.6);
+}
+
+.twoRow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  /* autoprefixer: ignore next */
+  -webkit-box-orient: vertical;
+
+
 }

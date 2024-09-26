@@ -196,6 +196,8 @@
       v-if="state.showPrintTable"
       ref="printTableDom"
       :tableData="state.printerData"
+      :needScanImg="false"
+      :needBottomPrice="false"
       style="
         position: fixed;
         left: 0;
@@ -375,6 +377,8 @@ export default {
         for (let i = 0; i < printerArr.length; i++) {
           await this.asyncEvent(printerArr[i]);
         }
+        this.state1.dialogVisible = false;
+        this.$message.success("出单成功!");
       }
     },
 
@@ -388,7 +392,10 @@ export default {
               this.state1.orderDetailData,
               e
             );
-            this.handlePrint(e);
+            // 有数据才打单
+            if (this.state.printerData.orderMenuList.length > 0) {
+              this.handlePrint(e);
+            }
             resolve(e);
           },
           10,
@@ -406,11 +413,15 @@ export default {
       if (res) {
         this.$nextTick(() => {
           let LODOP = getLodop();
+
           const height =
-            (this.$refs.printTableDom.$el.clientHeight /
-              this.$refs.printTableDom.$el.clientWidth) *
-              80 +
-            10;
+            data.printerType === "KITCHEN"
+              ? (this.$refs.kitchenTableDom.$el.clientHeight /
+                  this.$refs.kitchenTableDom.$el.clientWidth) *
+                80
+              : (this.$refs.printTableDom.$el.clientHeight /
+                  this.$refs.printTableDom.$el.clientWidth) *
+                80;
           console.log(height);
 
           const printerHtml =

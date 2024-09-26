@@ -2,7 +2,7 @@
 <template>
   <div>
     <div
-      style="text-align: center; font-size: 22px; padding: 1px 0; width:100%"
+      style="text-align: center; font-size: 22px; padding: 1px 0; width: 100%"
     >
       <div>客单-{{ tableData.pickupWayLabel }}</div>
       <div>{{ tableData.storeName }}</div>
@@ -46,7 +46,7 @@
           <th style="width: 12mm">小计</th>
         </tr>
       </thead>
-      <tbody >
+      <tbody>
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
           <td style="width: 22mm">
             {{ item.name }} <br />
@@ -56,7 +56,7 @@
           </td>
           <td style="width: 10mm" align="center">{{ item.unit }}</td>
           <td style="width: 10mm" align="center">{{ item.qty }}</td>
-          <td style="width: 12mm" align="center">{{ item.price }}</td>
+          <td style="width: 12mm" align="center">{{ item.realPrice }}</td>
           <td style="width: 12mm" align="center">{{ item.amount }}</td>
         </tr>
       </tbody>
@@ -70,7 +70,7 @@
         margin: 1mm 0;
       "
     ></div>
-    <div class="flex-sb" style="width: 80mm">
+    <!-- <div class="flex-sb" style="width: 80mm" v-if="needBottomPrice">
       <span
         style="display: inline-block; white-space: nowrap; flex: 1; width: 55mm"
         >消费原价合计：</span
@@ -86,18 +86,22 @@
         border-top: 2px dashed #000;
         margin: 1mm 0;
       "
-    ></div>
+      v-if="needBottomPrice"
+    ></div> -->
 
-    <div style="margin: 1mm 0; width: 80mm" class="flex-sb">
+    <div
+      style="margin: 1mm 0; width: 80mm"
+      class="flex-sb"
+      v-if="needBottomPrice"
+    >
       <span
         style="
           display: inline-block;
           font-weight: bold;
           font-size: 20px;
           width: 50mm;
-        
         "
-        >优惠后应收：</span
+        >合计：</span
       >
       <span
         style="
@@ -106,11 +110,16 @@
           font-size: 22px;
           margin-right: 10mm;
         "
-        >{{ tableData.amount }}</span
+        >{{ totalPrice }}</span
       >
     </div>
     <div v-if="needScanImg" style="width: 70mm; text-align: center">
-      <img :src="imgSrc" alt="" id="imgId" style="width: 40mm; height: 40mm;margin-top: 10mm;" />
+      <img
+        :src="imgSrc"
+        alt=""
+        id="imgId"
+        style="width: 40mm; height: 40mm; margin-top: 10mm"
+      />
     </div>
     <p>打印时间：{{ time }}</p>
   </div>
@@ -133,6 +142,10 @@ export default {
       default: () => {},
     },
     needScanImg: {
+      type: Boolean,
+      default: true,
+    },
+    needBottomPrice: {
       type: Boolean,
       default: true,
     },
@@ -165,10 +178,18 @@ export default {
     // }
   },
   mounted() {
-    // console.log(this.tableData);
+    console.log(this.tableData);
     // console.log(this.imgSrc);
 
     this.time = new Date().toLocaleString();
+  },
+  computed: {
+    totalPrice() {
+      const priceList = this.tableData.orderMenuList.map((x) => x.amount);
+      return priceList.reduce((pre, cur) => {
+        return pre + cur;
+      }, 0);
+    },
   },
   methods: {},
 };

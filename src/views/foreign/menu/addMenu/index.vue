@@ -14,7 +14,7 @@
       <!-- Order List -->
       <div class="order-list" :style="`height: ${tableHeight - 50}px;`">
         <div v-for="(item, index) in orderList" :key="index" class="order-item">
-          <div style="flex: 1;">
+          <div style="flex: 1">
             <span class="item-name">{{ item.name }}</span>
             <p style="font-size: 13px; color: #aeaaaa">{{ item.tasteNeed }}</p>
           </div>
@@ -52,8 +52,8 @@
 
       <!-- Bottom Buttons -->
       <div class="actions">
-        <el-popover :visible="visible0" placement="top" :width="180">
-          <p style="text-align: center; margin: 10px 0px 20px 0px">
+        <el-popover :visible="visible0" placement="top" :width="180" v-if="false">
+          <p style="text-align: center; margin: 10px 0px 20px 0px" >
             请选择就餐方式
           </p>
           <div style="text-align: right; margin: 0">
@@ -71,8 +71,10 @@
           <template #reference>
             <button
               @click="
+                underOrderAndPay;
                 visible0 = true;
                 needScanImg = true;
+                needBottomPrice = true;
               "
               style="background-color: #b0a07e"
             >
@@ -100,8 +102,10 @@
           <template #reference>
             <button
               @click="
+                justUnderOrder;
                 visible = true;
                 needScanImg = false;
+                needBottomPrice = true;
               "
               style="background-color: #b0a07e"
             >
@@ -132,7 +136,7 @@
               class="menuBox"
               @click="handleClick1(item1)"
             >
-              {{ item1.name }} &nbsp;
+              <div class="twoRow">{{ item1.name }}</div>
               <span v-if="item1.isSpec === '1'"> 多规格</span>
               <span v-else> ¥{{ item1.price }}/{{ item1.unit }} </span>
             </div>
@@ -228,6 +232,7 @@
       :imgSrc="printerWay.imgSrc"
       ref="lodopPrint"
       :needScanImg="needScanImg"
+      :needBottomPrice="needBottomPrice"
     ></lodopPrinter>
   </div>
 </template>
@@ -261,7 +266,7 @@ const lodopPrint = ref(null);
 const printerWay = reactive({
   imgSrc: "",
 });
-const sizeVal = ref([]);
+const needBottomPrice = ref(false); //是否需要底部结算
 const needScanImg = ref(false); //是否需要二维码
 const filePath = localStorage.getItem("filePath");
 const tableHeight = inject("$com").tableHeight();
@@ -349,14 +354,14 @@ const totalPrice = computed(() => {
 const placeOrderOnly = async (way) => {
   if (orderId.value) {
     // 已开单-----------
-    
+
     const body = {
       orderId: orderId.value,
       storeId: propsData.data.storeId,
       itemList: orderList.value,
     };
     const res = await afterPayChangeOrder(body);
-
+    //这里返回要修改一下提示 还有没有修改的情况
     const payImg = await getQrCodePayImg({
       orderId: orderId.value,
     });
@@ -364,9 +369,9 @@ const placeOrderOnly = async (way) => {
       printerWay.imgSrc = filePath + payImg.data;
     }
 
-    // 后付 全部机一起打单
+    // 后付 补单
     const body1 = {
-      method: "PART",
+      method: "REFILL",
       orderId: orderId.value,
       storeId: propsData.data.storeId,
       tableNo: propsData.data.tableNo,
@@ -375,8 +380,22 @@ const placeOrderOnly = async (way) => {
     // console.log("--------all", res);
     if (res1.code === 0) {
       const printerArr = res1.data;
+      // 如果没有新增修改菜品的情况
+      const hadNewAdd = printerArr.find((x) => x.orderMenuList != null);
+      if (!hadNewAdd) {
+        visible.value = false;
+        visible0.value = false;
+        return ElMessage({
+          message: "菜品没有修改，请检查菜品",
+          type: "error",
+        });
+      }
       for (let i = 0; i < printerArr.length; i++) {
-        const orderDetailData = Object.assign({}, orderDetail.value.data, printerArr[i]);
+        const orderDetailData = Object.assign(
+          {},
+          orderDetail.value.data,
+          printerArr[i]
+        );
         console.log(orderDetailData);
 
         await lodopPrint.value.asyncEvent(orderDetailData);
@@ -509,7 +528,10 @@ const handleClick1 = async (item) => {
   // 如果有设置规格口味
   if (res.data.ElTabstasteNeed || res.data.priceDetail) {
     tasteNeed.need = res.data.tasteNeed.split(",");
+    tasteNeed.need = tasteNeed.need.filter((x) => x != "");
+    console.log(tasteNeed.need);
     tasteNeed.priceDetail = JSON.parse(res.data.priceDetail);
+    tasteNeed.priceDetail = tasteNeed.priceDetail.filter((x) => x.price != "");
 
     tasteNeed.showCover = true;
     tasteNeed.choosingList = [];
@@ -562,8 +584,8 @@ const handleClick = (e) => {
   background-size: 100% 100%;
 }
 .menuBox {
-  padding: 40px;
-  font-size: 22px;
+  padding: 50px 40px;
+  font-size: 20px;
   margin: 10px 15px;
   letter-spacing: 2px;
   width: calc((100% / 5) - 30px);
