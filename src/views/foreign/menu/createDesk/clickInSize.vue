@@ -128,7 +128,6 @@
 
       <div class="confirmPay flex-c" @click="handleConfirm">确认结账</div>
     </el-drawer>
-
     <el-dialog
       v-model="printerWay.dialogVisible"
       title="打单方式"
@@ -208,7 +207,6 @@ const clickBoxState = ref(null);
 const drawer = ref(null);
 const orderDetail = ref({});
 const orderId = ref(null);
-
 const handleClickBox = async (val) => {
   clickBoxState.value = val;
   if (val === "pay") {
