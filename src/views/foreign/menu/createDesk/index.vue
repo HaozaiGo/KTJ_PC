@@ -217,7 +217,10 @@ const openSocket = () => {
       const data = JSON.parse(event.data);
       console.log(data);
 
-      tableData.row = data;
+      const newIdx = tableData.row.findIndex((item) => {
+        item.tableNo === data.tableNo})
+      tableData.row[newIdx].realStatus = data.realStatus;
+     
     } catch (err) {
       console.log(err);
       getList();
