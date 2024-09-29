@@ -320,8 +320,8 @@ onUnmounted(() => {
   background-color: #dbd48a;
 }
 .tabSty {
-  width: 7vw;
-  margin: 0 10px;
+  width: 6vw;
+  margin: 0 5px;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   height: 40px;

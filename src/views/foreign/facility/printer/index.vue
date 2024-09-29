@@ -150,6 +150,7 @@
         @check-change="handleCheckChange"
         ref="tree"
         node-key="menuId"
+       
       />
       <template #footer>
         <div class="dialog-footer">
@@ -174,8 +175,9 @@ import {
   getLists,
   deletePrinterApi,
   editPrinterApi,
+  getPrinterDetail,
 } from "@/api/project/foreign/printer.js";
-import { reactive, onMounted, ref, inject } from "vue";
+import { reactive, onMounted, ref, inject, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import getLodop from "@/utils/LodopFuncs.js";
 defineOptions({
@@ -209,6 +211,7 @@ class Printer {
 const settingPrinterMenu = reactive({
   setting: false,
   dialogVisible: false,
+  choosedItemIds: [], //之前选择的ids
   choosedItem: {},
 });
 onMounted(() => {
@@ -316,7 +319,22 @@ const getAllMenuList = async () => {
     state.menuDatas = res.data;
   }
 };
-const handleActionClick = (item) => {
+const handleActionClick = async (item) => {
+  // 获取打单机详情
+
+  const detail = await getPrinterDetail({
+    storeId: item.storeId,
+    printerId: item.printerId,
+  });
+  try {
+    settingPrinterMenu.choosedItemIds = detail.data.menuList.map(
+      (item) => item.menuId
+    );
+    tree.value.setCheckedKeys(settingPrinterMenu.choosedItemIds)
+  } catch (err) {
+    console.log(err);
+  }
+  await nextTick();
   // 菜品配置
   settingPrinterMenu.choosedItem = item;
   settingPrinterMenu.setting = true;
@@ -334,7 +352,8 @@ const handlePrintTest = (item) => {
 
   if (res) {
     LODOP.SET_PRINTER_INDEXA(item.printerModel);
-    LODOP.ADD_PRINT_TEXT(10, 10, "80mm", "30mm", `测试打印机${res.value}`);
+    LODOP.SET_PRINT_PAGESIZE(1, "80mm", "10mm", "");
+    LODOP.ADD_PRINT_TEXT(10, 10, "80mm", "5mm", `测试打印机${res.value}`);
     LODOP.PRINT();
   }
 };

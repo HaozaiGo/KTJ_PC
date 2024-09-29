@@ -116,7 +116,7 @@ const handlePrint = async (data) => {
       data.printerType === "KITCHEN"
         ? (kitchenTableDom.value.$el.clientHeight /
             kitchenTableDom.value.$el.clientWidth) *
-          80
+          80 + 10
         : (printTableDom.value.$el.clientHeight /
             printTableDom.value.$el.clientWidth) *
             80 +

@@ -141,7 +141,7 @@
               class="menuBox"
               @click="handleClick1(item1)"
             >
-              <div class="twoRow">{{ item1.name }}</div>
+              <div class="twoRow" style="height: 60px;">{{ item1.name }}</div>
               <span v-if="item1.isSpec === '1'"> 多规格</span>
               <span v-else> ¥{{ item1.price }}/{{ item1.unit }} </span>
             </div>
@@ -599,12 +599,12 @@ const handleClick = (e) => {
   background-size: 100% 100%;
 }
 .menuBox {
-  padding: 50px 40px;
+  padding: 2vh 2vw;
   font-size: 20px;
   margin: 10px 15px;
   letter-spacing: 2px;
   width: calc((100% / 5) - 30px);
-  min-width: 250px;
+  min-width: 11vw;
   position: relative;
   background-color: #ffffff;
   border-radius: 20px;
@@ -619,7 +619,7 @@ const handleClick = (e) => {
   bottom: 15px;
   font-size: 18px;
 }
-.cover {
+.cover {  
   position: fixed;
   top: 0;
   left: 0;

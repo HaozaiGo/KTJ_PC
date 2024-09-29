@@ -2,7 +2,7 @@
 <template>
   <div>
     <div
-      style="text-align: center; font-size: 22px; padding: 1px 0; width: 80mm"
+      style="text-align: center; font-size: 22px; font-weight: bold;padding: 1px 0; width: 80mm"
     >
       <div>厨房单</div>
       <!-- <div>{{ tableData.storeName }}</div> -->
@@ -19,7 +19,7 @@
     <div style="font-size: 20px; font-weight: bold">
       桌号:{{ tableData.tableNo }}
     </div>
-    <div style="margin: 1mm 0">人数:{{ tableData.peopleQty }}</div>
+    <div style="margin: 1mm 0;font-size: 20px; ">人数:{{ tableData.peopleQty }}</div>
     <div class="flex" style="flex-wrap: nowrap">
       <span style="font-size: 13px; white-space: nowrap; width: 10mm"
         >单号:</span
@@ -39,8 +39,8 @@
     <table style="min-width: 69mm">
       <thead>
         <tr>
-          <th style="min-width: 42mm; text-align: left">菜品名称</th>
-          <th style="width: 12mm">规格</th>
+          <th style="min-width: 54mm; text-align: left">菜品名称</th>
+          <!-- <th style="width: 12mm">规格</th> -->
           <th style="width: 12mm">数量</th>
           <!-- <th style="width: 12mm">单价</th>
           <th style="width: 12mm">小计</th> -->
@@ -48,15 +48,15 @@
       </thead>
       <tbody>
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
-          <td style="width: 22mm">
+          <td style="width: 22mm;font-size: 22px; ">
             {{ item.name }}
             <br />
-            <span style="font-size: 12px">
+            <span style="font-size: 21px">
               {{ item.tasteNeed }}
             </span>
           </td>
-          <td style="width: 10mm" align="center">{{ item.unit }}</td>
-          <td style="width: 10mm" align="center">{{ item.qty }}</td>
+          
+          <td style="width: 10mm;font-size: 22px;font-weight: bold;" align="center">{{ item.qty }}{{ item.unit }}</td>
           <!-- <td style="width: 12mm">{{ item.price }}</td>
           <td style="width: 12mm">{{ item.amount }}</td> -->
         </tr>
@@ -120,7 +120,7 @@ export default {
     },
   },
   mounted() {
-    // console.log(this.tableData);
+    console.log(this.tableData);
     this.time = new Date().toLocaleString();
   },
 };

@@ -1,12 +1,16 @@
 <template>
   <div class="whiteBg" v-show="model">
-    <div style="position: absolute; left: 200px; top: 200px" class="flex-c">
+    <div
+      style="position: absolute; left: 180px; top: 150px"
+      class="flex-c"
+      @click="model = false"
+    >
       <img
         src="@/assets/img/commonPic/back.png"
         alt=""
         style="width: 40px; height: 40px; margin-right: 10px"
       />
-      <span style="font-size: 25px" @click="model = false">返回</span>
+      <span style="font-size: 25px">返回</span>
     </div>
     <div class="choosedItem center">
       <div>
@@ -18,7 +22,8 @@
         </div>
       </div>
     </div>
-    <div class="clickBox center">
+
+    <div class="clickBox center" style="top: 55%">
       <div class="flex row1">
         <div
           style="border-right: 1px solid #000; border-top-left-radius: 10px"
@@ -60,7 +65,7 @@
     <!-- 结账 -->
     <el-drawer v-model="drawer" :with-header="false" direction="rtl" size="35%">
       <div class="order-summary">
-        <div class="flex-sb" style="margin: 25px 0; align-items: center">
+        <div class="flex-sb" style="margin: 30px 0 5px 0; align-items: center">
           <h2>菜品</h2>
           <div>
             共{{ orderDetail.data.menuList.length }}项
@@ -75,13 +80,15 @@
             >
           </div>
         </div>
-        <ul>
-          <li v-for="(item, idx) in items" :key="idx" class="liSty">
-            <span>{{ item.name }}</span>
-            <span>x{{ item.qty }}</span>
-            <span>¥{{ item.price }}</span>
-          </li>
-        </ul>
+        <div :style="`height:${tableHeight - 120}px;overflow: scroll`">
+          <ul>
+            <li v-for="(item, idx) in items" :key="idx" class="liSty">
+              <span>{{ item.name }}</span>
+              <span>x{{ item.qty }}</span>
+              <span>¥{{ item.price }}</span>
+            </li>
+          </ul>
+        </div>
       </div>
       <!-- 支付方式 -->
       <div class="flex-sb payWayMax">
@@ -128,6 +135,101 @@
 
       <div class="confirmPay flex-c" @click="handleConfirm">确认结账</div>
     </el-drawer>
+
+    <!-- 退菜退单 -->
+    <el-drawer
+      v-model="refundDrawer"
+      :with-header="false"
+      direction="rtl"
+      size="35%"
+      :show-close="true"
+    >
+      <!-- 退菜数量明显 -->
+      <div class="refundItemNum" v-if="refundNum">
+        <p>退菜数量</p>
+        <div class="refundListSty">
+          <div class="flex-sb" v-for="(item1, idx1) in refundList" :key="idx1">
+            <div>{{ item1.name }}</div>
+
+            <div class="flex-c">
+              <el-icon
+                @click="decreaseQuantity(idx1)"
+                color="#ff1014"
+                size="24"
+                style="cursor: pointer; margin: 5px"
+                ><RemoveFilled
+              /></el-icon>
+              {{ item1.qty }}
+              <el-icon
+                @click="increaseQuantity(idx1)"
+                color="#3e8bfb"
+                size="24"
+                style="cursor: pointer; margin: 5px"
+                ><CirclePlusFilled
+              /></el-icon>
+            </div>
+          </div>
+        </div>
+
+        <p>退菜原因</p>
+        <div class="flex">
+          <button class="why">未按要求制作</button>
+          <button class="why">不新鲜</button>
+          <button class="why">发现异物</button>
+          <button class="why">自定义</button>
+        </div>
+      </div>
+      <div class="order-summary">
+        <div class="flex-sb" style="margin: 30px 0 10px 0; align-items: center">
+          <h2>菜品</h2>
+          <div>
+            共{{ orderDetail.data.menuList.length }}项
+            <span
+              style="
+                color: #f27d43;
+                margin-left: 30px;
+                display: inline-block;
+                font-size: 19px;
+              "
+              >¥{{ orderDetail.data.amount }}</span
+            >
+          </div>
+        </div>
+        <div :style="`height:${tableHeight - 45}px;overflow: scroll`">
+          <ul>
+            <li
+              v-for="(item, idx) in items"
+              :key="idx"
+              class="liSty"
+              @click="handleSelectList(item, idx)"
+              :class="{ activeListy: liStyIdx === idx }"
+            >
+              <span>{{ item.name }}</span>
+              <span>x{{ item.qty }}</span>
+              <span>¥{{ item.price }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- 退菜明细 -->
+      <div class="flex-sb payWayMax" style="border: none">
+        <div style="flex: 1">
+          <h3 style="text-align: center">退菜明细</h3>
+          <div class="payDetail">
+            <div>
+              <span>退菜数量 </span
+              ><span style="width: 80px">x{{ refundNumTotal }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirmPay flex-c" @click="handleConfirmRefundMenu">
+        确认退菜
+      </div>
+    </el-drawer>
+
+    <!-- 自定义打单 -->
     <el-dialog
       v-model="printerWay.dialogVisible"
       title="打单方式"
@@ -176,8 +278,12 @@
 
 <script setup>
 import lodopPrinter from "@/components/printTable/lodopPrinter.vue";
-import { checkHasOrder, clearTable } from "@/api/project/foreign/createDesk.js";
-import { ref, onMounted, reactive, inject } from "vue";
+import {
+  checkHasOrder,
+  clearTable,
+  refundMenu,
+} from "@/api/project/foreign/createDesk.js";
+import { ref, onMounted, reactive, inject, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 import {
@@ -195,8 +301,10 @@ const printerWay = reactive({
   needScanImg: true,
   imgSrc: "",
 });
-
+const tableHeight = inject("$com").tableHeight();
 const emit = defineEmits(["clearDesk"]);
+const liStyIdx = ref(null); //列表acticeIdx
+
 const lodopPrint = ref(null);
 const filePath = localStorage.getItem("filePath");
 const methodOption = ref([]);
@@ -205,12 +313,27 @@ const model = defineModel({ default: false });
 const props = defineProps({ deskItem: Object, canClearDesk: Boolean });
 const clickBoxState = ref(null);
 const drawer = ref(null);
+const refundDrawer = ref(false);
 const orderDetail = ref({});
 const orderId = ref(null);
-const handleClickBox = async (val) => {
-  clickBoxState.value = val;
-  if (val === "pay") {
-    console.log(props.deskItem);
+const refundNum = ref(false);
+const refundList = ref([]);
+
+const handleSelectList = async (item, idx) => {
+  liStyIdx.value = idx;
+  console.log(item);
+  // 退菜list
+  refundList.value.push(item);
+};
+const decreaseQuantity = (idx) => {
+  refundList.value[idx].qty--;
+};
+const increaseQuantity = (idx) => {
+  refundList.value[idx].qty++;
+};
+
+const handleCheckHasOrder = async () => {
+  return new Promise(async (resolve, reject) => {
     // 检查是否存在订单
     const hadOrder = await checkHasOrder({
       storeId: props.deskItem.storeId,
@@ -224,11 +347,37 @@ const handleClickBox = async (val) => {
         orderDetail.value.data.menuList.length > 0
       ) {
         items.value = orderDetail.value.data.menuList;
+        resolve();
       }
-      drawer.value = true;
     } else {
-      ElMessage.info("该桌台无订单,无法进行结账");
+      reject();
     }
+  });
+};
+// 确认退菜
+const handleConfirmRefundMenu = async () => {
+  const body = {
+    menuList: refundList.value,
+    orderId: orderId.value,
+    storeId: props.deskItem.storeId,
+  };
+  const res = await refundMenu(body);
+  if (res.code === 0) {
+    ElMessage.success("退菜成功!");
+  }
+};
+const handleClickBox = async (val) => {
+  clickBoxState.value = val;
+  if (val === "pay") {
+    console.log(props.deskItem);
+    // 检查是否存在订单
+    handleCheckHasOrder()
+      .then((res) => {
+        drawer.value = true;
+      })
+      .catch(() => {
+        ElMessage.info("该桌台无订单,无法进行结账");
+      });
   } else if (val === "add") {
     // 点菜
     console.log(props.deskItem);
@@ -240,6 +389,15 @@ const handleClickBox = async (val) => {
         tableNo: props.deskItem.tableNo,
       },
     });
+  } else if (val === "refund") {
+    handleCheckHasOrder()
+      .then((res) => {
+        refundDrawer.value = true;
+        refundNum.value = true;
+      })
+      .catch(() => {
+        ElMessage.info("该桌台无订单,无法进行退单退菜操作");
+      });
   }
 };
 // 获取已经配置的打印机
@@ -330,6 +488,10 @@ const handleClearDesk = async () => {
     emit("clearDesk");
   }
 };
+const refundNumTotal = computed(() => {
+  const arr = refundList.value.map((x) => x.qty);
+  return arr.reduce((a, b) => a + b, 0);
+});
 
 onMounted(() => {
   inject("$com")
@@ -344,6 +506,49 @@ onMounted(() => {
 <style lang="scss" scoped>
 :deep(.el-drawer__body) {
   position: relative;
+}
+.refundItem {
+  display: flex;
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px;
+  background: #ffffff;
+  border-radius: 10px;
+  div {
+    width: 150px;
+    height: 100px;
+    margin: 5px;
+    border: 1px solid #302e2e;
+    border-radius: 8px;
+    display: flex;
+    font-size: 23px;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.refundItemNum {
+  position: fixed;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px;
+  background: #ffffff;
+  border-radius: 10px;
+  p {
+    font-size: 13px;
+    color: #828282;
+    margin: 4px;
+  }
+  button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    margin: 5px;
+    border-radius: 6px;
+    background-color: #ffffff;
+  }
 }
 .clickBox {
   width: 250px;
@@ -414,7 +619,6 @@ onMounted(() => {
 
 .order-summary {
   background-color: #f8f8f8;
-  padding: 20px;
 }
 
 ul {
@@ -425,7 +629,7 @@ ul {
 .liSty {
   display: flex;
   justify-content: space-between;
-  padding: 20px 0;
+  padding: 10px;
 }
 .payWayMax {
   border-radius: 15px;
@@ -456,5 +660,15 @@ ul {
   letter-spacing: 2px;
   font-weight: bold;
   background: #bda471;
+}
+.activeListy {
+  background-color: #bda471;
+}
+.refundListSty {
+  max-height: 150px;
+  overflow: scroll;
+}
+.why:focus {
+  background-color: #bda471 !important;
 }
 </style>

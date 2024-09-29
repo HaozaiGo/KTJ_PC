@@ -92,3 +92,15 @@ export function clearTable(data) {
     data,
   });
 }
+
+//退菜
+export function refundMenu(data) {
+  return request({
+    url: "/store/api/store/order/menu/item/return/menu",
+    method: "post",
+    data,
+  });
+}
+
+
+

@@ -37,3 +37,10 @@ export function editPrinterApi(data) {
     data
   });
 }
+export function getPrinterDetail(params){
+  return request({
+    url: `/store/api/store/printer/${params.storeId}/${params.printerId}`,
+    method: "get",
+  
+  });
+}
