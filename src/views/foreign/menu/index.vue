@@ -435,7 +435,6 @@ import {
   addTeaPosition,
 } from "@/api/project/foreign/menu.js";
 import { ElMessage, ElMessageBox } from "element-plus";
-
 defineOptions({
   name: "F-menus",
   isRouter: true,
