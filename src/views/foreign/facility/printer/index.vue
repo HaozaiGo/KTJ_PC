@@ -164,7 +164,6 @@
         </div>
       </template>
     </el-dialog>
-
     <!-- 配置菜品对应打印机 -->
     <el-dialog
       v-model="settingPrinterMenu.dialogVisible"
