@@ -385,7 +385,6 @@
         </el-table-column>
       </el-table>
     </el-dialog>
-
     <!-- 自定义出单方式 -->
     <el-dialog
       v-model="printerWay.dialogVisible"
