@@ -253,7 +253,6 @@ onMounted(() => {
       printerTypeOption.value = res.data[2].list;
       printerSizeOption.value = res.data[3].list;
     });
-
   getAllMenuList();
   getList();
   setTimeout(() => {
@@ -300,7 +299,6 @@ const handleEditPrinter = (item, idx) => {
   state.form.ip4 = item.printerIp.split(".")[3];
   state.dialogVisible = true;
 };
-
 const handleDeletePrinter = (item, idx) => {
   ElMessageBox.confirm("确定删除该打印机配置?", "Warning", {
     confirmButtonText: "确定",
@@ -329,7 +327,6 @@ const handleNext = () => {
     settingPrinterMenu.dialogVisible = true;
   }
 };
-
 const tableHeight = inject("$com").tableHeight();
 
 const handleCheckChange = (node, arr, choosed) => {
@@ -436,7 +433,6 @@ const handleAddPrinter = async () => {
     getList();
   }
 };
-
 const getList = async () => {
   const res = await getLists({ storeId: state.storeId });
   if (res.code === 0) {
