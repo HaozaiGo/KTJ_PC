@@ -451,7 +451,7 @@ onMounted(async () => {
   getCascaderOptions();
   setTimeout(() => {
     loading.value = false;
-  }, 1000);
+  }, 900);
 });
 const rules = {
   name: { required: true, message: "请输入口味名称", trigger: "blur" },
@@ -651,7 +651,6 @@ const handleComfirm = () => {
     }
   });
 };
-
 const handleComfirm1 = () => {
   if (!ruleFormRef1.value) return;
   ruleFormRef1.value.validate(async (valid) => {
