@@ -710,7 +710,7 @@ ul {
 }
 .refundListSty {
   max-height: 150px;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 .why:focus {
   background-color: #bda471 !important;
