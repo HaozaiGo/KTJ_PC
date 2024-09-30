@@ -105,15 +105,7 @@
             </el-button>
           </div>
           <template #reference>
-            <button
-              @click="
-                justUnderOrder;
-                visible = true;
-                needScanImg = false;
-                needBottomPrice = true;
-              "
-              style="background-color: #b0a07e"
-            >
+            <button @click="justUnderOrder" style="background-color: #b0a07e">
               下单
             </button>
           </template>
@@ -141,7 +133,7 @@
               class="menuBox"
               @click="handleClick1(item1)"
             >
-              <div class="twoRow" style="height: 60px;">{{ item1.name }}</div>
+              <div class="twoRow" style="height: 60px">{{ item1.name }}</div>
               <span v-if="item1.isSpec === '1'"> 多规格</span>
               <span v-else> ¥{{ item1.price }}/{{ item1.unit }} </span>
             </div>
@@ -150,6 +142,71 @@
       </div>
     </el-tabs>
 
+    <!-- 自定义菜品 -->
+    <div class="cover" v-if="custom.showCover">
+      <div class="cover-content center">
+        <h2 style="text-align: center; margin-bottom: 30px">自定义菜品</h2>
+
+        <div class="flex-c" style="justify-content: space-between">
+          <div class="customLabel">菜品名称</div>
+          <input type="text" class="spcailInput" v-model="custom.form.name" />
+        </div>
+
+        <div
+          class="flex-c"
+          style="justify-content: space-between; margin-top: 15px"
+        >
+          <div class="customLabel">售卖价</div>
+          <input
+            type="number"
+            class="spcailInput"
+            v-model="custom.form.price"
+          />
+        </div>
+        <div
+          class="flex-c"
+          style="justify-content: space-between; margin-top: 15px"
+        >
+          <div class="customLabel">数量</div>
+          <input type="number" class="spcailInput" v-model="custom.form.qty" />
+        </div>
+        <div
+          class="flex-c"
+          style="justify-content: space-between; margin-top: 15px"
+        >
+          <div class="customLabel">菜品单位</div>
+          <el-select
+            v-model="custom.form.unit"
+            placeholder="请选择"
+            size="large"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in custom.unitOptions"
+              :key="item.dictValue"
+              :label="item.dictLabel"
+              :value="item.dictValue"
+            />
+          </el-select>
+        </div>
+        <div
+          class="flex-c"
+          style="justify-content: space-between; margin-top: 15px"
+        >
+          <div class="customLabel">特殊备注</div>
+          <input
+            type="text"
+            class="spcailInput"
+            v-model="custom.form.tasteNeed"
+          />
+        </div>
+        <div style="text-align: right">
+          <button class="btn" @click="comfirmCustom">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 口味选择 -->
     <div class="cover" v-if="tasteNeed.showCover">
       <div class="cover-content center">
         <h2 style="text-align: center; margin-bottom: 30px">菜品备注</h2>
@@ -246,7 +303,15 @@
 
 <script setup>
 import lodopPrinter from "@/components/printTable/lodopPrinter.vue";
-import { reactive, onMounted, ref, inject, nextTick, computed } from "vue";
+import {
+  reactive,
+  onMounted,
+  ref,
+  inject,
+  nextTick,
+  computed,
+  watch,
+} from "vue";
 import {
   getTypeList,
   getMenusList,
@@ -271,11 +336,24 @@ const lodopPrint = ref(null);
 const printerWay = reactive({
   imgSrc: "",
 });
+const custom = reactive({
+  showCover: false,
+  unitOptions: [],
+  form: {
+    name: "",
+    price: "",
+    qty: "",
+    unit: "",
+    tasteNeed: "",
+    isCustom: "1",
+  },
+});
 const needBottomPrice = ref(false); //是否需要底部结算
 const needScanImg = ref(false); //是否需要二维码
 const filePath = localStorage.getItem("filePath");
 const tableHeight = inject("$com").tableHeight();
 const orderList = ref([]);
+const orderListChange = ref(false);
 const router = useRouter();
 const route = useRoute();
 const orderId = ref(null);
@@ -303,7 +381,11 @@ onMounted(() => {
   if (dataLength.length > 0) {
     hadOrder();
   }
-
+  inject("$com")
+    .getStoreDict("bill_store_menu_unit")
+    .then((res) => {
+      custom.unitOptions = res.data[0].list;
+    });
   getList();
 });
 
@@ -314,6 +396,18 @@ const tasteData = reactive({
   rightData: [], //子菜单
   finalChoose: {},
 });
+//下单按钮
+const justUnderOrder = () => {
+  if (!orderListChange.value) {
+    return ElMessage({
+      message: "菜品没有修改，请检查菜品",
+      type: "error",
+    });
+  }
+  visible.value = true;
+  needScanImg.value = false;
+  needBottomPrice.value = true;
+};
 // 先查询是否已经下单，订单是否存在
 const hadOrder = async () => {
   const res = await checkHasOrder({
@@ -340,7 +434,11 @@ const hadOrder = async () => {
     }
   }
 };
-
+const comfirmCustom = async () => {
+  orderListChange.value = true;
+  orderList.value.push(custom.form);
+  custom.showCover = false;
+};
 const totalItems = computed(() => {
   return orderList.value.reduce(
     (total, item) => Number(total) + Number(item.qty),
@@ -358,14 +456,13 @@ const totalPrice = computed(() => {
 const placeOrderOnly = async (way) => {
   if (orderId.value) {
     // 已开单-----------
-
     const body = {
       orderId: orderId.value,
       storeId: propsData.data.storeId,
       itemList: orderList.value,
     };
     const res = await afterPayChangeOrder(body);
-    //这里返回要修改一下提示 还有没有修改的情况
+
     const payImg = await getQrCodePayImg({
       orderId: orderId.value,
     });
@@ -384,16 +481,6 @@ const placeOrderOnly = async (way) => {
     // console.log("--------all", res);
     if (res1.code === 0) {
       const printerArr = res1.data;
-      // 如果没有新增修改菜品的情况
-      const hadNewAdd = printerArr.find((x) => x.orderMenuList != null);
-      if (!hadNewAdd) {
-        visible.value = false;
-        visible0.value = false;
-        return ElMessage({
-          message: "菜品没有修改，请检查菜品",
-          type: "error",
-        });
-      }
       for (let i = 0; i < printerArr.length; i++) {
         const orderDetailData = Object.assign(
           {},
@@ -452,12 +539,15 @@ const placeOrderOnly = async (way) => {
       visible0.value = false;
     }
   }
+  hadOrder();
+  orderListChange.value = false;
 };
 const goBack = () => {
   // 返回
   router.back();
 };
 const decreaseQuantity = (index) => {
+  orderListChange.value = true;
   if (orderList.value[index].qty > 1) {
     orderList.value[index].qty--;
   } else {
@@ -467,6 +557,7 @@ const decreaseQuantity = (index) => {
 
 const increaseQuantity = (index) => {
   orderList.value[index].qty++;
+  orderListChange.value = true;
 };
 
 const clearAll = () => {
@@ -518,12 +609,22 @@ const getList1 = async () => {
     if (res.code === 0) {
       tasteData.rightData = res.rows;
       tasteData.activeName = tasteData.selected.typeId;
+      tasteData.rightData.unshift({
+        name: "自定义菜品",
+        isSpec: "1",
+      });
     }
   } catch (e) {}
 };
 
 const handleClick1 = async (item) => {
   // console.log("-----", item);
+  if (item.name === "自定义菜品") {
+    console.log("自定义菜品");
+    custom.showCover = true;
+    return;
+  }
+  orderListChange.value = true;
 
   tasteNeed.tasteItem = item;
   const res = await getMenusDetail({
@@ -587,6 +688,9 @@ const handleClick = (e) => {
 :deep(.el-tabs__header) {
   // width: calc(100% - 400px);
 }
+:deep(.el-select__wrapper) {
+  background-color: #e8e8e5 !important;
+}
 .content {
   width: calc(100vw - 192px);
   align-items: normal;
@@ -619,7 +723,7 @@ const handleClick = (e) => {
   bottom: 15px;
   font-size: 18px;
 }
-.cover {  
+.cover {
   position: fixed;
   top: 0;
   left: 0;
@@ -768,5 +872,11 @@ const handleClick = (e) => {
   font-size: 16px;
   letter-spacing: 1px;
   cursor: pointer;
+}
+.customLabel {
+  font-size: 22px;
+  margin-right: 25px;
+  white-space: nowrap;
+  width: 80px;
 }
 </style>

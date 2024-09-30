@@ -101,6 +101,36 @@
             >
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="打印纸张规格">
+          <el-radio-group v-model="state.form.printSpec">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, idx) in printerSizeOption"
+              :key="idx"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="是否按菜品逐个打印">
+          <el-radio-group v-model="state.form.isSingleMenu">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, idx) in statusOption"
+              :key="idx"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="是否打印临时菜">
+          <el-radio-group v-model="state.form.isPrintCustom">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, idx) in statusOption"
+              :key="idx"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="IP地址">
           <el-input v-model="state.form.ip1" style="width: 100px">
             <template #append>.</template>
@@ -150,7 +180,6 @@
         @check-change="handleCheckChange"
         ref="tree"
         node-key="menuId"
-       
       />
       <template #footer>
         <div class="dialog-footer">
@@ -189,6 +218,7 @@ const statusOption = ref([]);
 const printWayOption = ref([]);
 const options = ref([]); //打印机型号
 const printerTypeOption = ref([]);
+const printerSizeOption = ref([]);
 const state = reactive({
   status: "add",
   dialogVisible: false,
@@ -217,11 +247,12 @@ const settingPrinterMenu = reactive({
 onMounted(() => {
   state.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
   inject("$com")
-    .getStoreDict("bill_print_way,sys_yes_no,bill_printer_type")
+    .getStoreDict("bill_print_way,sys_yes_no,bill_printer_type,bill_print_spec")
     .then((res) => {
       printWayOption.value = res.data[0].list;
       statusOption.value = res.data[1].list;
       printerTypeOption.value = res.data[2].list;
+      printerSizeOption.value = res.data[3].list;
     });
 
   getAllMenuList();
@@ -330,7 +361,7 @@ const handleActionClick = async (item) => {
     settingPrinterMenu.choosedItemIds = detail.data.menuList.map(
       (item) => item.menuId
     );
-    tree.value.setCheckedKeys(settingPrinterMenu.choosedItemIds)
+    tree.value.setCheckedKeys(settingPrinterMenu.choosedItemIds);
   } catch (err) {
     console.log(err);
   }

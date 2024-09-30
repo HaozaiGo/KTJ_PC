@@ -83,7 +83,20 @@
         <div :style="`height:${tableHeight - 120}px;overflow: scroll`">
           <ul>
             <li v-for="(item, idx) in items" :key="idx" class="liSty">
-              <span>{{ item.name }}</span>
+              <span class="flex-c">
+                <img
+                  src="@/assets/img/merchant/refund.png"
+                  alt=""
+                  style="
+                    width: 30px;
+                    height: 30px;
+                    margin-right: 8px;
+                    display: block;
+                  "
+                  v-if="item.isReturnMenu === '1'"
+                />
+                {{ item.name }}
+              </span>
               <span>x{{ item.qty }}</span>
               <span>¥{{ item.price }}</span>
             </li>
@@ -173,10 +186,12 @@
 
         <p>退菜原因</p>
         <div class="flex">
-          <button class="why">未按要求制作</button>
-          <button class="why">不新鲜</button>
-          <button class="why">发现异物</button>
-          <button class="why">自定义</button>
+          <button class="why" @click="whyRefund('未按要求制作')">
+            未按要求制作
+          </button>
+          <button class="why" @click="whyRefund('不新鲜')">不新鲜</button>
+          <button class="why" @click="whyRefund('发现异物')">发现异物</button>
+          <button class="why" @click="whyRefund('')">自定义</button>
         </div>
       </div>
       <div class="order-summary">
@@ -204,7 +219,21 @@
               @click="handleSelectList(item, idx)"
               :class="{ activeListy: liStyIdx === idx }"
             >
-              <span>{{ item.name }}</span>
+              <span class="flex-c">
+                <img
+                  src="@/assets/img/merchant/refund.png"
+                  alt=""
+                  style="
+                    width: 30px;
+                    height: 30px;
+                    margin-right: 8px;
+                    display: block;
+                  "
+                  v-if="item.isReturnMenu === '1'"
+                />
+
+                {{ item.name }}</span
+              >
               <span>x{{ item.qty }}</span>
               <span>¥{{ item.price }}</span>
             </li>
@@ -319,14 +348,28 @@ const orderId = ref(null);
 const refundNum = ref(false);
 const refundList = ref([]);
 
+// 退菜原因
+const whyRefund = (val) => {
+  refundList.value.forEach((x) => (x.tasteNeed = val));
+  console.log(refundList.value);
+};
+
 const handleSelectList = async (item, idx) => {
   liStyIdx.value = idx;
   console.log(item);
   // 退菜list
-  refundList.value.push(item);
+  if (item.isReturnMenu != "1") {
+    refundList.value.push(Object.assign({}, item));
+  } else {
+    ElMessage.error("该菜品已经退菜!");
+  }
 };
 const decreaseQuantity = (idx) => {
-  refundList.value[idx].qty--;
+  if (refundList.value[idx].qty > 1) {
+    refundList.value[idx].qty--;
+  }else{
+    refundList.value.splice(idx, 1);
+  }
 };
 const increaseQuantity = (idx) => {
   refundList.value[idx].qty++;
@@ -364,6 +407,7 @@ const handleConfirmRefundMenu = async () => {
   const res = await refundMenu(body);
   if (res.code === 0) {
     ElMessage.success("退菜成功!");
+    handleCheckHasOrder();
   }
 };
 const handleClickBox = async (val) => {
