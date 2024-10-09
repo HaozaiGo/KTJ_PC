@@ -4,21 +4,54 @@
     <div class="order-container" style="flex: 1">
       <!-- Header -->
       <div class="header">
-        <button @click="goBack" class="backBtn">返回</button>
-        <span
+        <div>
+          <button @click="goBack" class="backBtn">返回</button>
+          <button
+            @click="reprint"
+            class="backBtn"
+            style="font-size: 14px; display: block; margin-top: 13px"
+          >
+            补打制作单
+          </button>
+        </div>
+
+        <span style="flex: 1; text-align: center"
           >桌台 {{ propsData.data.tableNo }} {{ propsData.data.peopleQty }} 人
           大桌</span
         >
         <button @click="clearAll" class="backBtn">清空</button>
       </div>
       <!-- Order List -->
-      <div class="order-list" :style="`height: ${tableHeight - 50}px;`">
+      <div
+        class="order-list"
+        :style="
+          reprintState
+            ? `height: ${tableHeight + 50}px; 
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;`
+            : `height: ${tableHeight - 50}px;`
+        "
+      >
         <div v-for="(item, index) in orderList" :key="index" class="order-item">
           <div style="flex: 1">
-            <span class="item-name">{{ item.name }}</span>
+            <div class="flex-c">
+              <img
+                src="@/assets/img/merchant/refund.png"
+                alt=""
+                style="
+                  width: 25px;
+                  height: 25px;
+                  margin-right: 8px;
+                  display: inline-block;
+                "
+                v-if="item.isReturnMenu === '1'"
+              />
+              <span class="item-name">{{ item.name }}</span>
+            </div>
+
             <p style="font-size: 13px; color: #aeaaaa">{{ item.tasteNeed }}</p>
           </div>
-          <div class="item-actions">
+          <div class="item-actions" v-show="!reprintState">
             <el-icon
               @click="decreaseQuantity(index)"
               color="#ff1014"
@@ -40,10 +73,23 @@
             /></el-icon>
           </div>
           <span class="item-price">¥{{ item.price }}</span>
+          <el-button
+            size="mini"
+            type="primary"
+            @click="handleReprint(item)"
+            v-show="reprintState"
+            style="
+              background-color: rgb(176, 160, 126) !important;
+              border: none;
+              margin-left: 10px;
+            "
+          >
+            补打</el-button
+          >
         </div>
       </div>
       <!-- Total Price -->
-      <div class="total">
+      <div class="total" v-show="!reprintState">
         <span style="font-size: 15px; display: inline-block; margin-right: 20px"
           >共{{ totalItems }}项
         </span>
@@ -51,7 +97,7 @@
       </div>
 
       <!-- Bottom Buttons -->
-      <div class="actions">
+      <div class="actions" v-show="!reprintState">
         <el-popover
           :visible="visible0"
           placement="top"
@@ -326,6 +372,7 @@ import {
   getQrCodePayImg,
   offlineCheckOrder,
   afterPayChangeOrder,
+  printAgain,
 } from "@/api/project/foreign/order.js";
 import { ElMessage } from "element-plus";
 defineOptions({
@@ -360,6 +407,7 @@ const orderId = ref(null);
 const orderDetail = ref({});
 const visible = ref(false);
 const visible0 = ref(false);
+const reprintState = ref(false); //补打制作单
 const tasteNeed = reactive({
   tasteItem: {}, //选中项
   showCover: false,
@@ -396,6 +444,38 @@ const tasteData = reactive({
   rightData: [], //子菜单
   finalChoose: {},
 });
+//补打制作单
+const reprint = () => {
+  reprintState.value = !reprintState.value;
+  if (reprintState.value) {
+    orderList.value = orderDetail.value.data.menuList.slice(0);
+  } else {
+    orderList.value = [];
+  }
+};
+
+// 单个补打
+const handleReprint = async (item) => {
+  const res = await printAgain({
+    storeId: propsData.data.storeId,
+    menuItemList: [item],
+  });
+  if (res.code === 0) {
+    ElMessage({
+      message: "补打成功！",
+    });
+  }
+  for (let i = 0; i < res.data.length; i++) {
+    const orderDetailData = Object.assign(
+      {},
+      orderDetail.value.data,
+      res.data[i]
+    );
+    // console.log(orderDetailData);
+    await lodopPrint.value.asyncEvent(orderDetailData);
+  }
+};
+
 //下单按钮
 const justUnderOrder = () => {
   if (!orderListChange.value) {
@@ -418,9 +498,9 @@ const hadOrder = async () => {
     // 已有订单
     orderId.value = res.data.orderId;
     orderDetail.value = await checkNoDetail(orderId.value);
-    if (orderDetail.value.data.menuList.length > 0) {
-      orderList.value = orderDetail.value.data.menuList.slice(0);
-    }
+    // if (orderDetail.value.data.menuList.length > 0) {
+    //   orderList.value = orderDetail.value.data.menuList.slice(0);
+    // }
   } else {
     // 开台
     //获取茶位信息
@@ -459,7 +539,7 @@ const placeOrderOnly = async (way) => {
     const body = {
       orderId: orderId.value,
       storeId: propsData.data.storeId,
-      itemList: orderList.value,
+      itemList: orderList.value.concat(orderDetail.value.data.menuList),
     };
     const res = await afterPayChangeOrder(body);
 
@@ -478,7 +558,7 @@ const placeOrderOnly = async (way) => {
       tableNo: propsData.data.tableNo,
     };
     const res1 = await offlineCheckOrder(body1);
-    // console.log("--------all", res);
+    // console.log("--------all", res1);
     if (res1.code === 0) {
       const printerArr = res1.data;
       for (let i = 0; i < printerArr.length; i++) {
@@ -487,7 +567,7 @@ const placeOrderOnly = async (way) => {
           orderDetail.value.data,
           printerArr[i]
         );
-        console.log(orderDetailData);
+        // console.log(orderDetailData);
 
         await lodopPrint.value.asyncEvent(orderDetailData);
       }
@@ -649,7 +729,11 @@ const handleClick1 = async (item) => {
   if (idx != -1) {
     orderList.value[idx].qty++;
   } else {
-    const itemList = Object.assign({}, item, { qty: 1, menuId: "" });
+    const itemList = Object.assign({}, item, {
+      qty: 1,
+      menuId: "",
+      isReturnMenu: "0",
+    });
     orderList.value.unshift(itemList);
   }
 };
@@ -685,8 +769,9 @@ const handleClick = (e) => {
 </script>
 
 <style lang="scss" scoped>
-:deep(.el-tabs__header) {
-  // width: calc(100% - 400px);
+:deep(.el-tabs__item.is-active) {
+  background-color: rgb(176, 160, 126);
+  color: #ffffff;
 }
 :deep(.el-select__wrapper) {
   background-color: #e8e8e5 !important;

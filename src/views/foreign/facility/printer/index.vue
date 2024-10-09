@@ -291,7 +291,7 @@ const getPrinterOption = () => {
 };
 const handleEditPrinter = (item, idx) => {
   state.status = "edit";
-
+  settingPrinterMenu.setting = false;
   state.form = { ...item };
   state.form.ip1 = item.printerIp.split(".")[0];
   state.form.ip2 = item.printerIp.split(".")[1];

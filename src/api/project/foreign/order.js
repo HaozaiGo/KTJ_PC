@@ -161,3 +161,12 @@ export function getTeaInfo(storeId) {
   });
 }
 
+// 补打制作单 除去前台
+export function printAgain(data) {
+  return request({
+    url: `/store/api/store/order/store/pay/make/print`,
+    method: "post",
+    data,
+  });
+}
+

@@ -1,9 +1,12 @@
 <template>
-  <div class="whiteBg" v-show="model">
+  <div class="whiteBg" v-show="model" @click="model = false;clickBoxState = null">
     <div
       style="position: absolute; left: 180px; top: 150px"
       class="flex-c"
-      @click="model = false"
+      @click="
+        model = false;
+        clickBoxState = null;
+      "
     >
       <img
         src="@/assets/img/commonPic/back.png"
@@ -27,23 +30,23 @@
       <div class="flex row1">
         <div
           style="border-right: 1px solid #000; border-top-left-radius: 10px"
-          @click="handleClickBox('add')"
+          @click.stop="handleClickBox('add')"
           :class="{ active: clickBoxState === 'add' }"
         >
           点菜
         </div>
         <div
           style="border-top-right-radius: 10px"
-          @click="handleClickBox('refund')"
+          @click.stop="handleClickBox('refund')"
           :class="{ active: clickBoxState === 'refund' }"
         >
-          退单
+          退菜
         </div>
       </div>
       <div class="flex">
         <div
           class="row2"
-          @click="handleClickBox('pay')"
+          @click.stop="handleClickBox('pay')"
           :class="{ active: clickBoxState === 'pay' }"
           :style="
             props.canClearDesk
@@ -80,7 +83,7 @@
             >
           </div>
         </div>
-        <div :style="`height:${tableHeight - 120}px;overflow: scroll`">
+        <div :style="`height:${tableHeight - 120}px;overflow: auto`">
           <ul>
             <li v-for="(item, idx) in items" :key="idx" class="liSty">
               <span class="flex-c">
@@ -159,44 +162,81 @@
     >
       <!-- 退菜数量明显 -->
       <div class="refundItemNum" v-if="refundNum">
-        <p>退菜数量</p>
+        <div class="flex-sb">
+          <div style="padding: 6px">退菜数量</div>
+          <div style="padding: 6px" @click="refundList = []">清空</div>
+        </div>
+
         <div class="refundListSty">
-          <div class="flex-sb" v-for="(item1, idx1) in refundList" :key="idx1">
+          <div
+            class="flex-sb"
+            v-for="(item1, idx1) in refundList"
+            :key="idx1"
+            style="align-items: center"
+          >
             <div>{{ item1.name }}</div>
 
             <div class="flex-c">
               <el-icon
                 @click="decreaseQuantity(idx1)"
                 color="#ff1014"
-                size="24"
-                style="cursor: pointer; margin: 5px"
+                size="29"
+                style="cursor: pointer; margin: 5px 8px"
                 ><RemoveFilled
               /></el-icon>
               {{ item1.qty }}
               <el-icon
                 @click="increaseQuantity(idx1)"
                 color="#3e8bfb"
-                size="24"
-                style="cursor: pointer; margin: 5px"
+                size="29"
+                style="cursor: pointer; margin: 5px 8px"
                 ><CirclePlusFilled
               /></el-icon>
             </div>
           </div>
         </div>
 
-        <p>退菜原因</p>
+        <p>退菜原因 <span style="color: red; font-size: 22px">*</span></p>
         <div class="flex">
           <button class="why" @click="whyRefund('未按要求制作')">
             未按要求制作
           </button>
           <button class="why" @click="whyRefund('不新鲜')">不新鲜</button>
           <button class="why" @click="whyRefund('发现异物')">发现异物</button>
-          <button class="why" @click="whyRefund('')">自定义</button>
+
+          <button class="why" @click="whyRefund('无')">无</button>
+          <button class="why" @click="showCustom = true" v-if="!showCustom">
+            自定义
+          </button>
+          <input
+            v-else
+            type="text"
+            placeholder="自定义"
+            style="
+              width: 100px;
+              padding: 7px 10px;
+              border: 1px solid #ccc;
+              margin: 5px;
+              border-radius: 6px;
+              background-color: #ffffff;
+            "
+            v-model="customVal"
+            @change="customChange"
+          />
         </div>
       </div>
       <div class="order-summary">
         <div class="flex-sb" style="margin: 30px 0 10px 0; align-items: center">
-          <h2>菜品</h2>
+          <div class="flex">
+            <h2>菜品</h2>
+            <el-checkbox
+              v-model="checkedAll"
+              label="全选"
+              size="large"
+              style="margin-left: 10px"
+              @change="checkboxChange"
+            />
+          </div>
           <div>
             共{{ orderDetail.data.menuList.length }}项
             <span
@@ -248,6 +288,10 @@
             <div>
               <span>退菜数量 </span
               ><span style="width: 80px">x{{ refundNumTotal }}</span>
+            </div>
+            <div style="margin-top: 10px">
+              <span>退菜金额 </span
+              ><span style="width: 80px">¥{{ refundTotalCost }}</span>
             </div>
           </div>
         </div>
@@ -312,7 +356,7 @@ import {
   clearTable,
   refundMenu,
 } from "@/api/project/foreign/createDesk.js";
-import { ref, onMounted, reactive, inject, computed } from "vue";
+import { ref, onMounted, reactive, inject, computed, toRaw } from "vue";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 import {
@@ -347,19 +391,57 @@ const orderDetail = ref({});
 const orderId = ref(null);
 const refundNum = ref(false);
 const refundList = ref([]);
+const refundState = ref(false); //是否已经选择退菜原因
+const checkedAll = ref(false);
+const showCustom = ref(false); //自定义原因
+const customVal = ref(""); //自定义原因
+const customChange = (e) => {
+  console.log(e.target.value);
+  refundList.value.forEach((x) => (x.tasteNeed = e.target.value));
+};
+//全选
+const checkboxChange = (e) => {
+  if (e) {
+    refundList.value = [];
 
+    const allList = items.value
+      .map((x) => {
+        if (x.isReturnMenu != "1") {
+          return x;
+        }
+      })
+      .filter((x) => !!x);
+
+    for (let i = 0; i < allList.length; i++) {
+      const obj = Object.assign({}, allList[i]);
+      refundList.value.push(obj);
+    }
+  }
+};
 // 退菜原因
 const whyRefund = (val) => {
   refundList.value.forEach((x) => (x.tasteNeed = val));
+  refundState.value = true;
   console.log(refundList.value);
 };
 
 const handleSelectList = async (item, idx) => {
-  liStyIdx.value = idx;
   console.log(item);
+
+  liStyIdx.value = idx;
+  const index = refundList.value.findIndex((x) => x.menuId === item.menuId);
+
   // 退菜list
   if (item.isReturnMenu != "1") {
-    refundList.value.push(Object.assign({}, item));
+    if (index === -1) {
+      refundList.value.push(Object.assign({}, item, { qty: 1 }));
+    } else {
+      if (refundList.value[index].qty >= item.qty) {
+        ElMessage.error("退菜数量不能大于原菜数量!");
+      } else {
+        refundList.value[index].qty += 1;
+      }
+    }
   } else {
     ElMessage.error("该菜品已经退菜!");
   }
@@ -367,12 +449,23 @@ const handleSelectList = async (item, idx) => {
 const decreaseQuantity = (idx) => {
   if (refundList.value[idx].qty > 1) {
     refundList.value[idx].qty--;
-  }else{
+  } else {
     refundList.value.splice(idx, 1);
   }
 };
 const increaseQuantity = (idx) => {
-  refundList.value[idx].qty++;
+  const idxs = items.value.findIndex(
+    (x) => x.menuId === refundList.value[idx].menuId
+  );
+  if (idxs === -1) {
+    refundList.value[idx].qty++;
+  } else {
+    if (refundList.value[idx].qty >= items.value[idxs].qty) {
+      ElMessage.error("退菜数量不能大于原菜数量!");
+    } else {
+      refundList.value[idx].qty++;
+    }
+  }
 };
 
 const handleCheckHasOrder = async () => {
@@ -399,15 +492,26 @@ const handleCheckHasOrder = async () => {
 };
 // 确认退菜
 const handleConfirmRefundMenu = async () => {
-  const body = {
-    menuList: refundList.value,
-    orderId: orderId.value,
-    storeId: props.deskItem.storeId,
-  };
-  const res = await refundMenu(body);
-  if (res.code === 0) {
-    ElMessage.success("退菜成功!");
-    handleCheckHasOrder();
+  if (refundList.value.length <= 0) {
+    ElMessage.error("请选择需要退的菜品!");
+  } else if (refundState.value) {
+    const body = {
+      menuList: refundList.value,
+      orderId: orderId.value,
+      storeId: props.deskItem.storeId,
+    };
+    const res = await refundMenu(body);
+    if (res.code === 0) {
+      ElMessage.success("退菜成功!");
+      handleCheckHasOrder();
+      refundList.value = [];
+      refundState.value = false;
+      customVal.value = "";
+      showCustom.value = false;
+      refundDrawer.value = false;
+    }
+  } else {
+    ElMessage.error("请选择退菜原因!");
   }
 };
 const handleClickBox = async (val) => {
@@ -451,12 +555,58 @@ const getPrinterSysList = async () => {
   });
   if (res.code === 0) {
     printerWay.printerLists = res.rows;
+    console.log(printerWay.printerLists);
   }
 };
 const handleConfirm = () => {
   getPrinterSysList();
+  handleOfflinePay();
+  // printerWay.dialogVisible = true;
+};
 
-  printerWay.dialogVisible = true;
+//结账
+const handleOfflinePay = async () => {
+  // 二维码
+  const res1 = await getQrCodePayImg({
+    orderId: orderId.value,
+  });
+  if (res1.code === 0) {
+    printerWay.imgSrc = filePath + res1.data;
+  }
+  const printerIdItem = printerWay.printerLists
+    .map((x) => {
+      if (x.printerType === "CLIENT") {
+        return x;
+      }
+    })
+    .filter((x) => !!x);
+    console.log('------0000111',printerIdItem);
+    
+  for (let i = 0; i < printerIdItem.length; i++) {
+    const body = {
+      orderId: orderId.value,
+      printerId: printerIdItem[i].printerId,
+      storeId: props.deskItem.storeId,
+      method: "ALL",
+    };
+    const res = await customPrint(body);
+    if (res.code === 0) {
+      setTimeout(() => {
+        const orderDetailData = Object.assign(
+          {},
+          orderDetail.value.data,
+          res.data
+        );
+        // console.log("--------", orderDetailData);
+        lodopPrint.value.handlePrint(orderDetailData);
+        printerWay.dialogVisible = false;
+        drawer.value = false;
+        model.value = false;
+      }, 500);
+    } else {
+      ElMessage.error("结账失败，请检查配置!");
+    }
+  }
 };
 
 //自定义打单
@@ -537,6 +687,11 @@ const refundNumTotal = computed(() => {
   return arr.reduce((a, b) => a + b, 0);
 });
 
+const refundTotalCost = computed(() => {
+  const arr = refundList.value.map((x) => x.price * x.qty);
+  return arr.reduce((a, b) => a + b, 0);
+});
+
 onMounted(() => {
   inject("$com")
     .getStoreDict("bill_print_method")
@@ -548,6 +703,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
+}
+
 :deep(.el-drawer__body) {
   position: relative;
 }
@@ -574,11 +733,12 @@ onMounted(() => {
 }
 
 .refundItemNum {
+  min-width: 450px;
   position: fixed;
   top: 45px;
-  left: 50%;
+  left: 46%;
   transform: translateX(-50%);
-  padding: 5px;
+  padding: 10px;
   background: #ffffff;
   border-radius: 10px;
   p {
@@ -709,9 +869,10 @@ ul {
   background-color: #bda471;
 }
 .refundListSty {
-  max-height: 150px;
+  max-height: 600px;
   overflow-y: scroll;
 }
+
 .why:focus {
   background-color: #bda471 !important;
 }
