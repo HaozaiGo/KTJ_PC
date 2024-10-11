@@ -220,9 +220,16 @@
       "
     >
     </KitchenTable>
+
+    <lodopPrinter
+      :needScanImg="printerWay.needScanImg"
+      :imgSrc="printerWay.imgSrc"
+      ref="lodopPrint"
+    ></lodopPrinter>
   </div>
 </template>
 <script>
+import lodopPrinter from "@/components/printTable/lodopPrinter.vue";
 import { getFavorites } from "@/api/common/router.js";
 import { Avatar } from "@/layouts/components/index.js";
 import router from "@/router/index.ts";
@@ -245,6 +252,7 @@ export default {
     Avatar,
     printTable,
     KitchenTable,
+    lodopPrinter,
   },
   data() {
     return {
@@ -261,6 +269,13 @@ export default {
           amount: null,
           menuList: [],
         },
+      },
+      printerWay: {
+        dialogVisible: false,
+        form: { printerId: "", method: "" },
+        printerLists: [],
+        needScanImg: false,
+        imgSrc: "",
       },
       // 打印机数据
       state: {
@@ -375,71 +390,18 @@ export default {
       if (res.code === 0) {
         const printerArr = res.data;
         for (let i = 0; i < printerArr.length; i++) {
-          await this.asyncEvent(printerArr[i]);
+          const orderDetailData = Object.assign(
+            {},
+            this.state1.orderDetailData,
+            printerArr[i]
+          );
+          this.$refs.lodopPrint.asyncEvent(orderDetailData);
         }
         this.state1.dialogVisible = false;
         this.$message.success("出单成功!");
       }
     },
-
-    async asyncEvent(ele) {
-      return new Promise((resolve) => {
-        setTimeout(
-          (e) => {
-            console.log(e);
-            this.state.printerData = Object.assign(
-              {},
-              this.state1.orderDetailData,
-              e
-            );
-            // 有数据才打单
-            if (this.state.printerData.orderMenuList.length > 0) {
-              this.handlePrint(e);
-            }
-            resolve(e);
-          },
-          10,
-          ele
-        );
-      });
-    },
-    // 打印方法执行
-    handlePrint(data) {
-      this.state.showPrintTable = true;
-      const res = this.printerOption.find((x) => x.label === data.printerModel);
-      // 找到匹配的打印机
-      if (res) {
-        this.$nextTick(() => {
-          let LODOP = getLodop();
-
-          const height =
-            data.printerType === "KITCHEN"
-              ? (this.$refs.kitchenTableDom.$el.clientHeight /
-                  this.$refs.kitchenTableDom.$el.clientWidth) *
-                80
-              : (this.$refs.printTableDom.$el.clientHeight /
-                  this.$refs.printTableDom.$el.clientWidth) *
-                80;
-          console.log(height);
-
-          const printerHtml =
-            data.printerType === "KITCHEN"
-              ? this.$refs.kitchenTableDom.$el.innerHTML
-              : this.$refs.printTableDom.$el.innerHTML;
-
-          LODOP.PRINT_INIT(data.printerModel);
-          LODOP.SET_PRINT_PAGESIZE(1, "80mm", height + "mm", "");
-          LODOP.SET_PRINTER_INDEX(data.printerModel);
-          LODOP.SET_SHOW_MODE("LANDSCAPE_DEFROTATED", 1);
-          LODOP.ADD_PRINT_HTM(0, 0, "80mm", height + "mm", printerHtml);
-          // LODOP.PREVIEW();
-          LODOP.PRINT();
-          this.state.showPrintTable = false;
-          // debugger;
-        });
-      }
-    },
-
+  
     //获取台号
     async getTableNoList() {
       const res = await getDeskList({ storeId: this.storeId, pageSize: 999 });
@@ -460,8 +422,14 @@ export default {
       // console.log(ws);
       // 监听消息
 
-      this.ws.onmessage = function (event) {
+      this.ws.onmessage = async function (event) {
         console.log(event);
+        //       <button style="padding:5px 10px;
+        // border-radius: 5px;
+        // background-color: rgb(64, 158, 255);
+        // color: #fff;
+        // margin-left: 20px;
+        // cursor: pointer;" >去处理</button>
         try {
           const data = JSON.parse(event.data);
           that.orderLists.push(data);
@@ -471,29 +439,25 @@ export default {
             title: `订单号：${data.orderNo}`,
             message: `
             <p>订单数：${that.orderLists.length}</p>
-            <div class="flex-sb"> <div>桌号：${data.tableNo} 人数：${data.peopleQty}</div><button style="padding:5px 10px;
-  border-radius: 5px;
-  background-color: rgb(64, 158, 255);
-  color: #fff;
-  margin-left: 20px;
-  cursor: pointer;" >去处理</button></div>
-  `,
+            <div class="flex-sb"> <div>桌号：${data.tableNo} 人数：${data.peopleQty}</div></div>`,
             position: "bottom-right",
             dangerouslyUseHTMLString: true,
             showClose: false,
-            onClick: function (e) {
-              that.state1.dialogVisible = true;
-              that.getOrderDetail(data);
-              //关闭当前实例
-              const v = that.notifiactions.splice(
-                that.notifiactions.indexOf(notifiaction),
-                1
-              );
-              v[0].close();
-            },
-            duration: 0,
+            // onClick: function (e) {
+            //   that.state1.dialogVisible = true;
+            //   that.getOrderDetail(data);
+            //   //关闭当前实例
+            //   const v = that.notifiactions.splice(
+            //     that.notifiactions.indexOf(notifiaction),
+            //     1
+            //   );
+            //   v[0].close();
+            // },
+            duration: 5000,
           });
+          await that.getOrderDetail(data);
           that.notifiactions.push(notifiaction);
+          that.handleOutBill();
         } catch (err) {
           console.log(err);
         }
