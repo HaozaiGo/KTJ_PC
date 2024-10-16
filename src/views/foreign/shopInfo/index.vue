@@ -204,10 +204,19 @@
               end="24:00"
             />
           </el-form-item>
-          <el-icon size="28" color="#409efc" @click="handleAddOpenTime" style="margin-right: 10px;cursor: pointer;">
+          <el-icon
+            size="28"
+            color="#409efc"
+            @click="handleAddOpenTime"
+            style="margin-right: 10px; cursor: pointer"
+          >
             <CirclePlusFilled />
           </el-icon>
-          <el-icon size="28" color="red" @click="handleRemoveOpenTime" style="cursor: pointer;"
+          <el-icon
+            size="28"
+            color="red"
+            @click="handleRemoveOpenTime"
+            style="cursor: pointer"
             ><Remove
           /></el-icon>
         </div>
@@ -307,6 +316,8 @@ defineOptions({
   name: "Shop-Info",
   isRouter: true,
 });
+const tableHeight = inject("$com").tableHeight();
+
 const tableDom = ref(null);
 const filePath = localStorage.getItem("filePath");
 const multipleSelection = ref([]);
@@ -319,7 +330,7 @@ const query = reactive({
 });
 const innerDrawer = ref(false);
 let formData = reactive({
-  origin: inject("$com").baseUrl ,
+  origin: inject("$com").baseUrl,
   drawer: false,
   innerDrawer: false,
   dialogVisible: false,

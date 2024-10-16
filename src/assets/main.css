@@ -97,3 +97,19 @@ a,
 
 
 }
+
+/* 主色调按钮 */
+.mainBtnTitle{
+  background-color: #cdbca6;
+  border-radius: 8px;
+  padding: 3px 15px;
+  width: fit-content;
+}
+.mainBtn {
+  background-color: #f1e6d8;
+  border-radius: 8px;
+  padding: 3px 15px;
+  width: fit-content;
+  cursor: pointer;
+ 
+}

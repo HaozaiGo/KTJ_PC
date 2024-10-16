@@ -157,9 +157,8 @@ const handlePrint = async (data) => {
         (Front54TableDom.value.$el.clientHeight /
           Front54TableDom.value.$el.clientWidth) *
           50 +
-        5;
-      console.log("height", height);
-      height = 240;
+        20;
+      console.log("height-50mm", height)
     } else {
       height =
         data.printerType === "KITCHEN"
@@ -172,12 +171,10 @@ const handlePrint = async (data) => {
               80 +
             5;
     }
+    // console.log(printTableDom.value.$el.clientHeight);
+    // console.log(printTableDom.value.$el.clientWidth);
 
-    console.log("打印机类型", data.printerType);
-    console.log(printTableDom.value.$el.clientHeight);
-    console.log(printTableDom.value.$el.clientWidth);
-
-    console.log(height);
+    // console.log(height);
   
     var printerHtml;
     if (data.printSpec === "50mm") {

@@ -39,25 +39,30 @@
     <table style="min-width: 58mm">
       <thead>
         <tr style="font-size: 12px">
-          <th style="min-width: 25mm; text-align: left">菜品名称</th>
-          <th style="width: 11mm">规格</th>
-          <th style="width: 11mm">数量</th>
-          <th style="width: 11mm">单价</th>
-          <th style="width: 11mm">小计</th>
+          <th style="min-width: 23mm; text-align: left">菜品名称</th>
+          <th style="width: 14mm">单价</th>
+          <th style="width: 9mm">数量</th>
+          <th style="width: 10mm">小计</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in tableData.orderMenuList" :key="index">
-          <td style="width: 26mm;font-size: 12px;">
+          <td style="width: 23mm; font-size: 12px">
             {{ item.name }} <br />
             <span style="font-size: 12px">
               {{ item.tasteNeed }}
             </span>
           </td>
-          <td style="width: 11mm;font-size: 12px" align="center">{{ item.unit }}</td>
-          <td style="width: 11mm;font-size: 12px" align="center">{{ item.qty }}</td>
-          <td style="width: 11mm;font-size: 12px" align="center">{{ item.realPrice }}</td>
-          <td style="width: 11mm;font-size: 12px" align="center">{{ item.amount }}</td>
+          <td style="width: 14mm; font-size: 12px" align="center">
+            {{ item.realPrice }}/{{ item.unit }}
+          </td>
+          <td style="width: 9mm; font-size: 12px" align="center">
+            {{ item.qty }}
+          </td>
+          <td style="width: 10mm; font-size: 12px" align="center">
+            {{ item.amount }}
+          </td>
+       
         </tr>
       </tbody>
     </table>
@@ -102,7 +107,7 @@
         style="width: 30mm; height: 30mm; margin-top: 5mm"
       />
     </div>
-    <p  style="font-size: 12px">时间：{{ time }}</p>
+    <p style="font-size: 12px">时间：{{ time }}</p>
   </div>
 </template>
 <script>

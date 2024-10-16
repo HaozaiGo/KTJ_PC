@@ -466,6 +466,7 @@ const getList = async () => {
   height: fit-content !important;
   border-radius: 15px;
   min-height: 254px;
+  width: 375px;
 }
 
 .printer-icon {
@@ -475,6 +476,9 @@ const getList = async () => {
 
 .printer-details {
   margin-left: 40px;
+  p{
+    white-space: nowrap;
+  }
 }
 
 .printer-actions {
