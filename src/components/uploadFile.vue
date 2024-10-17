@@ -221,6 +221,8 @@ const beforeRemove = (uploadFile, uploadFiles) => {
   width: 178px;
   height: 178px;
   text-align: center;
+  border: 1px dashed var(--el-border-color);
+
 }
 .previewDownload {
   margin-top: 80px;

@@ -104,12 +104,14 @@ a,
   border-radius: 8px;
   padding: 3px 15px;
   width: fit-content;
+  letter-spacing: 2px;
 }
 .mainBtn {
   background-color: #f1e6d8;
   border-radius: 8px;
   padding: 3px 15px;
   width: fit-content;
+  letter-spacing: 2px;
   cursor: pointer;
  
 }

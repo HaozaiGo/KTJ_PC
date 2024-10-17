@@ -28,6 +28,7 @@
     "vite-plugin-commonjs": "^0.10.1",
     "vue": "^3.4.21",
     "vue-cropper": "^1.1.4",
+    "vue-draggable-plus": "^0.5.3",
     "vue-router": "^4.1.6",
     "vuedraggable": "^4.1.0",
     "worker-loader": "^3.0.8"
