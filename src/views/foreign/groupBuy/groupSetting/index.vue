@@ -97,10 +97,7 @@
         <div
           class="flex-c"
           style="width: fit-content; font-size: 21px; margin-bottom: 10px"
-          @click="
-            drawer = false;
-            step = 0;
-          "
+          @click="drawerBack"
         >
           <el-icon><ArrowLeftBold /></el-icon>
           <span>返回</span>
@@ -125,24 +122,40 @@
               />
             </el-select>
             <div class="flex" style="margin: 35px 0px">
-              <div style="margin-right: 35px">
+              <div>
                 <div class="mainBtnTitle" style="margin-bottom: 10px">
                   套餐名称
                 </div>
                 <el-input
                   placeholder="请输入套餐名称"
                   style="width: 250px"
-                  v-model="form.name"
+                  v-model="form.mealName"
                 ></el-input>
               </div>
-              <div>
+              <div style="margin: 0px 32px">
                 <div class="mainBtnTitle" style="margin-bottom: 10px">
                   套餐描述
                 </div>
                 <el-input
                   placeholder="请描述该套餐"
                   style="width: 400px"
-                  v-model="form.des"
+                  v-model="form.mealDescribe"
+                ></el-input>
+              </div>
+              <div>
+                <div class="flex">
+                  <div class="mainBtnTitle" style="margin: 0px 10px 10px 0px">
+                    套餐简称
+                  </div>
+                  <span style="color: red; font-size: 12px"
+                    >*如158双人套餐</span
+                  >
+                </div>
+
+                <el-input
+                  placeholder="请描述套餐简称"
+                  style="width: 300px"
+                  v-model="form.mealNickName"
                 ></el-input>
               </div>
             </div>
@@ -214,15 +227,18 @@
                 <div class="pricing flex-sr">
                   <div>
                     平台售价
-                    <el-input style="display: block"></el-input>
+                    <el-input
+                      style="display: block"
+                      v-model="form.price"
+                    ></el-input>
                   </div>
                   <div>
                     结算价
-                    <el-input style="display: block"></el-input>
+                    <el-input style="display: block" disabled></el-input>
                   </div>
                   <div>
                     费率
-                    <el-input style="display: block"></el-input>
+                    <el-input style="display: block" disabled></el-input>
                   </div>
                 </div>
               </div>
@@ -240,19 +256,26 @@
                         style="width: 120px"
                         placeholder="自上架之日"
                         disabled
-                      ></el-input
-                      >至
-                      <el-date-picker
-                        v-model="value1"
-                        type="datetime"
-                        placeholder="Pick a Date"
-                        format="YYYY/MM/DD HH:mm:ss"
                       />
+                      <el-input
+                        v-model="form.limitDayQty"
+                        style="width: 200px"
+                        placeholder="最多20天内"
+                        type="number"
+                        max="20"
+                        min="1"
+                      >
+                        <template #append>内有效</template>
+                      </el-input>
                     </div>
                   </div>
                   <div>
                     使用时间
-                    <el-input style="display: block"></el-input>
+                    <el-input
+                      style="display: block"
+                      disabled
+                      placeholder="营业时间内可用"
+                    ></el-input>
                   </div>
                 </div>
               </div>
@@ -267,54 +290,78 @@
               <div class="left-section flex-sb" style="flex-wrap: wrap">
                 <div class="form-group flex-c">
                   <label>是否需要预约</label>
-                  <button @click="toggleReservation" class="needBookbtn">
-                    {{ reservation ? "是" : "否" }}
+                  <button
+                    @click="form.isNeedBook = !form.isNeedBook"
+                    class="needBookbtn"
+                  >
+                    {{ form.isNeedBook ? "是" : "否" }}
                   </button>
                 </div>
                 <div class="form-group flex-c">
                   <label>使用人数</label>
                   <el-input
-                    type="text"
-                    v-model="usagePeople"
+                    type="number"
+                    v-model="form.usePeople"
                     placeholder="不限人数"
+                    style="text-align: center"
+                    @change="
+                      ruleList.push('使用人数不能大于' + form.usePeople + '人')
+                    "
                   ></el-input>
                 </div>
                 <div class="form-group flex-c">
-                  <label>单人限制的数量</label>
+                  <label>单人限购的数量</label>
                   <el-input
-                    type="text"
-                    v-model="individualLimit"
+                    type="number"
+                    v-model="form.singleLimitBuyQty"
                     placeholder="不限数量"
+                    @change="
+                      ruleList.push('单人限购' + form.singleLimitBuyQty + '次')
+                    "
                   />
                 </div>
                 <div class="form-group flex-c">
                   <label>单人起购数量</label>
                   <el-input
-                    type="text"
-                    v-model="individualLimit"
+                    type="number"
+                    v-model="form.singleNeedBuyQty"
                     placeholder="不限数量"
+                    style="text-align: center"
+                    @change="
+                      ruleList.push(
+                        '单人起购数量' + form.singleNeedBuyQty + '次'
+                      )
+                    "
                   />
                 </div>
                 <div class="form-group flex-c" style="width: 100%">
                   <label>不可用日期</label>
-                  <el-input
-                    type="text"
-                    v-model="unavailableDays"
-                    placeholder="周六, 周日"
-                  />
+
+                  <el-select
+                    v-model="form.noUseDate"
+                    placeholder="全天可用"
+                    style="width: 240px"
+                  >
+                    <el-option
+                      v-for="item in unavailableDaysOptions"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                    />
+                  </el-select>
                 </div>
               </div>
 
               <!-- Middle section -->
               <div style="width: 30%; position: relative">
                 <h3 style="text-align: center">使用规则</h3>
-                <div
+                <!-- <div
                   class="mainBtn flex-c"
                   style="cursor: pointer; position: absolute; right: 0; top: 0"
                 >
                   <el-icon :size="18"><Plus /></el-icon>
                   <span>添加规则</span>
-                </div>
+                </div> -->
                 <div
                   class="middle-section"
                   style="width: 100%; margin-top: 10px"
@@ -331,7 +378,7 @@
                   </div>
                   <div class="">
                     <label>不可用日期</label>
-                    <div class="ruleItem">周六、周日</div>
+                    <div class="ruleItem">{{ form.noUseDate }}</div>
                   </div>
                   <div class="">
                     <label>使用规则</label>
@@ -391,6 +438,7 @@
             <UploadImg
               :compress="true"
               @uploadSuccess="uploadSuccess"
+              :action="true"
             ></UploadImg>
           </div>
 
@@ -399,9 +447,16 @@
             <el-input
               placeholder="请输入套餐名称"
               style="width: 300px; margin: 10px 0 20px 0"
+              v-model="form1.ruleName"
             ></el-input>
 
-            <div class="mainBtn flex-c">
+            <div
+              class="mainBtn flex-c"
+              @click="
+                step = 2;
+                getLeftMenu();
+              "
+            >
               <el-icon :size="18"><Plus /></el-icon>
               <span>添加菜品</span>
             </div>
@@ -412,22 +467,48 @@
                   class="flex"
                   style="flex-direction: row-reverse; margin-bottom: 10px"
                 >
-                  <button class="customBtn">选配</button>
+                  <button
+                    class="customBtn"
+                    @click="form1.isSelect = !form1.isSelect"
+                    :style="
+                      form1.isSelect
+                        ? 'background:#ae9d87 !important'
+                        : 'background:#ffffff'
+                    "
+                  >
+                    选配
+                  </button>
                   <el-button
                     plain
                     style="
-                      padding: 5px 20px;
+                      padding: 10px 30px;
                       margin-right: 30px;
                       letter-spacing: 2px;
                     "
+                    size="large"
                     >清空</el-button
                   >
                 </div>
                 <!-- menuSelect -->
                 <div class="menuSelect">
+                  <div class="menuSelectTitle flex">
+                    <div style="flex: 2">菜品名称</div>
+                    <div style="flex: 1; text-align: center">数量</div>
+                    <div style="flex: 1; text-align: center">价格</div>
+                  </div>
                   <VueDraggable ref="ell" v-model="list">
-                    <div v-for="item in list" :key="item.id">
-                      {{ item.name }}
+                    <div
+                      v-for="item in list"
+                      :key="item.id"
+                      class="flex menuSelectItem"
+                    >
+                      <div style="flex: 2">{{ item.name }}</div>
+                      <div style="flex: 1; text-align: center">
+                        {{ item.num }}
+                      </div>
+                      <div style="flex: 1; text-align: center">
+                        {{ item.price }}
+                      </div>
                     </div>
                   </VueDraggable>
                 </div>
@@ -439,16 +520,23 @@
                 <el-input placeholder="请输入备注内容"></el-input>
               </div>
               <div style="flex: 2">
-                <h3 style="text-align: center">该分类可选择的数量</h3>
-                <div class="classify flex-sr" style="flex-wrap: wrap">
+                <h3 style="text-align: center" v-if="form1.isSelect">
+                  该分类可选择的数量
+                </h3>
+                <div
+                  class="classify flex-sr"
+                  style="flex-wrap: wrap"
+                  v-if="form1.isSelect"
+                >
                   <div
                     v-for="(item, index1) in numList"
                     :key="index1"
                     class="flex-c"
+                    @click="form1.maxSelectQty = item"
                   >
                     {{ item }}
                   </div>
-                  <input
+                  <!-- <input
                     placeholder="自定义"
                     style="
                       font-size: 22px;
@@ -457,8 +545,50 @@
                       width: 200px;
                       border: 1px solid #c1c1c1;
                     "
-                  />
+                  /> -->
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-show="step === 2">
+            <div class="mainBtnTitle">菜品选择</div>
+            <div class="flex">
+              <div
+                class="leftMenuList flex"
+                style="flex-direction: column; flex: 1; align-items: start"
+              >
+                <h2 style="text-align: center; width: 100%">菜品分类</h2>
+                <div
+                  v-for="(item, idx) in tasteData.leftData"
+                  :key="idx"
+                  class="leftMenuListItem"
+                  @click="handleMenuSelect(item, idx)"
+                  :style="
+                    tasteData.setectIdx === idx
+                      ? `background:#e0cbac`
+                      : `background:#FFFFFF`
+                  "
+                >
+                  {{ item.name }}
+                  <el-icon
+                    v-if="tasteData.setectIdx === idx"
+                    size="20"
+                    style="vertical-align: sub"
+                    ><CaretRight
+                  /></el-icon>
+                </div>
+              </div>
+              <div style="flex: 1">
+                <h2 style="text-align: center">菜品</h2>
+
+                <el-tree
+                  style="max-width: 600px"
+                  :data="tasteData.rightData"
+                  :props="defaultProps"
+                  show-checkbox
+                  @check-change="handleCheckChange"
+                />
               </div>
             </div>
           </div>
@@ -468,11 +598,32 @@
         <div
           class="flex-sb"
           style="position: absolute; bottom: 0px; left: 0; right: 0"
+          v-if="step === 0"
         >
-          <el-button plain>暂存/保存到草稿</el-button>
-          <div class="mainBtn">
+          <el-button
+            plain
+            size="large"
+            style="letter-spacing: 2px"
+            @click="handleSave"
+            >暂存/保存到草稿</el-button
+          >
+          <div class="mainBtn" style="line-height: 32px" @click="handleOnline">
             <span>立即上架</span>
           </div>
+        </div>
+        <div v-else-if="step === 1" style="text-align: right">
+          <el-button plain size="large" style="padding: 10px 40px"
+            >返回</el-button
+          >
+          <el-button plain size="large" style="padding: 10px 40px"
+            >确定</el-button
+          >
+        </div>
+        <!-- 选菜 -->
+        <div v-else-if="step === 2" style="text-align: right">
+          <el-button plain size="large" style="padding: 10px 40px"
+            >确定</el-button
+          >
         </div>
       </div>
     </el-drawer>
@@ -494,10 +645,20 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="comfirmCustomRule">
-            确定
-          </el-button>
+          <el-button
+            plain
+            size="large"
+            style="padding: 10px 40px"
+            @click="dialogVisible = false"
+            >取消</el-button
+          >
+          <el-button
+            plain
+            size="large"
+            style="padding: 10px 40px; background-color: #f1e6d8"
+            @click="comfirmCustomRule"
+            >确定</el-button
+          >
         </div>
       </template>
     </el-dialog>
@@ -511,6 +672,15 @@ import PieChart from "./components/PieChart.vue";
 import { ref, reactive, onMounted, inject, computed } from "vue";
 import { gerShopOption } from "@/api/project/foreign/employee.js";
 import { ElMessage } from "element-plus";
+import { getTypeList, getMenusList } from "@/api/project/foreign/menu.js";
+import {
+  addGroupSetting,
+  editGroupSetting,
+  getGroupSettingDetail,
+  delGroupSetting,
+  getGroupSettingList,
+  onlineStatus,
+} from "@/api/project/foreign/groupSetting.js";
 defineOptions({
   name: "groupSetting",
   isRouter: true,
@@ -518,11 +688,32 @@ defineOptions({
 onMounted(async () => {
   getShopOption();
 });
+const defaultProps = {
+  children: "children",
+  label: "name",
+};
 const form = reactive({
   storeId: "",
-  name: "",
-  des: "",
+  mealName: "",
+  mealDescribe: "",
+  mealNickName: "",
   remark: "",
+  price: "",
+  limitDayQty: "",
+  isNeedBook: 0,
+  usePeople: "",
+  file: "",
+  singleLimitBuyQty: "",
+  singleNeedBuyQty: "",
+  isOpenTimeUse: "1",
+  noUseDate: "全天可用",
+  ruleListJson: [], //第二层分类
+});
+const form1 = reactive({
+  ruleName: "",
+  isSelect: 0,
+  mealMenuList:[], //三级菜单
+  maxSelectQty: null,
 });
 const ell = ref(null);
 const step = ref(0);
@@ -576,31 +767,43 @@ const tableData = reactive({
   row: [],
   total: 0,
 });
+const unavailableDaysOptions = ref([
+  "全天可用",
+  "周六,周日",
+  "法定假节日",
+  "周一",
+  "周二",
+  "周三",
+  "周四",
+  "周五",
+]); //不可用日期
+const tasteData = reactive({
+  leftData: {},
+  selected: {},
+  setectIdx: 0,
+});
 const numList = ref([1, 2, 3, 4, 5, 6, 7, 8]); //分类数量
 const list = ref([
   {
-    name: "Joao",
+    name: "紫金酱凤爪",
+    num: 1,
+    price: 29,
     id: 1,
   },
   {
-    name: "Jean",
+    name: "蒜蓉排骨",
+    num: 10,
+    price: 40,
     id: 2,
-  },
-  {
-    name: "Johanna",
-    id: 3,
-  },
-  {
-    name: "Juan",
-    id: 4,
   },
 ]);
 
 const drawerWidth = computed(() => {
   return window.innerWidth - 165;
 });
-const uploadSuccess = (row) => {
-  console.log(row);
+const uploadSuccess = (file) => {
+  console.log(file);
+  form.file = file;
 };
 const comfirmCustomRule = () => {
   if (customRule.value != "") {
@@ -609,6 +812,13 @@ const comfirmCustomRule = () => {
     customRule.value = "";
   } else {
     ElMessage.error("请输入规则名称");
+  }
+};
+const drawerBack = () => {
+  if (step.value === 0) {
+    drawer.value = false;
+  } else {
+    step.value -= 1;
   }
 };
 const tableHeight = inject("$com").tableHeight();
@@ -627,6 +837,66 @@ const getShopOption = async () => {
 const getList = () => {};
 const addToRuleList = (rule) => {
   ruleList.value.push(rule);
+};
+const getLeftMenu = async () => {
+  const res = await getTypeList({
+    storeId: JSON.parse(localStorage.getItem("storeId")).storeId,
+    pageSize: 50,
+  });
+  if (res.code === 0) {
+    tasteData.leftData = res.rows;
+    tasteData.selected = tasteData.leftData[0];
+    getList1();
+  }
+};
+const handleMenuSelect = (item, idx) => {
+  tasteData.setectIdx = idx;
+  tasteData.selected = item;
+  getList1();
+};
+// 子菜单
+const getList1 = async () => {
+  try {
+    const res = await getMenusList({
+      typeId: tasteData.selected.typeId,
+      storeId: tasteData.selected.storeId,
+      pageSize: 50,
+    });
+    if (res.code === 0) {
+      tasteData.rightData = res.rows;
+    }
+  } catch (e) {}
+};
+const handleCheckChange = (data, checked) => {
+  console.log(data, checked);
+};
+
+const handleSave = async () => {
+  const body = Object.assign({}, form, {
+    onlineStatus: "0",
+    usePeople: form.usePeople === "" ? "-1" : form.usePeople,
+    singleLimitBuyQty:
+      form.singleLimitBuyQty === "" ? "-1" : form.singleLimitBuyQty,
+    singleNeedBuyQty:
+      form.singleNeedBuyQty === "" ? "-1" : form.singleNeedBuyQty,
+    useRule: ruleList.value.join(","),
+  });
+
+  const res = await addGroupSetting(body);
+};
+
+const handleOnline = async () => {
+  const body = Object.assign({}, form, {
+    onlineStatus: "1",
+    usePeople: form.usePeople === "" ? "-1" : form.usePeople,
+    singleLimitBuyQty:
+      form.singleLimitBuyQty === "" ? "-1" : form.singleLimitBuyQty,
+    singleNeedBuyQty:
+      form.singleNeedBuyQty === "" ? "-1" : form.singleNeedBuyQty,
+    useRule: ruleList.value.join(","),
+  });
+
+  const res = await addGroupSetting(body);
 };
 </script>
 
@@ -745,14 +1015,29 @@ button {
   }
 }
 .customBtn {
-  border: none;
-  background-color: #ae9d87;
-  padding: 5px 20px;
+  border: 1px solid #c1c1c1;
+  background-color: #ffffff;
+  padding: 10px 30px;
   letter-spacing: 2px;
   border-radius: 3px;
 }
 .tips {
   color: red;
   font-size: 12px;
+}
+.menuSelectTitle {
+  div {
+    padding: 15px;
+  }
+}
+.menuSelectItem {
+  padding: 10px 15px;
+  border: 1px solid #c1c1c1;
+  margin: 5px 10px;
+}
+.leftMenuListItem {
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
