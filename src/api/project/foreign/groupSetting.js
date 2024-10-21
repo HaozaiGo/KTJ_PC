@@ -33,7 +33,7 @@ export function getGroupSettingDetail(params) {
 // 删除团购套餐
 export function delGroupSetting(params) {
   return request({
-    url: `/store/api/store/meal/${params.storeId}/${params.mealId}`,
+    url: `/store/api/store/meal/${params.storeId}/${params.mealIds}`,
     method: "DELETE",
   });
 }
@@ -48,7 +48,7 @@ export function getGroupSettingList(params) {
 // 上下架
 export function onlineStatus(data) {
   return request({
-    url: "/store/api/store/meal/update/online/status",
+    url: `/store/api/store/meal/update/online/status?mealId=${data.mealId}&onlineStatus=${data.onlineStatus}`,
     method: "post",
     data,
   });

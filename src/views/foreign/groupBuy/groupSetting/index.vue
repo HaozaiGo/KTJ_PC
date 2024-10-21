@@ -29,7 +29,10 @@
       <div
         class="mainBtn flex-c"
         style="cursor: pointer"
-        @click="drawer = true"
+        @click="
+          drawer = true;
+          rowStatus = 'add';
+        "
       >
         <el-icon :size="18"><Plus /></el-icon>
         <span>创建单个套餐</span>
@@ -38,14 +41,13 @@
 
     <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
       <el-tab-pane
-        label="已上线"
-        name="first"
+        label="已上架"
+        name="1"
         style="padding-left: 20px"
       ></el-tab-pane>
-      <el-tab-pane label="审核中" name="second"></el-tab-pane>
-      <el-tab-pane label="草稿（暂存）" name="third"></el-tab-pane>
-      <el-tab-pane label="已下线" name="fourth"></el-tab-pane>
-      <el-tab-pane label="全部" name="fourth"></el-tab-pane>
+      <el-tab-pane label="审核中" name="2"></el-tab-pane>
+      <el-tab-pane label="已下架" name="0"></el-tab-pane>
+      <el-tab-pane label="全部" name=""></el-tab-pane>
     </el-tabs>
     <el-table
       :data="tableData.row"
@@ -55,7 +57,7 @@
       ref="tableDom"
       :height="tableHeight - 300"
     >
-      <el-table-column prop="name" label="套餐名称" sortable />
+      <el-table-column prop="mealName" label="套餐名称" sortable />
 
       <el-table-column label="上架状态" width="160">
         <template #default="scope">
@@ -70,11 +72,24 @@
         </template>
       </el-table-column>
       <el-table-column prop="startTime" label="审核状态" sortable width="180" />
-      <el-table-column prop="endTime" label="已售" sortable width="180" />
+      <el-table-column prop="salesCount" label="已售" sortable width="180" />
       <el-table-column label="操作" width="240">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="edit(scope.row)">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="getEditInfo(scope.row)"
+          >
             修改信息
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="delGroup(scope.row)"
+          >
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -107,7 +122,7 @@
           <div v-show="step === 0">
             <div class="mainBtnTitle">适用门店</div>
             <el-select
-              v-model="form.storeId"
+              v-model="form.data.storeId"
               filterable
               placeholder="请选择门店"
               style="width: 250px; margin-top: 10px"
@@ -129,7 +144,7 @@
                 <el-input
                   placeholder="请输入套餐名称"
                   style="width: 250px"
-                  v-model="form.mealName"
+                  v-model="form.data.mealName"
                 ></el-input>
               </div>
               <div style="margin: 0px 32px">
@@ -139,7 +154,7 @@
                 <el-input
                   placeholder="请描述该套餐"
                   style="width: 400px"
-                  v-model="form.mealDescribe"
+                  v-model="form.data.mealDescribe"
                 ></el-input>
               </div>
               <div>
@@ -155,7 +170,7 @@
                 <el-input
                   placeholder="请描述套餐简称"
                   style="width: 300px"
-                  v-model="form.mealNickName"
+                  v-model="form.data.mealNickName"
                 ></el-input>
               </div>
             </div>
@@ -164,7 +179,7 @@
             <div
               class="mainBtn flex-c"
               style="margin: 10px 0"
-              @click="step = 1"
+              @click="openClassify"
             >
               <el-icon :size="18"><Plus /></el-icon>
               <span>创建分类</span>
@@ -172,22 +187,25 @@
             <!-- 分类总览 -->
             <div style="padding: 20px; border: 1px solid #c1c1c1">
               <el-table
-                :data="tableData.row"
+                :data="form.data.ruleListJson"
                 style="width: 100%; margin: 10px 0"
                 row-key="id"
                 default-expand-all
                 ref="tableDom"
               >
                 <!-- :height="tableHeight - 300" -->
-                <el-table-column prop="name" label="分类名称" sortable />
+                <el-table-column prop="ruleName" label="分类名称" sortable />
 
                 <el-table-column label="菜品数量" width="160">
+                  <template #default="scope">
+                    {{ scope.row.mealMenuList.length }}
+                  </template>
                 </el-table-column>
-                <el-table-column
-                  prop="startTime"
-                  label="价格共计"
-                  width="180"
-                />
+                <el-table-column label="价格共计" width="180">
+                  <template #default="scope">
+                    {{ scope.row.totalPrice }}
+                  </template>
+                </el-table-column>
                 <el-table-column label="操作" width="240">
                   <template #default="scope">
                     <el-button
@@ -202,9 +220,12 @@
                 </el-table-column>
               </el-table>
               <div style="text-align: right">
-                共 <span style="margin: 0 8px; display: inline-block">5</span>项
+                共
+                <span style="margin: 0 8px; display: inline-block">
+                  {{ form.data.ruleListJson.length }} </span
+                >项
                 <span style="margin-left: 10px; display: inline-block"
-                  >¥300</span
+                  >¥{{ totalPriceStep1 }}</span
                 >
               </div>
             </div>
@@ -214,7 +235,7 @@
                 备注
               </div>
               <el-input
-                v-model="form.remark"
+                v-model="form.data.remark"
                 placeholder="请输入需要备注的内容，最多不超过50字"
                 style="width: 100%"
               ></el-input>
@@ -223,13 +244,15 @@
             <div class="flex" style="margin-top: 35px">
               <div style="flex: 1">
                 <div class="mainBtnTitle" style="padding: 3px 25px">定价</div>
-                <p style="text-align: center">目前套餐总价：¥300</p>
+                <p style="text-align: center">
+                  目前套餐总价：¥{{ totalPriceStep1 }}
+                </p>
                 <div class="pricing flex-sr">
                   <div>
                     平台售价
                     <el-input
                       style="display: block"
-                      v-model="form.price"
+                      v-model="form.data.price"
                     ></el-input>
                   </div>
                   <div>
@@ -258,7 +281,7 @@
                         disabled
                       />
                       <el-input
-                        v-model="form.limitDayQty"
+                        v-model="form.data.limitDayQty"
                         style="width: 200px"
                         placeholder="最多20天内"
                         type="number"
@@ -288,57 +311,61 @@
             <div class="container">
               <!-- Left section -->
               <div class="left-section flex-sb" style="flex-wrap: wrap">
-                <div class="form-group flex-c">
+                <div class="fGruop flex-c">
                   <label>是否需要预约</label>
                   <button
-                    @click="form.isNeedBook = !form.isNeedBook"
+                    @click="form.data.isNeedBook = !form.data.isNeedBook"
                     class="needBookbtn"
                   >
-                    {{ form.isNeedBook ? "是" : "否" }}
+                    {{ form.data.isNeedBook ? "是" : "否" }}
                   </button>
                 </div>
-                <div class="form-group flex-c">
+                <div class="fGruop flex-c">
                   <label>使用人数</label>
                   <el-input
                     type="number"
-                    v-model="form.usePeople"
+                    v-model="form.data.usePeople"
                     placeholder="不限人数"
                     style="text-align: center"
                     @change="
-                      ruleList.push('使用人数不能大于' + form.usePeople + '人')
+                      ruleList.push(
+                        '使用人数不能大于' + form.data.usePeople + '人'
+                      )
                     "
                   ></el-input>
                 </div>
-                <div class="form-group flex-c">
+                <div class="fGruop flex-c">
                   <label>单人限购的数量</label>
                   <el-input
                     type="number"
-                    v-model="form.singleLimitBuyQty"
+                    v-model="form.data.singleLimitBuyQty"
                     placeholder="不限数量"
-                    @change="
-                      ruleList.push('单人限购' + form.singleLimitBuyQty + '次')
-                    "
-                  />
-                </div>
-                <div class="form-group flex-c">
-                  <label>单人起购数量</label>
-                  <el-input
-                    type="number"
-                    v-model="form.singleNeedBuyQty"
-                    placeholder="不限数量"
-                    style="text-align: center"
                     @change="
                       ruleList.push(
-                        '单人起购数量' + form.singleNeedBuyQty + '次'
+                        '单人限购' + form.data.singleLimitBuyQty + '次'
                       )
                     "
                   />
                 </div>
-                <div class="form-group flex-c" style="width: 100%">
+                <div class="fGruop flex-c">
+                  <label>单人起购数量</label>
+                  <el-input
+                    type="number"
+                    v-model="form.data.singleNeedBuyQty"
+                    placeholder="不限数量"
+                    style="text-align: center"
+                    @change="
+                      ruleList.push(
+                        '单人起购数量' + form.data.singleNeedBuyQty + '次'
+                      )
+                    "
+                  />
+                </div>
+                <div class="fGruop flex-c" style="width: 100%">
                   <label>不可用日期</label>
 
                   <el-select
-                    v-model="form.noUseDate"
+                    v-model="form.data.noUseDate"
                     placeholder="全天可用"
                     style="width: 240px"
                   >
@@ -378,7 +405,7 @@
                   </div>
                   <div class="">
                     <label>不可用日期</label>
-                    <div class="ruleItem">{{ form.noUseDate }}</div>
+                    <div class="ruleItem">{{ form.data.noUseDate }}</div>
                   </div>
                   <div class="">
                     <label>使用规则</label>
@@ -442,19 +469,38 @@
             ></UploadImg>
           </div>
 
-          <div v-show="step === 1">
+          <div v-if="step === 1">
             <div class="mainBtnTitle">分类名称</div>
-            <el-input
-              placeholder="请输入套餐名称"
-              style="width: 300px; margin: 10px 0 20px 0"
-              v-model="form1.ruleName"
-            ></el-input>
+            <div class="flex" style="margin: 10px 0 20px 0">
+              <el-input
+                placeholder="请输入分类名称"
+                style="width: 300px"
+                v-model="form1.ruleName"
+              ></el-input>
+
+              <div class="choooseNum" v-if="form1.isSelect">
+                <p
+                  style="
+                    font-size: 12px;
+                    position: absolute;
+                    top: -23px;
+                    left: 0;
+                    white-space: nowrap;
+                  "
+                >
+                  请选择套餐可选数量
+                </p>
+
+                {{ form1.mealMenuList.length }}选{{ form1.maxSelectQty }}
+              </div>
+            </div>
 
             <div
               class="mainBtn flex-c"
               @click="
                 step = 2;
                 getLeftMenu();
+                form1.temporaryList = [];
               "
             >
               <el-icon :size="18"><Plus /></el-icon>
@@ -486,6 +532,10 @@
                       letter-spacing: 2px;
                     "
                     size="large"
+                    @click="
+                      form1.mealMenuList = [];
+                      form1.temporaryList = [];
+                    "
                     >清空</el-button
                   >
                 </div>
@@ -496,18 +546,30 @@
                     <div style="flex: 1; text-align: center">数量</div>
                     <div style="flex: 1; text-align: center">价格</div>
                   </div>
-                  <VueDraggable ref="ell" v-model="list">
+                  <VueDraggable
+                    ref="ell"
+                    v-model="form1.mealMenuList"
+                    style="height: 300px; overflow-y: scroll"
+                  >
                     <div
-                      v-for="item in list"
-                      :key="item.id"
+                      v-for="(item, idx) in form1.mealMenuList"
+                      :key="idx"
                       class="flex menuSelectItem"
+                      @click="handleMenuSelectStep2(idx)"
+                      :style="
+                        form1.selectedIdx === idx
+                          ? 'background:#cebda7'
+                          : 'background:#FFFFFF'
+                      "
                     >
                       <div style="flex: 2">{{ item.name }}</div>
                       <div style="flex: 1; text-align: center">
-                        {{ item.num }}
+                        <el-input v-model="item.qty" style="width: 150px">
+                          <template #append>{{ item.unit }}</template>
+                        </el-input>
                       </div>
                       <div style="flex: 1; text-align: center">
-                        {{ item.price }}
+                        <el-input v-model="item.price"></el-input>
                       </div>
                     </div>
                   </VueDraggable>
@@ -516,8 +578,17 @@
                 <div class="mainBtnTitle" style="margin: 35px 0 10px 0">
                   备注
                 </div>
-                <p class="tips">请选择需要备注的菜品</p>
-                <el-input placeholder="请输入备注内容"></el-input>
+                <p
+                  class="tips"
+                  v-if="!form1.selectedIdx && form1.selectedIdx != 0"
+                >
+                  请选择需要备注的菜品
+                </p>
+                <el-input
+                  v-if="form1.selectedIdx || form1.selectedIdx === 0"
+                  placeholder="请输入备注内容"
+                  v-model="form1.mealMenuList[form1.selectedIdx].remark"
+                ></el-input>
               </div>
               <div style="flex: 2">
                 <h3 style="text-align: center" v-if="form1.isSelect">
@@ -551,7 +622,7 @@
             </div>
           </div>
 
-          <div v-show="step === 2">
+          <div v-if="step === 2">
             <div class="mainBtnTitle">菜品选择</div>
             <div class="flex">
               <div
@@ -607,21 +678,46 @@
             @click="handleSave"
             >暂存/保存到草稿</el-button
           >
-          <div class="mainBtn" style="line-height: 32px" @click="handleOnline">
+          <div
+            class="mainBtn"
+            style="line-height: 32px"
+            @click="handleOnline"
+            v-if="rowStatus === 'add'"
+          >
             <span>立即上架</span>
+          </div>
+          <div
+            class="mainBtn"
+            style="line-height: 32px"
+            @click="handleEdit"
+            v-if="rowStatus === 'edit'"
+          >
+            <span>确认修改</span>
           </div>
         </div>
         <div v-else-if="step === 1" style="text-align: right">
-          <el-button plain size="large" style="padding: 10px 40px"
+          <el-button
+            plain
+            size="large"
+            style="padding: 10px 40px"
+            @click="step = 0"
             >返回</el-button
           >
-          <el-button plain size="large" style="padding: 10px 40px"
+          <el-button
+            plain
+            size="large"
+            style="padding: 10px 40px"
+            @click="confirmAddMenuStep1"
             >确定</el-button
           >
         </div>
         <!-- 选菜 -->
         <div v-else-if="step === 2" style="text-align: right">
-          <el-button plain size="large" style="padding: 10px 40px"
+          <el-button
+            plain
+            size="large"
+            style="padding: 10px 40px"
+            @click="confirmAddMenu"
             >确定</el-button
           >
         </div>
@@ -671,7 +767,7 @@ import UploadImg from "@/components/uploadFile.vue";
 import PieChart from "./components/PieChart.vue";
 import { ref, reactive, onMounted, inject, computed } from "vue";
 import { gerShopOption } from "@/api/project/foreign/employee.js";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { getTypeList, getMenusList } from "@/api/project/foreign/menu.js";
 import {
   addGroupSetting,
@@ -693,28 +789,43 @@ const defaultProps = {
   label: "name",
 };
 const form = reactive({
-  storeId: "",
-  mealName: "",
-  mealDescribe: "",
-  mealNickName: "",
-  remark: "",
-  price: "",
-  limitDayQty: "",
-  isNeedBook: 0,
-  usePeople: "",
-  file: "",
-  singleLimitBuyQty: "",
-  singleNeedBuyQty: "",
-  isOpenTimeUse: "1",
-  noUseDate: "全天可用",
-  ruleListJson: [], //第二层分类
+  data: {
+    storeId: "",
+    mealName: "",
+    mealDescribe: "",
+    mealNickName: "",
+    remark: "",
+    price: "",
+    limitDayQty: "",
+    isNeedBook: 0,
+    usePeople: "",
+    file: "",
+    singleLimitBuyQty: "",
+    singleNeedBuyQty: "",
+    isOpenTimeUse: "1",
+    noUseDate: "全天可用",
+    ruleListJson: [], //第二层分类
+  },
 });
-const form1 = reactive({
+let form1 = reactive({
   ruleName: "",
   isSelect: 0,
-  mealMenuList:[], //三级菜单
+  mealMenuList: [], //三级菜单
+  temporaryList: [], //临时选中的菜品
   maxSelectQty: null,
+  selectedIdx: null,
+  totalPrice: 0,
 });
+
+class Form1Data {
+  ruleName = "";
+  isSelect = 0;
+  mealMenuList = [];
+  temporaryList = [];
+  maxSelectQty = null;
+  selectedIdx = null;
+  totalPrice = 0;
+}
 const ell = ref(null);
 const step = ref(0);
 const customRule = ref("");
@@ -762,7 +873,8 @@ const addedRules = ref([
 const drawer = ref(false);
 const storeId = ref(""); //最外面的查询门店
 const ShopOptions = ref([]);
-const activeName = ref("");
+const rowStatus = ref("add");
+const activeName = ref("1");
 const tableData = reactive({
   row: [],
   total: 0,
@@ -783,27 +895,18 @@ const tasteData = reactive({
   setectIdx: 0,
 });
 const numList = ref([1, 2, 3, 4, 5, 6, 7, 8]); //分类数量
-const list = ref([
-  {
-    name: "紫金酱凤爪",
-    num: 1,
-    price: 29,
-    id: 1,
-  },
-  {
-    name: "蒜蓉排骨",
-    num: 10,
-    price: 40,
-    id: 2,
-  },
-]);
 
 const drawerWidth = computed(() => {
   return window.innerWidth - 165;
 });
+const totalPriceStep1 = computed(() => {
+  return form.data.ruleListJson.reduce((pre, next) => {
+    return pre + next.totalPrice;
+  }, 0);
+});
 const uploadSuccess = (file) => {
   console.log(file);
-  form.file = file;
+  form.data.file = file;
 };
 const comfirmCustomRule = () => {
   if (customRule.value != "") {
@@ -824,7 +927,11 @@ const drawerBack = () => {
 const tableHeight = inject("$com").tableHeight();
 const changePageSize = () => {};
 const storeIdChange = () => {};
-const handleClick = () => {};
+const handleClick = (e) => {
+  console.log(e.props.name);
+  activeName.value = e.props.name;
+  getList();
+};
 const getShopOption = async () => {
   const res = await gerShopOption();
   if (res.code === 0) {
@@ -833,8 +940,17 @@ const getShopOption = async () => {
     getList();
   }
 };
-
-const getList = () => {};
+// 最外层list
+const getList = async () => {
+  const res = await getGroupSettingList({
+    storeId: storeId.value,
+    onlineStatus: activeName.value,
+  });
+  if (res.code === 0) {
+    tableData.row = res.rows;
+    tableData.total = res.total;
+  }
+};
 const addToRuleList = (rule) => {
   ruleList.value.push(rule);
 };
@@ -854,6 +970,7 @@ const handleMenuSelect = (item, idx) => {
   tasteData.selected = item;
   getList1();
 };
+
 // 子菜单
 const getList1 = async () => {
   try {
@@ -868,39 +985,152 @@ const getList1 = async () => {
   } catch (e) {}
 };
 const handleCheckChange = (data, checked) => {
-  console.log(data, checked);
+  form1.temporaryList.push(Object.assign({}, data, { qty: 1 }));
+  console.log(form1.mealMenuList);
 };
 
 const handleSave = async () => {
-  const body = Object.assign({}, form, {
+  const body = Object.assign({}, form.data, {
     onlineStatus: "0",
-    usePeople: form.usePeople === "" ? "-1" : form.usePeople,
+    usePeople: form.data.usePeople === "" ? "-1" : form.data.usePeople,
     singleLimitBuyQty:
-      form.singleLimitBuyQty === "" ? "-1" : form.singleLimitBuyQty,
+      form.data.singleLimitBuyQty === "" ? "-1" : form.data.singleLimitBuyQty,
     singleNeedBuyQty:
-      form.singleNeedBuyQty === "" ? "-1" : form.singleNeedBuyQty,
+      form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
     useRule: ruleList.value.join(","),
+    ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
 
   const res = await addGroupSetting(body);
 };
 
 const handleOnline = async () => {
-  const body = Object.assign({}, form, {
+  const body = Object.assign({}, form.data, {
     onlineStatus: "1",
-    usePeople: form.usePeople === "" ? "-1" : form.usePeople,
+    usePeople: form.data.usePeople === "" ? "-1" : form.data.usePeople,
     singleLimitBuyQty:
-      form.singleLimitBuyQty === "" ? "-1" : form.singleLimitBuyQty,
+      form.data.singleLimitBuyQty === "" ? "-1" : form.data.singleLimitBuyQty,
     singleNeedBuyQty:
-      form.singleNeedBuyQty === "" ? "-1" : form.singleNeedBuyQty,
+      form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
     useRule: ruleList.value.join(","),
+    ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
 
   const res = await addGroupSetting(body);
+  if (res.code === 0) {
+    drawer.value = false;
+  }
+};
+const handleEdit = async () => {
+  const body = Object.assign({}, form.data, {
+    onlineStatus: "1",
+    usePeople: form.data.usePeople === "" ? "-1" : form.data.usePeople,
+    singleLimitBuyQty:
+      form.data.singleLimitBuyQty === "" ? "-1" : form.data.singleLimitBuyQty,
+    singleNeedBuyQty:
+      form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
+    useRule: ruleList.value.join(","),
+    ruleListJson: JSON.stringify(form.data.ruleListJson),
+  });
+
+  const res = await editGroupSetting(body);
+  if (res.code === 0) {
+    drawer.value = false;
+  }
+};
+const confirmAddMenu = () => {
+  form1.mealMenuList = form1.temporaryList;
+  form1.totalPrice = form1.mealMenuList.reduce((pre, next) => {
+    return pre + next.qty * next.price;
+  }, 0);
+  numList.value = [];
+  for (let i = 1; i <= form1.temporaryList.length; i++) {
+    numList.value.push(i);
+  }
+
+  step.value = 1;
+};
+const confirmAddMenuStep1 = () => {
+  form1.isSelect = form1.isSelect ? "1" : "0";
+  form.data.ruleListJson.push(form1);
+  step.value = 0;
+};
+const handleMenuSelectStep2 = (idx) => {
+  console.log(idx);
+  form1.selectedIdx = idx;
+};
+const openClassify = () => {
+  step.value = 1;
+  form1 = reactive(new Form1Data());
+};
+const getEditInfo = async (row) => {
+  console.log(row);
+  rowStatus.value = "edit";
+  const res = await getGroupSettingDetail({
+    storeId: row.storeId,
+    mealId: row.mealId,
+  });
+  if (res.code === 0) {
+    //回显
+    for (let i = 0; i < res.data.ruleList.length; i++) {
+      res.data.ruleList[i].totalPrice = res.data.ruleList[
+        i
+      ].mealMenuList.reduce((pre, next) => {
+        return pre + next.qty * next.price;
+      }, 0);
+    }
+    form.data = reactive(
+      Object.assign({}, res.data, {
+        ruleListJson: res.data.ruleList,
+        singleLimitBuyQty:
+          res.data.singleLimitBuyQty === -1 ? "" : res.data.singleLimitBuyQty,
+        singleNeedBuyQty:
+          res.data.singleNeedBuyQty === -1 ? "" : res.data.singleNeedBuyQty,
+        usePeople: res.data.usePeople === -1 ? "" : res.data.usePeople,
+      })
+    );
+  }
+  drawer.value = true;
+};
+
+const delGroup = (item) => {
+  ElMessageBox.confirm("确定删除所选套餐?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      const res = await delGroupSetting({
+        storeId: item.storeId,
+        mealIds: item.mealId,
+      });
+      if (res.code === 0) {
+        getList();
+      }
+    })
+    .catch((action) => {
+      console.log(action);
+    });
+};
+// 开关
+const switchChange = async (item) => {
+  await onlineStatus({
+    onlineStatus: item.onlineStatus === "1" ? 1 : 0,
+    mealId: item.mealId,
+  });
+  getList()
 };
 </script>
 
 <style lang="scss" scoped>
+.choooseNum {
+  padding: 2px 20px;
+  border: 1px solid #c1c1c1;
+  border-radius: 4px;
+  margin-left: 15px;
+  font-size: 18px;
+  position: relative;
+}
 .menuSelect {
   width: 100%;
   height: 400px;
@@ -972,7 +1202,7 @@ const handleOnline = async () => {
   width: 30%;
 }
 
-.form-group {
+.fGruop {
   margin-bottom: 20px;
   width: calc(50% - 20px);
   flex-direction: column;
