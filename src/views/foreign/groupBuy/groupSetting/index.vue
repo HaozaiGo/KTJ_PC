@@ -26,14 +26,7 @@
         </el-select>
       </div>
 
-      <div
-        class="mainBtn flex-c"
-        style="cursor: pointer"
-        @click="
-          drawer = true;
-          rowStatus = 'add';
-        "
-      >
+      <div class="mainBtn flex-c" style="cursor: pointer" @click="handleCreate">
         <el-icon :size="18"><Plus /></el-icon>
         <span>创建单个套餐</span>
       </div>
@@ -208,13 +201,21 @@
                 </el-table-column>
                 <el-table-column label="操作" width="240">
                   <template #default="scope">
-                    <el-button
+                    <!-- <el-button
                       link
                       type="primary"
                       size="small"
                       @click="edit(scope.row)"
                     >
                       修改信息
+                    </el-button> -->
+                    <el-button
+                      link
+                      type="primary"
+                      size="small"
+                      @click="delRuleListJson(scope)"
+                    >
+                      删除
                     </el-button>
                   </template>
                 </el-table-column>
@@ -501,6 +502,8 @@
                 step = 2;
                 getLeftMenu();
                 form1.temporaryList = [];
+                form1.mealMenuList = [];
+
               "
             >
               <el-icon :size="18"><Plus /></el-icon>
@@ -549,7 +552,7 @@
                   <VueDraggable
                     ref="ell"
                     v-model="form1.mealMenuList"
-                    style="height: 300px; overflow-y: scroll"
+                    style="height: 350px; overflow-y: scroll"
                   >
                     <div
                       v-for="(item, idx) in form1.mealMenuList"
@@ -562,7 +565,18 @@
                           : 'background:#FFFFFF'
                       "
                     >
-                      <div style="flex: 2">{{ item.name }}</div>
+                      <div style="flex: 2">
+                        {{ item.name }}
+                        <span
+                          style="
+                            font-size: 12px;
+                            display: inline-block;
+                            margin-left: 15px;
+                          "
+                        >
+                          {{ item.remark }}
+                        </span>
+                      </div>
                       <div style="flex: 1; text-align: center">
                         <el-input v-model="item.qty" style="width: 150px">
                           <template #append>{{ item.unit }}</template>
@@ -584,11 +598,33 @@
                 >
                   请选择需要备注的菜品
                 </p>
-                <el-input
-                  v-if="form1.selectedIdx || form1.selectedIdx === 0"
-                  placeholder="请输入备注内容"
-                  v-model="form1.mealMenuList[form1.selectedIdx].remark"
-                ></el-input>
+                <div class="flex">
+                  <el-input
+                    v-if="
+                      form1.mealMenuList.length > 0 &&
+                      (form1.selectedIdx || form1.selectedIdx === 0)
+                    "
+                    placeholder="请输入备注内容"
+                    v-model="form1.mealMenuList[form1.selectedIdx].remark"
+                  ></el-input>
+
+                  <div
+                    v-if="
+                      form1.mealMenuList.length > 0 &&
+                      (form1.selectedIdx || form1.selectedIdx === 0)
+                    "
+                    style="
+                      height: 33px;
+                      white-space: nowrap;
+                      border: 1px solid #c1c1c1;
+                      padding: 1px 15px;
+                      margin-left: 20px;
+                      border-radius: 3px;
+                    "
+                  >
+                    {{ form1.mealMenuList[form1.selectedIdx].name }}
+                  </div>
+                </div>
               </div>
               <div style="flex: 2">
                 <h3 style="text-align: center" v-if="form1.isSelect">
@@ -676,6 +712,7 @@
             size="large"
             style="letter-spacing: 2px"
             @click="handleSave"
+            v-if="rowStatus === 'add'"
             >暂存/保存到草稿</el-button
           >
           <div
@@ -807,6 +844,24 @@ const form = reactive({
     ruleListJson: [], //第二层分类
   },
 });
+
+class FormData {
+  storeId = "";
+  mealName = "";
+  mealDescribe = "";
+  mealNickName = "";
+  remark = "";
+  price = "";
+  limitDayQty = "";
+  isNeedBook = 0;
+  usePeople = "";
+  file = "";
+  singleLimitBuyQty = "";
+  singleNeedBuyQty = "";
+  isOpenTimeUse = "1";
+  noUseDate = "全天可用";
+  ruleListJson = []; //第二层分类
+}
 let form1 = reactive({
   ruleName: "",
   isSelect: 0,
@@ -924,13 +979,24 @@ const drawerBack = () => {
     step.value -= 1;
   }
 };
+
 const tableHeight = inject("$com").tableHeight();
+// 删除二级分类
+const delRuleListJson = (item) => {
+  console.log(item.$index);
+  form.data.ruleListJson.splice(item.$index, 1);
+};
 const changePageSize = () => {};
 const storeIdChange = () => {};
 const handleClick = (e) => {
   console.log(e.props.name);
   activeName.value = e.props.name;
   getList();
+};
+const handleCreate = () => {
+  drawer.value = true;
+  rowStatus.value = "add";
+  form.data = reactive(new FormData());
 };
 const getShopOption = async () => {
   const res = await gerShopOption();
@@ -997,6 +1063,7 @@ const handleSave = async () => {
       form.data.singleLimitBuyQty === "" ? "-1" : form.data.singleLimitBuyQty,
     singleNeedBuyQty:
       form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
+    isNeedBook: form.data.isNeedBook ? 1 : 0,
     useRule: ruleList.value.join(","),
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
@@ -1012,6 +1079,7 @@ const handleOnline = async () => {
       form.data.singleLimitBuyQty === "" ? "-1" : form.data.singleLimitBuyQty,
     singleNeedBuyQty:
       form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
+    isNeedBook: form.data.isNeedBook ? 1 : 0,
     useRule: ruleList.value.join(","),
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
@@ -1029,6 +1097,7 @@ const handleEdit = async () => {
       form.data.singleLimitBuyQty === "" ? "-1" : form.data.singleLimitBuyQty,
     singleNeedBuyQty:
       form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
+    isNeedBook: form.data.isNeedBook ? 1 : 0,
     useRule: ruleList.value.join(","),
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
@@ -1051,6 +1120,9 @@ const confirmAddMenu = () => {
   step.value = 1;
 };
 const confirmAddMenuStep1 = () => {
+  if (form1.ruleName === "") {
+    return ElMessage.error("请输入套餐分类名称！");
+  }
   form1.isSelect = form1.isSelect ? "1" : "0";
   form.data.ruleListJson.push(form1);
   step.value = 0;
@@ -1118,7 +1190,7 @@ const switchChange = async (item) => {
     onlineStatus: item.onlineStatus === "1" ? 1 : 0,
     mealId: item.mealId,
   });
-  getList()
+  getList();
 };
 </script>
 
@@ -1133,7 +1205,7 @@ const switchChange = async (item) => {
 }
 .menuSelect {
   width: 100%;
-  height: 400px;
+  height: 450px;
   border: 1px solid #c1c1c1;
 }
 .classify {
