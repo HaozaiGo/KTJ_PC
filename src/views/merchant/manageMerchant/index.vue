@@ -220,9 +220,17 @@
 
     <el-dialog v-model="Discounts.dialogVisible" title="设置优惠" width="500">
       <el-form :model="Discounts" label-width="auto" style="max-width: 450px">
-        <el-form-item label="优惠力度">
+        <el-form-item label="线上优惠力度">
           <el-input
             v-model="Discounts.discount"
+            style="width: 200px"
+            type="number"
+            ><template #append>%</template></el-input
+          >
+        </el-form-item>
+        <el-form-item label="团购优惠">
+          <el-input
+            v-model="Discounts.mealDiscount"
             style="width: 200px"
             type="number"
             ><template #append>%</template></el-input
@@ -698,6 +706,7 @@ const Discounts = reactive({
   discount: null,
   storeId: "",
   settingAll: false,
+  mealDiscount: null
 });
 const ScanCode = reactive({
   dialogVisible: false,
@@ -854,6 +863,8 @@ const comfirmDiscount = async () => {
     const storeIds = multipleSelection.value.map((x) => x.storeId);
     const res = await discountAPI({
       discount: Discounts.discount / 100,
+      mealDiscount: Discounts.mealDiscount / 100,
+
       storeIds: storeIds,
     });
     if (res.code === 0) {
@@ -862,6 +873,7 @@ const comfirmDiscount = async () => {
   } else {
     const res = await discountAPI({
       discount: Discounts.discount / 100,
+      mealDiscount: Discounts.mealDiscount / 100,
       storeIds: [Discounts.storeId],
     });
     if (res.code === 0) {

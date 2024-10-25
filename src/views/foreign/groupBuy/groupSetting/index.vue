@@ -247,6 +247,18 @@
                 <div class="mainBtnTitle" style="padding: 3px 25px">定价</div>
                 <p style="text-align: center">
                   目前套餐总价：¥{{ totalPriceStep1 }}
+                  <span
+                    style="
+                      padding: 3px 8px;
+                      border: 1px solid #f76e4e;
+                      color:#f76e4e;
+                      font-size: 13px;
+                      border-radius: 5px;
+                    "
+                    v-if="form.data.price != ''"
+                  >
+                    {{ (form.data.price / totalPriceStep1).toFixed(2) }}折
+                  </span>
                 </p>
                 <div class="pricing flex-sr">
                   <div>
@@ -274,7 +286,7 @@
                   style="margin-top: 10px; width: calc(100% - 20px)"
                 >
                   <div>
-                    卷有效期
+                    券有效期
                     <div class="flex">
                       <el-input
                         style="width: 120px"
@@ -283,13 +295,13 @@
                       />
                       <el-input
                         v-model="form.data.limitDayQty"
-                        style="width: 200px"
+                        style="width: 210px"
                         placeholder="最多20天内"
                         type="number"
                         max="20"
                         min="1"
                       >
-                        <template #append>内有效</template>
+                        <template #append>天内有效</template>
                       </el-input>
                     </div>
                   </div>
@@ -503,7 +515,6 @@
                 getLeftMenu();
                 form1.temporaryList = [];
                 form1.mealMenuList = [];
-
               "
             >
               <el-icon :size="18"><Plus /></el-icon>
@@ -1065,6 +1076,7 @@ const handleSave = async () => {
       form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
     isNeedBook: form.data.isNeedBook ? 1 : 0,
     useRule: ruleList.value.join(","),
+    oldPrice: totalPriceStep1.value,
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
 
@@ -1072,6 +1084,7 @@ const handleSave = async () => {
 };
 
 const handleOnline = async () => {
+  console.log(totalPriceStep1.value);
   const body = Object.assign({}, form.data, {
     onlineStatus: "1",
     usePeople: form.data.usePeople === "" ? "-1" : form.data.usePeople,
@@ -1081,12 +1094,14 @@ const handleOnline = async () => {
       form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
     isNeedBook: form.data.isNeedBook ? 1 : 0,
     useRule: ruleList.value.join(","),
+    oldPrice: totalPriceStep1.value,
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
 
   const res = await addGroupSetting(body);
   if (res.code === 0) {
     drawer.value = false;
+    getList();
   }
 };
 const handleEdit = async () => {
@@ -1099,12 +1114,15 @@ const handleEdit = async () => {
       form.data.singleNeedBuyQty === "" ? "-1" : form.data.singleNeedBuyQty,
     isNeedBook: form.data.isNeedBook ? 1 : 0,
     useRule: ruleList.value.join(","),
+    oldPrice: totalPriceStep1.value,
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
 
   const res = await editGroupSetting(body);
   if (res.code === 0) {
     drawer.value = false;
+    getList();
+
   }
 };
 const confirmAddMenu = () => {

@@ -24,6 +24,7 @@
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="storeId" label="商家ID" sortable />
+        <el-table-column prop="orderLabels" label="分账类型" sortable />
         <el-table-column prop="account" label="接收方账号" sortable />
         <el-table-column prop="name" label="分账接收方全称" sortable>
         </el-table-column>
@@ -58,7 +59,7 @@
     <el-dialog
       v-model="dialogVisible"
       title="添加分账比例"
-      width="500"
+      width="700"
       align-center
     >
       <el-form
@@ -69,10 +70,26 @@
         :rules="rules"
         ref="formRef"
       >
-        <el-form-item label="分账比例" prop="rate">
-          <el-input v-model="formData.data.rate" placeholder="输入分账比例">
-            <template #append>%</template>
-          </el-input>
+        <el-form-item label="分账比例">
+          <div class="flex">
+            <el-select
+              v-model="formData.data.orderTypes"
+              placeholder="选择分账类型"
+              style="width: 300px"
+              multiple
+              clearable
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.dictValue"
+                :label="item.dictLabel"
+                :value="item.dictValue"
+              />
+            </el-select>
+            <el-input v-model="formData.data.rate" placeholder="输入分账比例" style="width:200px">
+              <template #append>%</template>
+            </el-input>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -109,6 +126,7 @@ const query = reactive({
 class Data {
   rate = "";
   storeId = "";
+  orderTypes = "";
 }
 let formData = reactive({
   data: new Data(),
@@ -128,6 +146,7 @@ const tableData = ref({
   row: [],
   total: 0,
 });
+const options = ref([]); //分账类型
 const storeId = ref("");
 const changePageSize = (e) => {
   query.pageNum = e;
@@ -164,6 +183,7 @@ const handleComfirm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       formData.data.rate = formData.data.rate / 100;
+      formData.data.orderTypes = formData.data.orderTypes.join(",");
       await addAccountList(formData.data);
       getList();
       dialogVisible.value = false;
@@ -189,6 +209,11 @@ const getList = async () => {
 onMounted(async () => {
   storeId.value = route.query.storeId;
   getList();
+  inject("$com")
+    .getDict("bill_order_type")
+    .then((res) => {
+      options.value = res.data[0].list;
+    });
 });
 </script>
 
