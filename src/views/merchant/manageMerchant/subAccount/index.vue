@@ -24,7 +24,7 @@
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="storeId" label="商家ID" sortable />
-        <el-table-column prop="orderLabels" label="分账类型" sortable />
+        <el-table-column prop="orderTypeLabels" label="分账类型" sortable />
         <el-table-column prop="account" label="接收方账号" sortable />
         <el-table-column prop="name" label="分账接收方全称" sortable>
         </el-table-column>
