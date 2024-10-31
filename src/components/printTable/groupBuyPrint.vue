@@ -112,6 +112,7 @@ const asyncEvent = async (ele) => {
       async (e) => {
         // 一个菜一个单
         console.log("ddddd", e);
+
         if (e.isSingleMenu === "1") {
           for (let i = 0; i < e.orderMenuList.length; i++) {
             state.orderDetailData = Object.assign({}, state.orderDetailData, e);
@@ -125,39 +126,7 @@ const asyncEvent = async (ele) => {
         } else {
           // 多个菜一个单
           state.orderDetailData = Object.assign({}, state.orderDetailData, e);
-
-          handlePrint(e);
-          resolve(e);
-        }
-      },
-      10,
-      ele
-    );
-  });
-};
-// 团购打单
-
-const groupBuyAsyncEvent = async (ele) => {
-  return new Promise((resolve) => {
-    setTimeout(
-      async (e) => {
-        // 一个菜一个单
-        console.log("ddddd", e);
-        if (e.isSingleMenu === "1") {
-          for (let i = 0; i < e.mealMenuList.length; i++) {
-            state.orderDetailData = Object.assign({}, state.orderDetailData, e);
-
-            state.orderDetailData.orderMenuList = [e.mealMenuList[i]];
-            console.log("打印菜单", state.orderDetailData);
-
-            await handlePrint(state.orderDetailData);
-          }
-          resolve(e);
-        } else {
-          // 多个菜一个单
-          state.orderDetailData = Object.assign({}, state.orderDetailData, e);
-          state.orderDetailData.orderMenuList = e.mealMenuList;
-          console.log(state.orderDetailData);
+          console.log("打印菜单", state.orderDetailData);
           
           handlePrint(state.orderDetailData);
           resolve(e);
@@ -168,20 +137,21 @@ const groupBuyAsyncEvent = async (ele) => {
     );
   });
 };
-
 // 打印方法执行
 const handlePrint = async (data) => {
+  state.orderDetailData = Object.assign({}, data);
 
   state.showPrintTable = true;
+  console.log("----2222----", data);
+
   const res = printerOption.value.find((x) => x.label === data.printerModel);
+
   if (res) {
     console.log("-------找到打印机", res);
   }
-
   await nextTick();
   // 找到匹配的打印机
-
-  console.log("----111----", data);
+  console.log("----111----", state.orderDetailData);
 
   if (res && data.orderMenuList.length > 0) {
     let LODOP = getLodop();
@@ -192,7 +162,7 @@ const handlePrint = async (data) => {
           Front54TableDom.value.$el.clientWidth) *
           50 +
         20;
-      console.log("height-50mm", height);
+      console.log("height-50mm", height)
     } else {
       height =
         data.printerType === "KITCHEN"
@@ -205,11 +175,6 @@ const handlePrint = async (data) => {
               80 +
             5;
     }
-    // console.log(printTableDom.value.$el.clientHeight);
-    // console.log(printTableDom.value.$el.clientWidth);
-
-    // console.log(height);
-
     var printerHtml;
     if (data.printSpec === "50mm") {
       printerHtml = Front54TableDom.value.$el.innerHTML;
@@ -246,7 +211,6 @@ const handlePrint = async (data) => {
 defineExpose({
   handlePrint,
   asyncEvent,
-  groupBuyAsyncEvent
 });
 </script>
 

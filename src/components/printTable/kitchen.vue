@@ -70,8 +70,6 @@
           >
             {{ item.qty }}{{ item.unit }}
           </td>
-          <!-- <td style="width: 12mm">{{ item.price }}</td>
-          <td style="width: 12mm">{{ item.amount }}</td> -->
         </tr>
       </tbody>
     </table>

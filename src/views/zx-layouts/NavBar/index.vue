@@ -244,6 +244,7 @@ import {
   checkNoDetail,
   offlineCheckOrder,
   beforePayCheckOrder,
+  teamBuyOrder,
 } from "@/api/project/foreign/order.js";
 
 export default {
@@ -369,7 +370,32 @@ export default {
       this.printerOption = arr;
       console.log("打印机列表", arr);
     },
+    handleTeamBuy() {},
+
     async handleOutBill() {
+      // 团购
+      if (this.socketData.type === "TEAM_BUY_PAY") {
+        const body = {
+          orderId: this.socketData.orderId,
+          storeId: this.socketData.storeId,
+        };
+
+        const res = await teamBuyOrder(body);
+        if (res.code === 0) {
+          const printerArr = res.data[0].printerList;
+          for (let i = 0; i < printerArr.length; i++) {
+            const orderDetailData = Object.assign(
+              {},
+              this.state1.orderDetailData,
+              printerArr[i]
+            );
+            this.$refs.lodopPrint.groupBuyAsyncEvent(orderDetailData);
+          }
+          this.$message.success("出单成功!");
+        }
+        return;
+      }
+      //扫码
       const body = {
         method:
           this.socketData.method === "新单"
@@ -401,7 +427,7 @@ export default {
         this.$message.success("出单成功!");
       }
     },
-  
+
     //获取台号
     async getTableNoList() {
       const res = await getDeskList({ storeId: this.storeId, pageSize: 999 });

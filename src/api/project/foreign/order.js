@@ -170,3 +170,11 @@ export function printAgain(data) {
   });
 }
 
+// 团购打单
+export function teamBuyOrder(data){
+  return request({
+    url: `/store/api/store/order/meal/print`,
+    method: "post",
+    data,
+  });
+}
