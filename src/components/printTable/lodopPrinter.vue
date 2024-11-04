@@ -148,7 +148,7 @@ const groupBuyAsyncEvent = async (ele) => {
             state.orderDetailData = Object.assign({}, state.orderDetailData, e);
 
             state.orderDetailData.orderMenuList = [e.mealMenuList[i]];
-            console.log("打印菜单", state.orderDetailData);
+            // console.log("打印菜单", state.orderDetailData);
 
             await handlePrint(state.orderDetailData);
           }
@@ -157,7 +157,7 @@ const groupBuyAsyncEvent = async (ele) => {
           // 多个菜一个单
           state.orderDetailData = Object.assign({}, state.orderDetailData, e);
           state.orderDetailData.orderMenuList = e.mealMenuList;
-          console.log(state.orderDetailData);
+          // console.log(state.orderDetailData);
           
           handlePrint(state.orderDetailData);
           resolve(e);

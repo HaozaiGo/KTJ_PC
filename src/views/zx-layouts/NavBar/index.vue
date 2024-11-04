@@ -387,8 +387,11 @@ export default {
             const orderDetailData = Object.assign(
               {},
               this.state1.orderDetailData,
-              printerArr[i]
+              { peopleQty:res.data[0].peopleQty,tableNo:res.data[0].tableNo, ...printerArr[i]}
+            
             );
+            // console.log('-------------------',orderDetailData);
+            
             this.$refs.lodopPrint.groupBuyAsyncEvent(orderDetailData);
           }
           this.$message.success("出单成功!");
