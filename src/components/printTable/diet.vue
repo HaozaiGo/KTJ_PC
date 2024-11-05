@@ -56,7 +56,7 @@
           </td>
           <td style="width: 10mm" align="center">{{ item.unit }}</td>
           <td style="width: 10mm" align="center">{{ item.qty }}</td>
-          <td style="width: 12mm" align="center">{{ item.realPrice }}</td>
+          <td style="width: 12mm" align="center">{{ item?.realPrice || item?.price }}</td>
           <td style="width: 12mm" align="center">{{ item.amount }}</td>
         </tr>
       </tbody>
@@ -110,7 +110,7 @@
           font-size: 22px;
           margin-right: 10mm;
         "
-        >{{ Number(totalPrice).toFixed(2) }}</span
+        >{{ Number(tableData?.mealPrice || totalPrice).toFixed(2) }}</span
       >
     </div>
     <div v-if="needScanImg" style="width: 70mm; text-align: center">

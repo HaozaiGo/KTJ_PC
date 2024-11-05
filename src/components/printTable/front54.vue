@@ -4,7 +4,7 @@
     <div
       style="text-align: center; font-size: 22px; padding: 1px 0; width: 100%"
     >
-      <div>客单-{{ tableData.pickupWayLabel }}</div>
+      <div>{{ tableData.pickupWayLabel }}</div>
       <div>{{ tableData.storeName }}</div>
     </div>
 
@@ -54,7 +54,7 @@
             </span>
           </td>
           <td style="width: 14mm; font-size: 12px" align="center">
-            {{ item.realPrice }}/{{ item.unit }}
+            {{ item?.realPrice || item?.price }}/{{ item.unit }}
           </td>
           <td style="width: 9mm; font-size: 12px" align="center">
             {{ item.qty }}
@@ -62,7 +62,6 @@
           <td style="width: 10mm; font-size: 12px" align="center">
             {{ item.amount }}
           </td>
-       
         </tr>
       </tbody>
     </table>
@@ -96,7 +95,9 @@
           font-size: 22px;
           margin-right: 10mm;
         "
-        >{{ Number(totalPrice).toFixed(2) }}</span
+      >
+        <!-- {{ Number(totalPrice).toFixed(2) }} -->
+        {{ Number(tableData?.mealPrice || totalPrice).toFixed(2) }}</span
       >
     </div>
     <div v-if="needScanImg" style="width: 48mm; text-align: center">

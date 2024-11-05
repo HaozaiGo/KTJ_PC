@@ -90,6 +90,7 @@
     <el-pagination
       layout="prev, pager, next"
       :total="tableData.total"
+      :default-page-size="5"
       style="float: right"
       @current-change="changePageSize"
     />
@@ -187,7 +188,16 @@
                 ref="tableDom"
               >
                 <!-- :height="tableHeight - 300" -->
-                <el-table-column prop="ruleName" label="分类名称" sortable />
+                <el-table-column prop="ruleName" label="分类名称" sortable>
+                  <template #default="scope">
+                    {{ scope.row.ruleName }}
+                    <span v-if="scope.row.maxSelectQty">
+                      ({{ scope.row.mealMenuList.length }}选{{
+                        scope.row.maxSelectQty
+                      }})
+                    </span>
+                  </template>
+                </el-table-column>
 
                 <el-table-column label="菜品数量" width="160">
                   <template #default="scope">
@@ -251,7 +261,7 @@
                     style="
                       padding: 3px 8px;
                       border: 1px solid #f76e4e;
-                      color:#f76e4e;
+                      color: #f76e4e;
                       font-size: 13px;
                       border-radius: 5px;
                     "
@@ -479,6 +489,7 @@
               :compress="true"
               @uploadSuccess="uploadSuccess"
               :action="true"
+              ref="uploadImg"
             ></UploadImg>
           </div>
 
@@ -507,18 +518,25 @@
                 {{ form1.mealMenuList.length }}选{{ form1.maxSelectQty }}
               </div>
             </div>
-
-            <div
-              class="mainBtn flex-c"
-              @click="
-                step = 2;
-                getLeftMenu();
-                form1.temporaryList = [];
-                form1.mealMenuList = [];
-              "
-            >
-              <el-icon :size="18"><Plus /></el-icon>
-              <span>添加菜品</span>
+            <div class="flex">
+              <div
+                class="mainBtn flex-c"
+                @click="
+                  step = 2;
+                  getLeftMenu();
+                "
+              >
+                <el-icon :size="18"><Plus /></el-icon>
+                <span>添加菜品</span>
+              </div>
+              <div
+                class="mainBtn flex-c"
+                style="margin-left: 20px"
+                @click="customMenus()"
+              >
+                <el-icon :size="18"><Plus /></el-icon>
+                <span>自定义菜品</span>
+              </div>
             </div>
 
             <div class="flex" style="align-items: start">
@@ -558,7 +576,8 @@
                   <div class="menuSelectTitle flex">
                     <div style="flex: 2">菜品名称</div>
                     <div style="flex: 1; text-align: center">数量</div>
-                    <div style="flex: 1; text-align: center">价格</div>
+                    <div style="flex: 1; text-align: center">单价</div>
+                    <div style="flex: 1; text-align: center">合计</div>
                   </div>
                   <VueDraggable
                     ref="ell"
@@ -576,7 +595,7 @@
                           : 'background:#FFFFFF'
                       "
                     >
-                      <div style="flex: 2">
+                      <div style="flex: 2.5">
                         {{ item.name }}
                         <span
                           style="
@@ -589,12 +608,15 @@
                         </span>
                       </div>
                       <div style="flex: 1; text-align: center">
-                        <el-input v-model="item.qty" style="width: 150px">
+                        <el-input v-model="item.qty" style="width: 200px">
                           <template #append>{{ item.unit }}</template>
                         </el-input>
                       </div>
-                      <div style="flex: 1; text-align: center">
+                      <div style="flex: 1; text-align: center; padding: 0 15px">
                         <el-input v-model="item.price"></el-input>
+                      </div>
+                      <div style="flex: 1; text-align: center; padding: 0 15px">
+                        <span>{{ item.qty * item.price }}</span>
                       </div>
                     </div>
                   </VueDraggable>
@@ -650,7 +672,15 @@
                     v-for="(item, index1) in numList"
                     :key="index1"
                     class="flex-c"
-                    @click="form1.maxSelectQty = item"
+                    :style="
+                      activeMaxSelectQty === index1
+                        ? 'background:#ae9d87'
+                        : 'background:#FFFFFF'
+                    "
+                    @click="
+                      form1.maxSelectQty = item;
+                      activeMaxSelectQty = index1;
+                    "
                   >
                     {{ item }}
                   </div>
@@ -699,6 +729,16 @@
               </div>
               <div style="flex: 1">
                 <h2 style="text-align: center">菜品</h2>
+                <div class="flex">
+                  <el-input
+                    placeholder="请输入搜索的菜品名称"
+                    style="width: 50%; margin: 20px 25px"
+                    v-model="tasteData.searchVal"
+                  ></el-input>
+                  <el-button plain icon="search" @click="tasteDataSearch"
+                    >搜索</el-button
+                  >
+                </div>
 
                 <el-tree
                   style="max-width: 600px"
@@ -806,6 +846,53 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 自定义菜品 -->
+    <div class="whiteBg" v-if="showCustomMenu">
+      <div class="center">
+        <div class="customMenuSty">
+          <p>菜品名称</p>
+          <input type="text" v-model="customData.data.name" />
+          <p>价格</p>
+          <input type="text" v-model="customData.data.price" />
+          <div class="flex">
+            <div style="width: 200px">数量</div>
+            <div style="width: 200px">单位</div>
+          </div>
+          <div class="flex">
+            <input
+              type="text"
+              style="width: 180px"
+              v-model="customData.data.qty"
+            />
+            <el-select
+              v-model="customData.data.unit"
+              placeholder="Select"
+              size="large"
+              style="width: 180px"
+              :teleported="false"
+            >
+              <el-option
+                v-for="item in unitList"
+                :key="item.dictValue"
+                :label="item.dictLabel"
+                :value="item.dictValue"
+              />
+            </el-select>
+          </div>
+          <div
+            class="customMenuBtnSty flex-c"
+            @click="showCustomMenu = false"
+            style="right: 150px"
+          >
+            取消
+          </div>
+          <div class="customMenuBtnSty flex-c" @click="joinToMealMenuList">
+            确定
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -813,7 +900,7 @@
 import { VueDraggable } from "vue-draggable-plus";
 import UploadImg from "@/components/uploadFile.vue";
 import PieChart from "./components/PieChart.vue";
-import { ref, reactive, onMounted, inject, computed } from "vue";
+import { ref, reactive, onMounted, inject, computed, nextTick } from "vue";
 import { gerShopOption } from "@/api/project/foreign/employee.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getTypeList, getMenusList } from "@/api/project/foreign/menu.js";
@@ -825,13 +912,20 @@ import {
   getGroupSettingList,
   onlineStatus,
 } from "@/api/project/foreign/groupSetting.js";
+
 defineOptions({
   name: "groupSetting",
   isRouter: true,
 });
 onMounted(async () => {
+  inject("$com")
+    .getStoreDict("bill_store_menu_unit")
+    .then((res) => {
+      unitList.value = res.data[0].list;
+    });
   getShopOption();
 });
+const uploadImg = ref(null);
 const defaultProps = {
   children: "children",
   label: "name",
@@ -882,6 +976,7 @@ let form1 = reactive({
   selectedIdx: null,
   totalPrice: 0,
 });
+const activeMaxSelectQty = ref(null);
 
 class Form1Data {
   ruleName = "";
@@ -892,6 +987,7 @@ class Form1Data {
   selectedIdx = null;
   totalPrice = 0;
 }
+const showCustomMenu = ref(false);
 const ell = ref(null);
 const step = ref(0);
 const customRule = ref("");
@@ -904,7 +1000,7 @@ const addedRules = ref([
   },
   {
     name: "就餐规则",
-    childen: ["仅限堂食", "仅限外带", "均可使用"],
+    childen: ["仅限大厅", "仅限堂食", "仅限外带", "堂食外带均可"],
   },
   {
     name: "用餐时间",
@@ -917,7 +1013,12 @@ const addedRules = ref([
   },
   {
     name: "发票",
-    childen: ["发票按照账单实际消费金额开具", "本单无法提供发票"],
+    childen: [
+      "本单发票由商家提供，详情请咨询商家",
+      "特价菜品不含票税",
+      "发票按照账单实际消费金额开具",
+      "本单无法提供发票",
+    ],
   },
   {
     name: "秒杀",
@@ -931,8 +1032,18 @@ const addedRules = ref([
   {
     name: "优惠规则",
     childen: [
-      "团购用户不可同时享受商家其他优惠",
+      "使用团购后，将无法同时享受商家其他优惠",
       "购买用户只能享受店内部分优惠,详情咨询商家",
+      "使用团购后，仍可同时享受商家其他优惠",
+      "使用团购后，只能享受商家部分优惠，详情咨询商家",
+    ],
+  },
+  {
+    name: "其他",
+    childen: [
+      "如部分菜品因时令或其他不可抗因素导致无法提供，商家会用等价菜品替换，具体事宜请与商家协商",
+      "无需预约，消费高峰期可能需要等位",
+      "每桌最多使用1张团购券",
     ],
   },
 ]); //右边的规则字典
@@ -944,6 +1055,7 @@ const activeName = ref("1");
 const tableData = reactive({
   row: [],
   total: 0,
+  pageNum: 1,
 });
 const unavailableDaysOptions = ref([
   "全天可用",
@@ -957,11 +1069,21 @@ const unavailableDaysOptions = ref([
 ]); //不可用日期
 const tasteData = reactive({
   leftData: {},
+  rightData: {},
   selected: {},
   setectIdx: 0,
+  searchVal: "",
+});
+const customData = reactive({
+  data: {
+    name: "",
+    price: "",
+    qty: 1,
+    unit: "份",
+  },
 });
 const numList = ref([1, 2, 3, 4, 5, 6, 7, 8]); //分类数量
-
+const unitList = ref([]); //单位列表
 const drawerWidth = computed(() => {
   return window.innerWidth - 165;
 });
@@ -990,23 +1112,41 @@ const drawerBack = () => {
     step.value -= 1;
   }
 };
-
+const tasteDataSearch = async () => {
+  const res = await getMenusList({
+    name: tasteData.searchVal,
+    pageSize: 100,
+    storeId: tasteData.selected.storeId,
+  });
+  if (res.code === 0) {
+    tasteData.rightData = res.rows;
+  }
+};
 const tableHeight = inject("$com").tableHeight();
 // 删除二级分类
 const delRuleListJson = (item) => {
   console.log(item.$index);
   form.data.ruleListJson.splice(item.$index, 1);
 };
-const changePageSize = () => {};
+const changePageSize = (e) => {
+  tableData.pageNum = e;
+  getList();
+};
 const storeIdChange = () => {};
 const handleClick = (e) => {
   console.log(e.props.name);
   activeName.value = e.props.name;
   getList();
 };
-const handleCreate = () => {
+const handleCreate = async () => {
   drawer.value = true;
   rowStatus.value = "add";
+  ruleList.value = [];
+  nextTick(() => {
+    console.log(uploadImg.value);
+    uploadImg.value.clearImg();
+  });
+
   form.data = reactive(new FormData());
 };
 const getShopOption = async () => {
@@ -1022,6 +1162,8 @@ const getList = async () => {
   const res = await getGroupSettingList({
     storeId: storeId.value,
     onlineStatus: activeName.value,
+    pageNum: tableData.pageNum,
+    pageSize: 5,
   });
   if (res.code === 0) {
     tableData.row = res.rows;
@@ -1122,14 +1264,13 @@ const handleEdit = async () => {
   if (res.code === 0) {
     drawer.value = false;
     getList();
-
   }
 };
 const confirmAddMenu = () => {
   form1.mealMenuList = form1.temporaryList;
-  form1.totalPrice = form1.mealMenuList.reduce((pre, next) => {
-    return pre + next.qty * next.price;
-  }, 0);
+  // form1.totalPrice = form1.mealMenuList.reduce((pre, next) => {
+  //   return pre + next.qty * next.price;
+  // }, 0);
   numList.value = [];
   for (let i = 1; i <= form1.temporaryList.length; i++) {
     numList.value.push(i);
@@ -1141,7 +1282,29 @@ const confirmAddMenuStep1 = () => {
   if (form1.ruleName === "") {
     return ElMessage.error("请输入套餐分类名称！");
   }
+
   form1.isSelect = form1.isSelect ? "1" : "0";
+
+  if (!form1.isSelect) {
+    form1.totalPrice = form1.mealMenuList.reduce((pre, next) => {
+      return pre + next.qty * next.price;
+    }, 0);
+  } else {
+    // 降序排序
+    const temp = form1.mealMenuList.map((item) => item.price * item.qty);
+
+    temp.sort(function (a, b) {
+      return b - a;
+    });
+
+    const sortArr = temp.slice(0, Number(form1.maxSelectQty));
+
+    form1.totalPrice = sortArr.reduce((pre, next) => {
+      return pre + next;
+    }, 0);
+    console.log(form1.totalPrice);
+  }
+
   form.data.ruleListJson.push(form1);
   step.value = 0;
 };
@@ -1209,6 +1372,29 @@ const switchChange = async (item) => {
     mealId: item.mealId,
   });
   getList();
+};
+
+const customMenus = () => {
+  showCustomMenu.value = true;
+};
+const joinToMealMenuList = () => {
+  let pass = true;
+  for (let i in customData.data) {
+    if (customData.data[i] === "") {
+      ElMessage.error("请输入完整信息！");
+      pass = false;
+    }
+  }
+  if (pass) {
+    form1.mealMenuList.push(Object.assign({}, customData.data));
+    showCustomMenu.value = false;
+    customData.data = reactive({
+      name: "",
+      price: "",
+      qty: "",
+      unit: "份",
+    });
+  }
 };
 </script>
 
@@ -1359,5 +1545,30 @@ button {
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
+}
+.customMenuSty {
+  width: 400px;
+  height: 500px;
+  padding: 40px 20px;
+  position: relative;
+  background: #ffffff;
+  input {
+    width: 100%;
+    height: 40px;
+    padding: 4px 5px;
+    border: 1px solid #ccc;
+    font-size: 20px;
+    margin: 12px 0;
+  }
+  .customMenuBtnSty {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 120px;
+    height: 45px;
+    font-size: 20px;
+    letter-spacing: 2px;
+    border: 1px solid #c1c1c1;
+  }
 }
 </style>

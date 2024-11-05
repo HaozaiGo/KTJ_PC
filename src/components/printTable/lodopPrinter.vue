@@ -43,11 +43,25 @@
         opacity: 0;
       "
     ></Front54>
+    <KitchenTable58
+      v-if="state.showPrintTable"
+      ref="Front58Kitchen"
+      :tableData="state.orderDetailData"
+      style="
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        transform: translate(-80mm, -80mm);
+        opacity: 0;
+      "
+    >
+    </KitchenTable58>
   </div>
 </template>
 
 <script setup>
 import Front54 from "@/components/printTable/front54.vue";
+import KitchenTable58 from "@/components/printTable/kitchen58.vue";
 import printTable from "@/components/printTable/diet.vue";
 import KitchenTable from "@/components/printTable/kitchen.vue";
 import getLodop from "@/utils/LodopFuncs.js";
@@ -55,6 +69,7 @@ import { reactive, onMounted, ref, inject, nextTick } from "vue";
 const kitchenTableDom = ref(null);
 const printTableDom = ref(null);
 const Front54TableDom = ref(null);
+const Front58Kitchen = ref(null);
 const LODOPOBJ = ref(null);
 const props = defineProps({
   needScanImg: {
@@ -158,7 +173,7 @@ const groupBuyAsyncEvent = async (ele) => {
           state.orderDetailData = Object.assign({}, state.orderDetailData, e);
           state.orderDetailData.orderMenuList = e.mealMenuList;
           // console.log(state.orderDetailData);
-          
+
           handlePrint(state.orderDetailData);
           resolve(e);
         }
@@ -171,7 +186,6 @@ const groupBuyAsyncEvent = async (ele) => {
 
 // 打印方法执行
 const handlePrint = async (data) => {
-
   state.showPrintTable = true;
   const res = printerOption.value.find((x) => x.label === data.printerModel);
   if (res) {
@@ -188,11 +202,15 @@ const handlePrint = async (data) => {
     var height;
     if (data.printSpec === "50mm") {
       height =
-        (Front54TableDom.value.$el.clientHeight /
-          Front54TableDom.value.$el.clientWidth) *
-          50 +
-        20;
-      console.log("height-50mm", height);
+        data.printerType === "KITCHEN"
+          ? (Front58Kitchen.value.$el.clientHeight /
+              Front58Kitchen.value.$el.clientWidth) *
+              50 +
+            10
+          : (Front54TableDom.value.$el.clientHeight /
+              Front54TableDom.value.$el.clientWidth) *
+              50 +
+            20;
     } else {
       height =
         data.printerType === "KITCHEN"
@@ -205,14 +223,14 @@ const handlePrint = async (data) => {
               80 +
             5;
     }
-    // console.log(printTableDom.value.$el.clientHeight);
-    // console.log(printTableDom.value.$el.clientWidth);
-
-    // console.log(height);
+    console.log("height", height);
 
     var printerHtml;
     if (data.printSpec === "50mm") {
-      printerHtml = Front54TableDom.value.$el.innerHTML;
+      printerHtml =
+        data.printerType === "KITCHEN"
+          ? Front58Kitchen.value.$el.innerHTML
+          : Front54TableDom.value.$el.innerHTML;
     } else {
       printerHtml =
         data.printerType === "KITCHEN"
@@ -246,7 +264,7 @@ const handlePrint = async (data) => {
 defineExpose({
   handlePrint,
   asyncEvent,
-  groupBuyAsyncEvent
+  groupBuyAsyncEvent,
 });
 </script>
 

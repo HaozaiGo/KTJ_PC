@@ -379,7 +379,6 @@ export default {
           orderId: this.socketData.orderId,
           storeId: this.socketData.storeId,
         };
-
         const res = await teamBuyOrder(body);
         if (res.code === 0) {
           const printerArr = res.data[0].printerList;
@@ -387,15 +386,20 @@ export default {
             const orderDetailData = Object.assign(
               {},
               this.state1.orderDetailData,
-              { peopleQty:res.data[0].peopleQty,tableNo:res.data[0].tableNo, ...printerArr[i]}
-            
+              {
+                peopleQty: res.data[0].peopleQty,
+                tableNo: res.data[0].tableNo,
+                mealPrice: res.data[0].mealPrice,
+                ...printerArr[i],
+              }
             );
             // console.log('-------------------',orderDetailData);
-            
+
             this.$refs.lodopPrint.groupBuyAsyncEvent(orderDetailData);
           }
           this.$message.success("出单成功!");
         }
+
         return;
       }
       //扫码

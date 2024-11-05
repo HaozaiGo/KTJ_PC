@@ -35,7 +35,7 @@
   </div> -->
 </template>
 <script setup>
-import { ref, watch, inject, onMounted } from "vue";
+import { ref, watch, inject, onMounted,defineExpose } from "vue";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 import common from "@/utils/common";
 const props = defineProps({
@@ -167,6 +167,10 @@ const onUpload = async (file, fileList) => {
   }
   return true;
 };
+// 清空图片
+const clearImg = () => {
+  imageUrl.value = "";
+};
 
 const handleRemove = (file, uploadFiles) => {
   console.log(file);
@@ -195,6 +199,9 @@ const beforeRemove = (uploadFile, uploadFiles) => {
     () => false
   );
 };
+defineExpose({
+  clearImg
+})
 </script>
 <style lang="scss" scoped>
 .avatar-uploader .avatar {
@@ -222,7 +229,6 @@ const beforeRemove = (uploadFile, uploadFiles) => {
   height: 178px;
   text-align: center;
   border: 1px dashed var(--el-border-color);
-
 }
 .previewDownload {
   margin-top: 80px;
