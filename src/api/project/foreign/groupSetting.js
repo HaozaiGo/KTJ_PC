@@ -53,3 +53,12 @@ export function onlineStatus(data) {
     data,
   });
 }
+
+// 计算费率和结算价
+export function computedRate(params) {
+  return request({
+    url: `/store/api/store/meal/calculate/settle/price`,
+    method: "get",
+    params,
+  });
+}

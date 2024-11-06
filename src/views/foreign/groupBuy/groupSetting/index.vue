@@ -276,15 +276,26 @@
                     <el-input
                       style="display: block"
                       v-model="form.data.price"
+                      @blur="getRate"
                     ></el-input>
                   </div>
                   <div>
                     结算价
-                    <el-input style="display: block" disabled></el-input>
+                    <el-input
+                      style="display: block"
+                      disabled
+                      v-model="rate.settlePrice"
+                    ></el-input>
                   </div>
                   <div>
                     费率
-                    <el-input style="display: block" disabled></el-input>
+                    <el-input
+                      style="display: block"
+                      disabled
+                      v-model="rate.preRate"
+                    >
+                      <template #append>%</template></el-input
+                    >
                   </div>
                 </div>
               </div>
@@ -490,6 +501,7 @@
               @uploadSuccess="uploadSuccess"
               :action="true"
               ref="uploadImg"
+              :fileList="fileList"
             ></UploadImg>
           </div>
 
@@ -911,6 +923,7 @@ import {
   delGroupSetting,
   getGroupSettingList,
   onlineStatus,
+  computedRate,
 } from "@/api/project/foreign/groupSetting.js";
 
 defineOptions({
@@ -930,6 +943,7 @@ const defaultProps = {
   children: "children",
   label: "name",
 };
+const rate = ref({});
 const form = reactive({
   data: {
     storeId: "",
@@ -950,7 +964,7 @@ const form = reactive({
   },
 });
 
-class FormData {
+class FormData0 {
   storeId = "";
   mealName = "";
   mealDescribe = "";
@@ -977,7 +991,7 @@ let form1 = reactive({
   totalPrice: 0,
 });
 const activeMaxSelectQty = ref(null);
-
+const fileList = ref([]);
 class Form1Data {
   ruleName = "";
   isSelect = 0;
@@ -1092,6 +1106,19 @@ const totalPriceStep1 = computed(() => {
     return pre + next.totalPrice;
   }, 0);
 });
+const getRate = async (e) => {
+  const body = {
+    price: form.data.price,
+    storeId: form.data.storeId,
+  };
+  const res = await computedRate(body);
+  if (res.code === 0) {
+    rate.value = res.data;
+    rate.value.preRate = (res.data.rate * 100).toFixed(3);
+    console.log(rate.value.preRate);
+  }
+};
+
 const uploadSuccess = (file) => {
   console.log(file);
   form.data.file = file;
@@ -1147,7 +1174,7 @@ const handleCreate = async () => {
     uploadImg.value.clearImg();
   });
 
-  form.data = reactive(new FormData());
+  form.data = reactive(new FormData0());
 };
 const getShopOption = async () => {
   const res = await gerShopOption();
@@ -1221,6 +1248,7 @@ const handleSave = async () => {
     oldPrice: totalPriceStep1.value,
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
+  // console.log(body);
 
   const res = await addGroupSetting(body);
 };
@@ -1259,6 +1287,7 @@ const handleEdit = async () => {
     oldPrice: totalPriceStep1.value,
     ruleListJson: JSON.stringify(form.data.ruleListJson),
   });
+  delete body.ruleList;
 
   const res = await editGroupSetting(body);
   if (res.code === 0) {
@@ -1323,6 +1352,8 @@ const getEditInfo = async (row) => {
     storeId: row.storeId,
     mealId: row.mealId,
   });
+  console.log(res);
+
   if (res.code === 0) {
     //回显
     for (let i = 0; i < res.data.ruleList.length; i++) {
@@ -1342,6 +1373,10 @@ const getEditInfo = async (row) => {
         usePeople: res.data.usePeople === -1 ? "" : res.data.usePeople,
       })
     );
+    ruleList.value = res.data.useRule.split(",");
+    fileList.value = [{ url: res.data.coverUrl }];
+    rate.value.preRate = Number(res.data.rate * 100).toFixed(3);
+    rate.value.settlePrice = res.data.settlePrice;
   }
   drawer.value = true;
 };
