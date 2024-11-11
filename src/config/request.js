@@ -45,7 +45,7 @@ const waringMsg = (message) => {
 };
 
 service.interceptors.response.use(
-  (response) => {
+  async (response) => {
     if (loadingInstance) {
       loadingInstance.close();
     }
@@ -83,7 +83,10 @@ service.interceptors.response.use(
           // 登录失效
           removeToken();
           if (common.role === "merchant") {
-            router.replace("/signup");
+            await refleshToken();
+            // 再次发起401的请求
+            return service(config);
+
           } else {
             router.replace("/login");
           }
@@ -126,7 +129,40 @@ service.interceptors.response.use(
   }
 );
 
-// 通用下载方法
+// refleshToken
+
+function refleshToken() {
+  // console.log("----reflash");
+  const staffId = localStorage.getItem("staffId");
+  const storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+  const userName = localStorage.getItem("account"); //商家的用户名缓存是account 平台是username
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        "/store/api/store/login/auto",
+        { staffId, storeId, userName },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => {
+        if (res.data.code === 0) {
+          window.localStorage.setItem("token", res.data.data.token);
+          window.localStorage.setItem("staffId", res.data.data.staffId);
+          window.localStorage.setItem("isAdmin", res.data.data.isAdmin);
+          resolve();
+        } else {
+          router.replace("/signup");
+          waringMsg("信息验证失败！请重新登录");
+          reject();
+        }
+      });
+  });
+}
+
+// 通用下载方法œ
 export function download(url, params, filename) {
   return service
     .post(url + "?" + tansParams(params), params, {

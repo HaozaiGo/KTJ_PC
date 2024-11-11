@@ -77,7 +77,7 @@ let settings = {
   //登录失效code
   invalidCode: 401,
   //无权限code
-  noPermissionCode: 401,
+  noPermissionCode: 4001,
   //是否显示在页面高亮错误
   errorLog: ["development", "test", "production"],
   //是否开启登录拦截

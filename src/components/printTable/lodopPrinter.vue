@@ -187,6 +187,8 @@ const groupBuyAsyncEvent = async (ele) => {
 // 打印方法执行
 const handlePrint = async (data) => {
   state.showPrintTable = true;
+  console.log(printerOption.value);
+  
   const res = printerOption.value.find((x) => x.label === data.printerModel);
   if (res) {
     console.log("-------找到打印机", res);
