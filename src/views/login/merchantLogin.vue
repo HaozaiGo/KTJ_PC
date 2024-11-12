@@ -112,6 +112,8 @@ import {
   getFilePath,
 } from "@/api/common/user.js";
 import { baseSettings } from "@/stores/counter";
+import { ElMessage, ElLoading } from "element-plus";
+import axios from "axios";
 
 export default {
   data() {
@@ -138,13 +140,56 @@ export default {
       this.account = account;
       this.remeber = true;
     }
+    this.autoLogin();
   },
   methods: {
+    //自动登录
+    autoLogin() {
+      console.log('autoLogin');
+      
+      const token = localStorage.getItem("token");
+      if (token) {
+        const loading = ElLoading.service({
+          lock: true,
+          text: "正在为你登录...",
+          background: "rgba(0, 0, 0, 0.7)",
+        });
+        const staffId = localStorage.getItem("staffId");
+        const storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+        const userName = localStorage.getItem("account"); //商家的用户名缓存是account 平台是username
+        axios
+          .post(
+            "/store/api/store/login/auto",
+            { staffId, storeId, userName },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          )
+          .then((res) => {
+            if (res.data.code === 0) {
+              window.localStorage.setItem("token", res.data.data.token);
+              window.localStorage.setItem("staffId", res.data.data.staffId);
+              window.localStorage.setItem("isAdmin", res.data.data.isAdmin);
+              loading.close();
+              this.$router.push("/home");
+            } else {
+              ElMessage({
+                message: "信息验证失败！请重新登录",
+                type: "warning",
+              });
+              return;
+            }
+          });
+      }
+    },
+
     //记住账号
     rememberAccount() {
       if (this.remeber) {
         localStorage.setItem("account", this.account);
-      }else{
+      } else {
         localStorage.removeItem("account");
       }
     },
