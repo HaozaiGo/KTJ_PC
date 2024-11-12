@@ -343,7 +343,7 @@ export default {
         this.getOrderListSocket();
         this.getTableNoList();
       }
-    }, 1000);
+    }, 3000);
   },
   methods: {
     logout() {
