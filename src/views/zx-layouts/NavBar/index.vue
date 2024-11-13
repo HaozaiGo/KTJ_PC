@@ -297,7 +297,7 @@ export default {
       storeId: "",
       socketData: {}, //点击的socket数据
       printerMethod: [], //打单方式
-      printerOption: [], //打印机全部型号
+    
       tableHeight: common.tableHeight(),
       notifiactions: [],
       wsClose: false,
@@ -366,8 +366,7 @@ export default {
         obj.label = LODOP.GET_PRINTER_NAME(i);
         arr.push(obj);
       }
-
-      this.printerOption = arr;
+      localStorage.setItem("printerList",JSON.stringify(arr));
       console.log("打印机列表", arr);
     },
     handleTeamBuy() {},
@@ -397,7 +396,7 @@ export default {
 
             this.$refs.lodopPrint.groupBuyAsyncEvent(orderDetailData);
           }
-          this.$message.success("出单成功!");
+          this.$message.success("团购出单成功!");
         }
 
         return;

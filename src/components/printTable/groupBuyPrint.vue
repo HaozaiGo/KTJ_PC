@@ -79,11 +79,13 @@ onMounted(() => {
     var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
     if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
       // console.log("这是windows32位系统");
-      getPrinterList();
+      // getPrinterList();
+      printerOption.value = JSON.parse(localStorage.getItem("printerList"));
     }
     if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
       // console.log("这是windows64位系统");
-      getPrinterList();
+      // getPrinterList();
+      printerOption.value = JSON.parse(localStorage.getItem("printerList"));
     }
     if (isMac) {
       console.log("这是mac系统");
@@ -127,7 +129,7 @@ const asyncEvent = async (ele) => {
           // 多个菜一个单
           state.orderDetailData = Object.assign({}, state.orderDetailData, e);
           console.log("打印菜单", state.orderDetailData);
-          
+
           handlePrint(state.orderDetailData);
           resolve(e);
         }
@@ -162,7 +164,7 @@ const handlePrint = async (data) => {
           Front54TableDom.value.$el.clientWidth) *
           50 +
         20;
-      console.log("height-50mm", height)
+      console.log("height-50mm", height);
     } else {
       height =
         data.printerType === "KITCHEN"
