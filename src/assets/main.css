@@ -26,7 +26,7 @@ a,
 }
 
 .nav-bar-container {
-  background-image: url("./img/shuidian/top1.png") !important;
+  /* background-image: url("./img/shuidian/top1.png") !important; */
   background-position: right;
   background-repeat: no-repeat;
   background-size: 100%;

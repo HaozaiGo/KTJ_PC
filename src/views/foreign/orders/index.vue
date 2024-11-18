@@ -61,7 +61,7 @@
         :max-height="tableHeight - 30"
       >
         <el-table-column prop="orderNo" label="订单编号" sortable />
-        <el-table-column prop="tableNo" label="台号" sortable />
+        <el-table-column prop="tableNo" label="台号" sortable width="150" />
         <el-table-column prop="typeLabel" label="订单类型" sortable />
         <el-table-column
           prop="orderTime"
@@ -69,7 +69,7 @@
           sortable
           width="180"
         />
-        <el-table-column prop="amount" label="支付金额" sortable />
+        <el-table-column prop="amount" label="支付金额" sortable width="150" />
 
         <el-table-column
           prop="payStatusLabel"
@@ -78,7 +78,10 @@
           width="150"
         />
 
-        <el-table-column prop="pickupWayLabel" label="就餐方式" sortable />
+        <el-table-column prop="pickupWayLabel" label="就餐方式" sortable  width="150" />
+        <el-table-column prop="mealInfo.mealName" label="套餐名" sortable v-if="activeName === 'TEAM_BUY_PAY'" width="150" />
+
+        <el-table-column prop="sureRefundCouponQty" label="可退数量" sortable v-if="activeName === 'TEAM_BUY_PAY'" width="150" />
 
         <el-table-column label="操作" width="220">
           <template #default="scope">
@@ -87,8 +90,7 @@
               type="primary"
               size="small"
               @click="orderDetail(scope.row)"
-              >订单详情</el-button
-            > -->
+              >订单详情</el-button > -->
 
             <el-button
               link
@@ -130,6 +132,14 @@
                 scope.row.payStatus === '0'
               "
               >删除订单</el-button
+            >
+            <el-button
+              link
+              type="primary"
+              size="small"
+              v-if="scope.row.type === 'TEAM_BUY_PAY'"
+              @click="cancelOrder(scope.row)"
+              >撤销订单</el-button
             >
           </template>
         </el-table-column>
@@ -206,6 +216,26 @@
           {{ state.orderDetailData.payTypeLabel }}
         </el-descriptions-item>
       </el-descriptions>
+    </el-dialog>
+
+    <!-- 团购退费人数选择 -->
+    <el-dialog
+      v-model="cancelOrderDialogVisible"
+      title="可退数量"
+      width="600"
+      align-center
+    >
+      <div style="text-align: center">
+        <el-input-number v-model="cancelNum" size="large" :min="1" :max="cancelRow.sureRefundCouponQty" />
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="cancelOrderDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleCancelConfirm">
+            确定
+          </el-button>
+        </div>
+      </template>
     </el-dialog>
 
     <!-- 核销订单详情 -->
@@ -488,6 +518,7 @@ import {
   AddOrderInsideMenu,
   updateOrderInsideMenu,
   deleteOrderInsideMenu,
+  cancelGroupBuyOrder,
 } from "@/api/project/foreign/order.js";
 import { getQrCodePayImg } from "@/api/project/foreign/order";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -555,6 +586,9 @@ const printerWay = reactive({
   },
 });
 const printerOption = ref([]);
+const cancelOrderDialogVisible = ref(false);
+const cancelNum = ref(1);
+const cancelRow = ref({});
 // const LODOPOBJ = ref(null);
 const deleteOrder = (item) => {
   ElMessageBox.confirm(
@@ -579,6 +613,31 @@ const deleteOrder = (item) => {
         message: "取消删除",
       });
     });
+};
+const cancelOrder = async (row) => {
+  if (row.sureRefundCouponQty <= 1) {
+    const body = {
+      orderId: row.orderId,
+      qty: row.sureRefundCouponQty,
+      reason: "团购退费",
+    };
+    const res = await cancelGroupBuyOrder(body);
+    getList();
+  } else {
+    cancelRow.value = row;
+    cancelOrderDialogVisible.value = true;
+  }
+};
+const handleCancelConfirm = async () => {
+  const body = {
+    orderId: cancelRow.value.orderId,
+    qty: cancelNum.value,
+    reason: "团购部分退费",
+  };
+  const res = await cancelGroupBuyOrder(body);
+
+  cancelOrderDialogVisible.value = false;
+  getList();
 };
 
 const editMenu = (item) => {
@@ -917,6 +976,8 @@ const handleClick = (e) => {
   try {
     const val = e.props.name;
     activeName.value = val;
+    console.log(activeName.value);
+    
     query.pageNum = 1;
     getList();
   } catch (e) {
@@ -955,7 +1016,6 @@ onMounted(async () => {
     if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
       console.log("这是windows64位系统");
       printerOption.value = JSON.parse(localStorage.getItem("printerList"));
-
     }
     if (isMac) {
       console.log("这是mac系统");

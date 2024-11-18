@@ -321,6 +321,7 @@
                         type="number"
                         max="20"
                         min="1"
+                        @blur="getLimitDayQty"
                       >
                         <template #append>天内有效</template>
                       </el-input>
@@ -350,6 +351,7 @@
                   <button
                     @click="form.data.isNeedBook = !form.data.isNeedBook"
                     class="needBookbtn"
+                    :style="form.data.isNeedBook ? 'color:#000' : '#c1c1c1'"
                   >
                     {{ form.data.isNeedBook ? "是" : "否" }}
                   </button>
@@ -430,7 +432,7 @@
                   <div class="">
                     <label>有效期</label>
                     <div class="ruleItem">
-                      2024-10-20 00:00 至 2024-10-25 23:59
+                      {{ startDate }} 00:00 至 {{ endDate }} 23:59:59
                     </div>
                   </div>
                   <div class="">
@@ -608,13 +610,25 @@
                       "
                     >
                       <div style="flex: 2.5">
-                        {{ item.name }}
+                        <div class="flex" style="align-items: center">
+                          <el-icon
+                            color="red"
+                            size="24"
+                            @click.stop="mealMenuListDel(idx)"
+                            ><Remove
+                          /></el-icon>
+                          <span style="margin-left: 10px">
+                            {{ item.name }}</span
+                          >
+                        </div>
+
                         <span
                           style="
                             font-size: 12px;
                             display: inline-block;
                             margin-left: 15px;
                           "
+                          v-if="item.remark"
                         >
                           {{ item.remark }}
                         </span>
@@ -625,10 +639,12 @@
                         </el-input>
                       </div>
                       <div style="flex: 1; text-align: center; padding: 0 15px">
-                        <el-input v-model="item.price"></el-input>
+                        <el-input v-model="item.price">
+                          <template #prepend>¥</template>
+                        </el-input>
                       </div>
-                      <div style="flex: 1; text-align: center; padding: 0 15px">
-                        <span>{{ item.qty * item.price }}</span>
+                      <div style="flex: 1; text-align: center">
+                        <div>¥{{ item.qty * item.price }}</div>
                       </div>
                     </div>
                   </VueDraggable>
@@ -649,8 +665,9 @@
                       form1.mealMenuList.length > 0 &&
                       (form1.selectedIdx || form1.selectedIdx === 0)
                     "
-                    placeholder="请输入备注内容"
+                    placeholder="请输入备注内容（不超出10个字）"
                     v-model="form1.mealMenuList[form1.selectedIdx].remark"
+                    maxlength="10"
                   ></el-input>
 
                   <div
@@ -796,17 +813,17 @@
           </div>
         </div>
         <div v-else-if="step === 1" style="text-align: right">
-          <el-button
+          <!-- <el-button
             plain
             size="large"
             style="padding: 10px 40px"
             @click="step = 0"
             >返回</el-button
-          >
+          > -->
           <el-button
             plain
             size="large"
-            style="padding: 10px 40px"
+            style="padding: 10px 40px; font-size: 18px"
             @click="confirmAddMenuStep1"
             >确定</el-button
           >
@@ -938,6 +955,29 @@ onMounted(async () => {
     });
   getShopOption();
 });
+
+const startDate = inject("$com").retunTodayNoHour(); // 有效期开始时间
+const endDate = ref(null);
+const getLimitDayQty = () => {
+  const timeString = Number(form.data.limitDayQty) * 24 * 60 * 60 * 1000;
+  const nowString = new Date().getTime();
+  const afterString = nowString + timeString;
+  const limitString = new Date(afterString);
+
+  // 时间戳转日期
+  const year = limitString.getFullYear();
+  const month =
+    limitString.getMonth() > 9
+      ? limitString.getMonth() + 1
+      : "0" + (limitString.getMonth() + 1);
+  const day =
+    limitString.getDate() > 9
+      ? limitString.getDate()
+      : "0" + limitString.getDate();
+  console.log(month, day);
+
+  endDate.value = year + "-" + month + "-" + day;
+};
 const uploadImg = ref(null);
 const defaultProps = {
   children: "children",
@@ -1106,6 +1146,12 @@ const totalPriceStep1 = computed(() => {
     return pre + next.totalPrice;
   }, 0);
 });
+// 删除菜品
+const mealMenuListDel = (idx) => {
+  console.log(idx);
+  form1.mealMenuList.splice(idx, 1);
+  form1.selectedIdx = null;
+};
 const getRate = async (e) => {
   const body = {
     price: form.data.price,
@@ -1175,12 +1221,18 @@ const handleCreate = async () => {
   });
 
   form.data = reactive(new FormData0());
+  // 如果只有一家店 自动带入
+  if (ShopOptions.value.length === 1) {
+    form.data.storeId = ShopOptions.value[0].storeId;
+  }
 };
 const getShopOption = async () => {
   const res = await gerShopOption();
   if (res.code === 0) {
     ShopOptions.value = res.data;
+
     storeId.value = res.data[0].storeId;
+
     getList();
   }
 };
@@ -1605,5 +1657,8 @@ button {
     letter-spacing: 2px;
     border: 1px solid #c1c1c1;
   }
+}
+::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
 }
 </style>

@@ -260,13 +260,11 @@ onMounted(() => {
     var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
     if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
       console.log("这是windows32位系统");
-      // getPrinterOption();
       options.value = JSON.parse(localStorage.getItem("printerList"));
 
     }
     if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
       console.log("这是windows64位系统");
-      // getPrinterOption();
       options.value = JSON.parse(localStorage.getItem("printerList"));
 
     }
@@ -277,21 +275,6 @@ onMounted(() => {
 });
 const handlePrinterClick = (item, idx) => {
   state.printerIdx = idx;
-};
-const getPrinterOption = () => {
-  let LODOP = getLodop();
-
-  let count = LODOP.GET_PRINTER_COUNT();
-  let arr = [];
-  for (var i = 0; i < count; i++) {
-    let obj = {};
-    obj.value = LODOP.GET_PRINTER_NAME(i);
-    obj.label = LODOP.GET_PRINTER_NAME(i);
-    arr.push(obj);
-  }
-
-  options.value = arr;
-  console.log("打印机列表", arr);
 };
 const handleEditPrinter = (item, idx) => {
   state.status = "edit";

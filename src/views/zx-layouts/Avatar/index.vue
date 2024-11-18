@@ -5,7 +5,7 @@
       @command="handleCommand"
       v-if="role === 'merchant'"
     >
-      <span style="color: #ffffff" class="flex-c">
+      <span style="color: #000" class="flex-c">
         <el-icon size="15"><Shop /></el-icon>
         {{ storeName || "切换分店" }}
       </span>
@@ -27,16 +27,16 @@
       @click="callUs"
       v-if="role === 'merchant'"
     >
-      <el-icon color="#fff"><User /></el-icon>
-      <span style="color: #fff">客服</span>
+      <el-icon color="#000"><User /></el-icon>
+      <span style="color: #000">客服</span>
     </div>
     <div
       :title="'退出'"
       style="float: left; display: flex; cursor: pointer; align-items: center"
       @click="logout"
     >
-      <el-icon color="#fff"><SwitchButton /></el-icon>
-      <span style="color: #fff">退出</span>
+      <el-icon color="#000"><SwitchButton /></el-icon>
+      <span style="color: #000">退出</span>
     </div>
     <!-- 重置密码 -->
     <el-dialog
@@ -142,6 +142,8 @@ export default {
               name: res.data[0].name,
             })
           );
+          this.storeName = res.data[0].name;
+
         }
       }
     },
@@ -151,6 +153,7 @@ export default {
     },
     logout() {
       window.localStorage.removeItem("token");
+      window.localStorage.removeItem("storeId");
       window.localStorage.removeItem("routes");
       this.$emit("logout")
       if (this.role === "platform") {

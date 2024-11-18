@@ -95,6 +95,13 @@ const commonMethod = {
     const second = date.getSeconds() > 9 ? date.getSeconds() : "0" + date.getSeconds();
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
   },
+  retunTodayNoHour() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() > 9 ? date.getMonth() + 1: "0" + (date.getMonth() + 1);
+    const day = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+    return year + "-" + month + "-" + day ;
+  },
 
   debounce(fn: any, val: any) {
     let timer;

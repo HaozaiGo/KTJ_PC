@@ -79,12 +79,10 @@ onMounted(() => {
     var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
     if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
       // console.log("这是windows32位系统");
-      // getPrinterList();
       printerOption.value = JSON.parse(localStorage.getItem("printerList"));
     }
     if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
       // console.log("这是windows64位系统");
-      // getPrinterList();
       printerOption.value = JSON.parse(localStorage.getItem("printerList"));
     }
     if (isMac) {
@@ -92,21 +90,6 @@ onMounted(() => {
     }
   }, 100);
 });
-// 获取打印机list
-const getPrinterList = async () => {
-  let LODOP = getLodop();
-  let count = LODOP.GET_PRINTER_COUNT();
-  let arr = [];
-  for (var i = 0; i < count; i++) {
-    let obj = {};
-    obj.value = LODOP.GET_PRINTER_NAME(i);
-    obj.label = LODOP.GET_PRINTER_NAME(i);
-    arr.push(obj);
-  }
-  printerOption.value = arr;
-  // console.log("打印机列表", arr);
-  LODOPOBJ.value = LODOP;
-};
 //轮流打单
 const asyncEvent = async (ele) => {
   return new Promise((resolve) => {
@@ -144,7 +127,6 @@ const handlePrint = async (data) => {
   state.orderDetailData = Object.assign({}, data);
 
   state.showPrintTable = true;
-  console.log("----2222----", data);
 
   const res = printerOption.value.find((x) => x.label === data.printerModel);
 

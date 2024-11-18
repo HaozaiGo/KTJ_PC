@@ -178,3 +178,21 @@ export function teamBuyOrder(data){
     data,
   });
 }
+// 团购打单
+export function platForm95BuyOrder(data){
+  return request({
+    url: `/store/api/store/order/menu/print`,
+    method: "post",
+    data,
+  });
+}
+
+export function cancelGroupBuyOrder(data){
+  return request({
+    url: `/store/api/store/wx/refund/meal`,
+    method: "post",
+    data,
+  });
+}
+
+

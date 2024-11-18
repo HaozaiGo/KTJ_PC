@@ -50,7 +50,7 @@
         <div class="topBg">
           <span
             style="
-              color: #fff;
+              color: #000;
               float: left;
               font-size: 21px;
               margin-left: 20px;
@@ -70,6 +70,8 @@
       </el-col>
       <el-col :xs="16" :sm="14" :md="14" :lg="14" :xl="14" style="float: right">
         <div class="right-panel">
+          <!-- <div style="flex: 1;">123123</div> -->
+
           <div
             :title="'总览'"
             style="cursor: pointer"
@@ -77,8 +79,8 @@
             @click="handleShowBigView"
             v-if="role === 'platform'"
           >
-            <el-icon style="transform: translateY(-2px)"><View /></el-icon>
-            <span style="color: #fff">总览 </span>
+            <el-icon  color="#000"><View /></el-icon>
+            <span style="color: #000">总览 </span>
           </div>
           <!-- <div
             :title="'收藏'"
@@ -245,6 +247,7 @@ import {
   offlineCheckOrder,
   beforePayCheckOrder,
   teamBuyOrder,
+  platForm95BuyOrder,
 } from "@/api/project/foreign/order.js";
 
 export default {
@@ -297,7 +300,7 @@ export default {
       storeId: "",
       socketData: {}, //点击的socket数据
       printerMethod: [], //打单方式
-    
+
       tableHeight: common.tableHeight(),
       notifiactions: [],
       wsClose: false,
@@ -315,17 +318,15 @@ export default {
     this.role = window.localStorage.getItem("role");
   },
   mounted() {
-    try {
-      this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
-    } catch (err) {
-      console.log(err);
-    }
+
     if (this.role === "merchant") {
       common.getStoreDict("bill_print_method").then((res) => {
         this.printerMethod = res.data[0].list;
       });
     }
     setTimeout(() => {
+      this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+
       var agent = navigator.userAgent.toLowerCase();
       var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
       if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
@@ -343,7 +344,7 @@ export default {
         this.getOrderListSocket();
         this.getTableNoList();
       }
-    }, 3000);
+    }, 1500);
   },
   methods: {
     logout() {
@@ -366,7 +367,7 @@ export default {
         obj.label = LODOP.GET_PRINTER_NAME(i);
         arr.push(obj);
       }
-      localStorage.setItem("printerList",JSON.stringify(arr));
+      localStorage.setItem("printerList", JSON.stringify(arr));
       console.log("打印机列表", arr);
     },
     handleTeamBuy() {},
@@ -398,7 +399,32 @@ export default {
           }
           this.$message.success("团购出单成功!");
         }
-
+        return;
+      } else if (this.socketData.type === "ONLINE_ORDER_PAY") {
+        const body = {
+          orderId: this.socketData.orderId,
+          storeId: this.socketData.storeId,
+          tableNo: this.socketData.tableNo,
+          method: "ALL",
+        };
+        const res = await platForm95BuyOrder(body);
+        if (res.code === 0) {
+          const printerArr = res.data;
+          for (let i = 0; i < printerArr.length; i++) {
+            const orderDetailData = Object.assign(
+              {},
+              this.state1.orderDetailData,
+              {
+                peopleQty: this.socketData.peopleQty,
+                tableNo: this.socketData.tableNo,
+                // mealPrice: res.data[0].mealPrice,
+                ...printerArr[i],
+              }
+            );
+            this.$refs.lodopPrint.groupBuyAsyncEvent(orderDetailData);
+          }
+          this.$message.success("出单成功!");
+        }
         return;
       }
       //扫码
@@ -736,7 +762,8 @@ li.el-menu-item.is-active.is-active {
   padding-right: $base-padding;
   overflow: hidden;
   user-select: none;
-  background: $base-color-white;
+  background:  linear-gradient(to right, #e0cbac, #c9ab7e);;
+  
   box-shadow: $base-box-shadow;
   z-index: 100;
 

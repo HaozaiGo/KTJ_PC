@@ -189,7 +189,7 @@ const handleClickMenuFirst = (item: any, index: Number) => {
     console.log("有children");
   } else {
     console.log(item, index);
-    const menuRouter = item.path  + item.component;
+    const menuRouter = item.path + item.component;
     router.push({ path: menuRouter });
   }
 };
@@ -215,6 +215,9 @@ const handleClickMenu = (item: any, children: any, idx: Number) => {
 <style lang="scss" scoped>
 :deep(.el-menu) {
   border-right: none !important;
+}
+:deep(.el-menu-item.is-active) {
+  color: #ab9472;
 }
 .sideBar_container {
   top: $base-nav-bar-height;
