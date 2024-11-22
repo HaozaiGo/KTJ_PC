@@ -50,9 +50,9 @@ export function addTab(data) {
   });
 }
 // 删除桌号管理
-export function deleteTab(typeIds) {
+export function deleteTab(storeId,typeIds) {
   return request({
-    url: `/store/api/store/table/type/${typeIds}`,
+    url: `/store/api/store/table/type/${storeId}/${typeIds}`,
     method: "DELETE",
   });
 }
@@ -102,5 +102,37 @@ export function refundMenu(data) {
   });
 }
 
+// 桌台类型新增
+export function addDeskType(data) {
+  return request({
+    url: "/store/api/store/table/model",
+    method: "post",
+    data,
+  });
+}
+//修改桌台类型
+export function editDeskType(data) {
+  return request({
+    url: "/store/api/store/table/model",
+    method: "PUT",
+    data,
+  });
+}
+//删除
 
+export function deleteDeskType(storeId,typeIds) {
+  return request({
+    url: `/store/api/store/table/model/${storeId}/${typeIds}`,
+    method: "DELETE",
+  });
+}
 
+// 查询桌台类型列表
+
+export function getDeskTypeListApi(params) {
+  return request({
+    url: "/store/api/store/table/model/list",
+    method: "get",
+    params,
+  });
+}

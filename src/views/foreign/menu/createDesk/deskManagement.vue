@@ -26,8 +26,16 @@
         icon="Plus"
         round
         size="small"
+        @click="handleManageDeskType"
+        >桌台类型管理</el-button
+      >
+      <el-button
+        type="primary"
+        icon="Plus"
+        round
+        size="small"
         @click="handleManageDesk"
-        >管理桌台类型</el-button
+        >区域类型管理</el-button
       >
       <el-button
         type="danger"
@@ -49,7 +57,7 @@
       >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="tableNo" label="桌号" sortable />
-        <el-table-column prop="typeName" label="桌台类型" sortable />
+        <el-table-column prop="typeName" label="区域类型" sortable />
 
         <el-table-column prop="createBy" label="创建人" sortable />
 
@@ -111,7 +119,7 @@
             style="width: 300px"
           />
         </el-form-item>
-        <el-form-item label="桌号类型">
+        <el-form-item label="区域类型">
           <el-select v-model="formData.data.typeId" style="width: 300px">
             <el-option
               v-for="(item, index) in typeIdList"
@@ -122,6 +130,27 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="桌台类型">
+          <el-select v-model="formData.data.modelId" style="width: 300px">
+            <el-option
+              v-for="(item, index) in manageDeskType.originTabs"
+              :key="index"
+              :label="item.modelName"
+              :value="item.modelId"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="是否开放预约" label-width="108px">
+          <el-radio-group v-model="formData.data.isOpenBook">
+            <el-radio
+              :value="item.dictValue"
+              v-for="(item, idx) in statusOptions"
+              :key="idx"
+              >{{item.dictLabel}}</el-radio
+            >F
+          </el-radio-group>
+        </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -131,10 +160,10 @@
       </template>
     </el-dialog>
 
-    <!-- 管理台类型 -->
+    <!-- 管理区域类型 -->
     <el-dialog
       v-model="manageDesk.dialogVisible"
-      title="桌台类型"
+      title="区域类型"
       width="600"
       align-center
     >
@@ -153,7 +182,7 @@
         >
           名称:<el-input
             v-model="item.tabName"
-            placeholder="请输入桌台类型"
+            placeholder="请输入区域类型"
             @change="handleTabsEditName(item, index)"
             style="width: 200px"
           ></el-input>
@@ -167,6 +196,64 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="manageDesk.dialogVisible = false">
+            取消
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 桌台类型管理 -->
+    <el-dialog
+      v-model="manageDeskType.dialogVisible"
+      title="桌台类型"
+      width="600"
+      align-center
+    >
+      <el-tabs
+        v-model="manageDeskType.editableTabsValue"
+        type="card"
+        editable
+        class="demo-tabs"
+        @edit="handleAddDeskType"
+      >
+        <el-tab-pane
+          v-for="(item, index) in manageDeskType.editableTabs"
+          :key="index"
+          :label="item.title"
+          :name="item.name"
+        >
+          <div class="interval">
+            桌台类型：<el-input
+              v-model="item.modelName"
+              placeholder="请输入桌台类型"
+              style="width: 200px"
+            ></el-input>
+          </div>
+          <div class="interval">
+            最大人数：
+            <el-input-number v-model="item.maxQty" :min="1" :max="100" />
+          </div>
+          <div class="interval">
+            最小人数：
+            <el-input-number v-model="item.minQty" :min="1" :max="100" />
+          </div>
+          <div class="interval">
+            追加最大人数：
+            <el-input-number v-model="item.addLimitQty" :min="1" :max="10" />
+          </div>
+
+          <el-button
+            style="margin-left: 10px"
+            @click="handleAddDeskTypeConfirm(item, index)"
+            >新增</el-button
+          >
+          <el-button @click="handleEditDeskType(item, index)">修改</el-button>
+          <el-button @click="handleDelDeskType(item, index)">删除</el-button>
+        </el-tab-pane>
+      </el-tabs>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="manageDeskType.dialogVisible = false">
             取消
           </el-button>
         </div>
@@ -217,12 +304,17 @@ import {
   addTab,
   deleteTab,
   editTab,
+  getDeskTypeListApi,
+  addDeskType,
+  editDeskType,
+  deleteDeskType,
 } from "@/api/project/foreign/createDesk.js";
 import { ElMessageBox, ElMessage } from "element-plus";
 defineOptions({
   name: "desk-Management",
   isRouter: true,
 });
+const statusOptions = ref([]); //是否开放预约
 const tableHeight = inject("$com").tableHeight();
 const multipleSelection = ref([]);
 const StoreOptions = ref([]);
@@ -234,12 +326,28 @@ const manageDesk = reactive({
   originTabs: [], //原始数据
   editableTabs: [
     {
-      title: "新桌台类型",
+      title: "新区域类型",
       name: null,
       tabName: "",
     },
   ],
 });
+const manageDeskType = reactive({
+  dialogVisible: false,
+  editableTabsValue: 0,
+  originTabs: [], //原始数据
+  editableTabs: [
+    {
+      title: "新桌台类型",
+      name: null,
+      modelName: "",
+      addLimitQty: 2,
+      maxQty: "",
+      minQty: "",
+    },
+  ],
+});
+
 const query = reactive({
   storeId: "",
   pageNum: 1,
@@ -248,6 +356,8 @@ let formData = reactive({
   data: {
     tableNo: "",
     typeId: "",
+    isOpenBook:"",
+    modelId:"",
   },
 });
 const ScanCode = reactive({
@@ -372,16 +482,47 @@ const handleManageDesk = () => {
   // 获取tablist
   getTabList();
 };
+const handleManageDeskType = () => {
+  manageDeskType.dialogVisible = true;
+};
+const getDeskTypeList = async () => {
+  const res = await getDeskTypeListApi({ storeId: query.storeId });
+  if (res.code === 0 && res.rows.length > 0) {
+    res.rows.forEach((item) => {
+      item.title = item.modelName;
+    });
+    manageDeskType.originTabs = res.rows;
+    manageDeskType.editableTabs = manageDeskType.originTabs.slice(0);
+  } else {
+    manageDeskType.editableTabs = [
+      {
+        title: "新桌台类型",
+        name: null,
+        modelName: "",
+        addLimitQty: 2,
+        maxQty: "",
+        minQty: "",
+      },
+    ];
+  }
+};
+
 const getTabList = async () => {
   const res = await getTabLists({ storeId: query.storeId });
-  if (res.code === 0) {
-    const resArr = res.rows.map((item, index) => {
+  if (res.code === 0 && res.rows.length > 0) {
+    res.rows.forEach((item) => {
       item.title = item.typeName;
     });
-    console.log(resArr);
-
     manageDesk.originTabs = res.rows;
     manageDesk.editableTabs = manageDesk.originTabs.slice(0);
+  } else {
+    manageDesk.editableTabs = [
+      {
+        title: "新桌台区域",
+        name: null,
+        tabName: "",
+      },
+    ];
   }
 };
 
@@ -394,6 +535,23 @@ const handleAdd = async (item, index) => {
     getTabList();
   }
 };
+//确认新增 桌台类型
+const handleAddDeskTypeConfirm = async (item) => {
+  console.log(item);
+
+  const body = Object.assign(
+    {},
+    {
+      storeId: query.storeId,
+    },
+    item
+  );
+  const res = await addDeskType(body);
+  if (res.code === 0) {
+    getDeskTypeList();
+  }
+};
+
 const handleEdit = async (item, index) => {
   console.log(item);
 
@@ -406,16 +564,39 @@ const handleEdit = async (item, index) => {
     getTabList();
   }
 };
+const handleEditDeskType = async (item) => {
+  console.log(item);
+
+  const res = await editDeskType(item);
+  if (res.code === 0) {
+    getDeskTypeList();
+  }
+};
+
 const handleDel = (item, index) => {
   console.log(item);
+  ElMessageBox.confirm("确定删除所选区域类型?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      const res = await deleteTab(query.storeId, item.typeId);
+      getTabList();
+    })
+    .catch((action) => {
+      console.log(action);
+    });
+};
+const handleDelDeskType = (item) => {
   ElMessageBox.confirm("确定删除所选台号类型?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(async () => {
-      const res = await deleteTab(item.typeId);
-      getTabList();
+      const res = await deleteDeskType(query.storeId, item.modelId);
+      getDeskTypeList();
     })
     .catch((action) => {
       console.log(action);
@@ -428,7 +609,7 @@ const handleTabsEdit = async (e) => {
   } else {
     const newTabName = `${++manageDesk.originTabs.length}`;
     manageDesk.editableTabs.push({
-      title: "新桌台类型",
+      title: "新区域类型",
       name: newTabName,
       tabName: "",
     });
@@ -437,6 +618,27 @@ const handleTabsEdit = async (e) => {
     manageDesk.editableTabsValue = newTabName;
   }
 };
+const handleAddDeskType = async (e) => {
+  console.log(e);
+
+  if (e) {
+    // 删除
+  } else {
+    const newTabName = `${++manageDeskType.originTabs.length}`;
+    manageDeskType.editableTabs.push({
+      name: newTabName,
+      title: "新桌台类型",
+      modelName: "",
+      addLimitQty: 2,
+      maxQty: "",
+      minQty: "",
+    });
+    console.log(manageDeskType.editableTabs);
+
+    manageDeskType.editableTabsValue = newTabName;
+  }
+};
+
 const getTabListFirst = async () => {
   const res = await getTabLists({ storeId: query.storeId });
   if (res.code === 0) {
@@ -445,9 +647,16 @@ const getTabListFirst = async () => {
 };
 
 const handleTabsEditName = (item, idx) => {};
+
 onMounted(async () => {
+  inject("$com")
+    .getStoreDict("sys_yes_no")
+    .then((res) => {
+      statusOptions.value = res.data[0].list;
+    });
   await getStoreList();
   getTabListFirst();
+  getDeskTypeList();
 });
 </script>
 
@@ -464,5 +673,8 @@ onMounted(async () => {
   color: #6b778c;
   font-size: 32px;
   font-weight: 600;
+}
+.interval {
+  margin-bottom: 15px;
 }
 </style>

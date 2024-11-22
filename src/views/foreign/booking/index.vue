@@ -92,23 +92,35 @@
           可预约时间
         </div>
 
-        <div class="flex" style="flex-wrap: wrap;padding: 10px;">
+        <div class="flex" style="flex-wrap: wrap; padding: 10px">
           <div
             v-for="(item, idx1) in canbookTime"
             :key="idx1"
             class="timeBox flex-c"
-            style="margin: 10px 15px;background-color: #d7c7b7;border: 1px solid #d7c7b7;"
+            style="
+              margin: 10px 15px;
+              background-color: #d7c7b7;
+              border: 1px solid #d7c7b7;
+            "
           >
             {{ item }}
           </div>
         </div>
       </div>
       <div>
-        <div class="totalInfo_Row flex-c" style="width: 100%">
+        <div
+          class="totalInfo_Row flex-c"
+          style="width: 100%"
+          @click="handleClickDeskDrawer"
+        >
           <el-icon size="20" style="margin-right: 3px" v-show="editStatus"
             ><EditPen
           /></el-icon>
           桌型配置
+        </div>
+
+        <div v-for="(table, idx) in deskData.outSizeDeskData" :key="idx">
+          <div>{{ table.name }}</div>
         </div>
       </div>
       <div>
@@ -299,6 +311,113 @@
         </div>
       </div>
     </el-drawer>
+
+    <!-- 桌台管理 -->
+    <el-drawer v-model="deskDrawer" :with-header="false" size="57%">
+      <div class="flex">
+        <div class="deskDrawerLeft">
+          <div class="bookingTitle">预定桌型配置</div>
+          <div
+            class="flex-c"
+            style="width: fit-content; font-size: 21px; margin: 15px 0 15px 0"
+            @click="deskDrawer = false"
+          >
+            <el-icon><ArrowLeftBold /></el-icon>
+            <span>返回</span>
+          </div>
+          <div class="mainBtnTitle">桌型显示</div>
+          <el-select
+            v-model="deskData.settingTarget"
+            placeholder="配置"
+            size="large"
+            style="width: 150px; margin: 10px 0"
+          >
+            <el-option
+              v-for="item in deskData.options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <div class="mainBtnTitle" style="padding: 40px 30px; font-size: 20px">
+            选择桌台
+          </div>
+        </div>
+        <div class="deskDrawerCenter">
+          <div style="font-size: 18px; letter-spacing: 2px">桌台区域</div>
+          <div class="flex" style="flex-direction: column">
+            <div
+              v-for="(item, index) in TabsList"
+              :key="index"
+              @click="tabChange(item, index)"
+              :style="
+                deskData.TabIdx === index
+                  ? 'color:#a98e73;font-weight:bold'
+                  : 'color:#c1c1c1'
+              "
+              class="typeNameSty"
+            >
+              {{ item.typeName }}
+            </div>
+          </div>
+        </div>
+        <div class="deskDrawerRight">
+          <div
+            class="bookingTitle"
+            style="
+              position: absolute;
+              left: 55%;
+              top: 0;
+              border-bottom-left-radius: 10px;
+              border-bottom-right-radius: 10px;
+            "
+          >
+            已选{{ hadSelectDesk }}桌
+          </div>
+          <div
+            class="mainBtnTitle"
+            style="position: absolute; right: 20px; top: 20px; font-size: 18px"
+            @click="handleAllDeskSelect"
+          >
+            {{ allDeskSelect ? "取消全选" : "全选" }}
+          </div>
+
+          <div v-for="(table, idx) in deskData.rightDeskData" :key="idx">
+            <div class="bookingTitle1">
+              {{ table[0].modelName }}
+              <span style="font-size: 14px">({{ table.length }}桌)</span>
+            </div>
+            <div class="flex" style="flex-wrap: wrap">
+              <div
+                v-for="(tableItem, idx1) in table"
+                :key="idx1"
+                class="deskSty flex-c"
+                :style="
+                  tableItem.isSelect
+                    ? 'background-color:#a98e73'
+                    : 'background-color:#FFFFFF'
+                "
+                @click="handleChangeSelect(tableItem, idx1)"
+              >
+                <div style="text-align: center">
+                  {{ tableItem.tableNo }}
+
+                  <div>（{{ tableItem.minQty }}~{{ tableItem.maxQty }}人）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="doneBtn"
+          style="line-height: 32px"
+          @click="handleSelectDeskDone"
+        >
+          <span>完成</span>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -306,6 +425,7 @@
 import { ref, reactive, onMounted, inject, computed, nextTick } from "vue";
 import PieChart from "../groupBuy/groupSetting/components/PieChart.vue";
 import { getShopInfo } from "@/api/project/foreign/booking.js";
+import { getTabLists, getLists } from "@/api/project/foreign/createDesk.js";
 defineOptions({
   name: "Booking",
   isRouter: true,
@@ -313,17 +433,104 @@ defineOptions({
 const openService = ref(false);
 const editStatus = ref(false);
 const bookingDrawer = ref(false);
+const deskDrawer = ref(false);
 const canbookTime = ref(); //可预约时间
 const shopInfo = ref({});
 const openTime = ref([]); //营业时间
+const allDeskSelect = ref(true); //全选
 const cusTime = ref([
   { startTime: "", endTime: "" },
   { startTime: "", endTime: "" },
 ]); //自定义时间
+const deskData = reactive({
+  options: [
+    { value: "为大厅配置", label: "为大厅配置" },
+    { value: "为包厢配置", label: "为包厢配置" },
+  ],
+  settingTarget: "为大厅配置",
+  hall: { name: "为大厅配置", list: [] },
+  room: { name: "为包厢配置", list: [] },
+  TabIdx: 0,
+  typeId: "",
+  rightDeskData: [],
+  outSizeDeskData: [],
+});
 
 const timeLine = ref(30); //时间间隔
 const timeType = ref("default"); //时间类型
 const deskStayTime = ref(60); //留座时间
+const TabsList = ref([]); //桌台区域
+
+const tabChange = (item, idx) => {
+  deskData.TabIdx = idx;
+  deskData.typeId = item.typeId;
+  getDeskList();
+};
+
+const getDeskList = async () => {
+  const body = {
+    storeId: JSON.parse(localStorage.getItem("storeId")).storeId,
+    pageNum: 1,
+    pageSize: 999,
+    typeId: deskData.typeId,
+  };
+  const res = await getLists(body);
+  if (res.code === 0) {
+    let newArr = new Array(20).fill().map(() => []);
+
+    for (let i = 0, j = 0; i < res.rows.length; i++) {
+      res.rows[i].isSelect = true;
+      j = res.rows[i].modelId;
+      // console.log(j);
+
+      newArr[j].push(res.rows[i]);
+    }
+    console.log(newArr.filter((x) => x.length > 0));
+
+    deskData.rightDeskData = newArr.filter((x) => x.length > 0);
+    console.log(deskData.rightDeskData);
+  }
+};
+const handleChangeSelect = (item, idx) => {
+  console.log(item, idx);
+  item.isSelect = !item.isSelect;
+  if (deskData.settingTarget === "为大厅配置") {
+    const newArr = deskData.rightDeskData.flat();
+    deskData.hall.list = newArr
+      .map((x) => {
+        if (x.isSelect) {
+          return x;
+        }
+      })
+      .filter((x) => !!x);
+  } else {
+    const newArr = deskData.rightDeskData.flat();
+    deskData.room.list = newArr
+      .map((x) => {
+        if (x.isSelect) {
+          return x;
+        }
+      })
+      .filter((x) => !!x);
+  }
+};
+const handleAllDeskSelect = () => {
+  allDeskSelect.value = !allDeskSelect.value;
+  for (let i = 0; i < deskData.rightDeskData.length; i++) {
+    for (let j = 0; j < deskData.rightDeskData[i].length; j++) {
+      deskData.rightDeskData[i][j].isSelect = allDeskSelect.value;
+    }
+  }
+};
+const handleSelectDeskDone = () => {
+  // console.log(deskData.rightDeskData);
+
+  console.log(deskData.hall);
+  console.log(deskData.room);
+
+  deskData.outSizeDeskData = [deskData.hall, deskData.room];
+  console.log(deskData.outSizeDeskData);
+};
 
 const disabledSeconds = () => {
   let arr = [];
@@ -334,6 +541,20 @@ const disabledSeconds = () => {
 };
 const handleEdit = () => {
   editStatus.value = !editStatus.value;
+};
+const handleClickDeskDrawer = () => {
+  if (editStatus.value) deskDrawer.value = true;
+  getAreaList();
+};
+const getAreaList = async () => {
+  const storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+
+  const res = await getTabLists({ storeId: storeId });
+  if (res.code === 0) {
+    TabsList.value = res.rows;
+    TabsList.value.unshift({ typeName: "全部", typeId: "" });
+    getDeskList();
+  }
 };
 
 const changeTimeLine = (val) => {
@@ -468,6 +689,18 @@ const autoComputedTimeLine = computed(() => {
     }
   }
 });
+
+const hadSelectDesk = computed(() => {
+  var count = 0;
+  for (let i = 0; i < deskData.rightDeskData.length; i++) {
+    for (let j = 0; j < deskData.rightDeskData[i].length; j++) {
+      if (deskData.rightDeskData[i][j].isSelect) {
+        count += 1;
+      }
+    }
+  }
+  return count;
+});
 onMounted(() => {});
 </script>
 
@@ -501,7 +734,6 @@ $bgColor: #a98e73;
 .bottomBox {
   margin-top: 20px;
   height: 50vh;
-
 }
 .bottomBox > div {
   background-color: $bgColor;
@@ -518,6 +750,15 @@ $bgColor: #a98e73;
   border-bottom-left-radius: 10px;
   font-size: 19px;
   letter-spacing: 2px;
+}
+.bookingTitle1 {
+  padding: 6px 10px;
+  width: fit-content;
+  background-color: $tabColor;
+  font-size: 18px;
+  letter-spacing: 2px;
+  border-radius: 10px;
+  margin-top: 10px;
 }
 .timingBox {
   height: 100px;
@@ -544,5 +785,36 @@ $bgColor: #a98e73;
 }
 ::-webkit-scrollbar {
   display: none; /* Chrome Safari */
+}
+.deskDrawerLeft {
+  height: calc(100vh - 40px);
+  padding-right: 25px;
+  border-right: 1px solid #c2c2c2;
+}
+.deskDrawerCenter {
+  height: calc(100vh - 40px);
+  padding: 0 25px;
+  border-right: 1px solid #c2c2c2;
+}
+.typeNameSty {
+  color: #c2c2c2;
+  padding: 10px 0;
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+.deskDrawerRight {
+  position: initial;
+  padding: 0 20px;
+  height: calc(100vh - 140px);
+  overflow-y: scroll;
+  flex: 1;
+  .deskSty {
+    width: calc((100% / 5) - 30px);
+    min-width: 90px;
+    margin: 15px 15px 0 0;
+    height: 80px;
+    border: 1px solid #c2c2c2;
+    border-radius: 10px;
+  }
 }
 </style>
