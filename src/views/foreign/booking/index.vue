@@ -120,18 +120,37 @@
         </div>
 
         <div v-for="(table, idx) in deskData.outSizeDeskData" :key="idx">
-          <div>{{ table.name }}</div>
+          <div class="tablePosition">{{ table.name }}</div>
+          <div class="flex" style="flex-wrap: wrap">
+            <div
+              v-for="(table1, idx1) in table.oustSizeList"
+              :key="idx1"
+              class="tableTypeSty flex-c"
+            >
+              <div style="font-size: 17px; text-align: center">
+                <div style="font-size: 20px; font-weight: bold">
+                  {{ table1.modelName }}
+                </div>
+                <div>({{ table1.minQty }} ～ {{ table1.maxQty }}人)</div>
+                <div>{{ table1.total }}张</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div>
         <div class="totalInfo_Row flex-sb" style="width: 100%">
-          <div class="flex-c">
+          <div
+            class="flex-c"
+            style="margin: 0 20px"
+            @click="handleShowRuleDrawer"
+          >
             <el-icon size="20" style="margin-right: 3px" v-show="editStatus"
               ><EditPen
             /></el-icon>
             <span>取消规定</span>
           </div>
-          <span>取消费用</span>
+          <span style="margin: 0 20px">取消费用</span>
         </div>
       </div>
     </div>
@@ -331,6 +350,7 @@
             placeholder="配置"
             size="large"
             style="width: 150px; margin: 10px 0"
+            @change="selectChange"
           >
             <el-option
               v-for="item in deskData.options"
@@ -418,6 +438,155 @@
         </div>
       </div>
     </el-drawer>
+
+    <!-- 规则管理 -->
+    <el-drawer v-model="handleRuleDrawer" :with-header="false" size="57%">
+      <div>
+        <div class="bookingTitle">取消/延迟配置</div>
+        <div
+          class="flex-c"
+          style="width: fit-content; font-size: 21px; margin: 15px 0 15px 0"
+          @click="handleRuleDrawer = false"
+        >
+          <el-icon><ArrowLeftBold /></el-icon>
+          <span>返回</span>
+        </div>
+
+        <div class="mainBtnTitle_other">取消规定</div>
+        <div class="ruleBox flex-c">
+          <div class="flex" style="flex-direction: column; align-items: center">
+            <div class="bookingTitle">前/分钟</div>
+
+            <div>
+              <el-input
+                v-model="ruleData.cancelRule.val"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>外</template>
+              </el-input>
+            </div>
+            <div>
+              <el-input
+                v-model="ruleData.cancelRule.val1"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>内</template>
+              </el-input>
+            </div>
+            <el-input
+              v-model="ruleData.cancelRule.val2"
+              style="max-width: 280px; margin-top: 20px"
+            >
+            </el-input>
+          </div>
+          <div
+            class="flex-c"
+            style="
+              height: 180px;
+              width: 180px;
+              border: 2px solid #000;
+              margin: 0 30px;
+            "
+          >
+            <div style="font-size: 20px; letter-spacing: 2px">
+              预定时间
+              <div style="font-size: 25px; text-align: center">X</div>
+            </div>
+          </div>
+          <div class="flex" style="flex-direction: column; align-items: center">
+            <div class="bookingTitle">扣除费用（%）</div>
+
+            <div>
+              <el-input
+                v-model="ruleData.delayRule.per"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>%</template>
+              </el-input>
+            </div>
+            <div>
+              <el-input
+                v-model="ruleData.delayRule.per1"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>%</template>
+              </el-input>
+            </div>
+            <div>
+              <el-input
+                v-model="ruleData.delayRule.per2"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>%</template>
+              </el-input>
+            </div>
+          </div>
+        </div>
+
+        <div class="mainBtnTitle_other" style="margin-top: 30px">延迟规定</div>
+        <div class="ruleBox flex-c">
+          <div class="flex" style="flex-direction: column; align-items: center">
+            <div class="bookingTitle">后/分钟</div>
+
+            <div>
+              <el-input
+                v-model="ruleData.cancelRule.val"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>内</template>
+              </el-input>
+            </div>
+            <div>
+              <el-input
+                v-model="ruleData.cancelRule.val1"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>外</template>
+              </el-input>
+            </div>
+          </div>
+          <div
+            class="flex-c"
+            style="
+              height: 120px;
+              width: 180px;
+              border: 2px solid #000;
+              margin: 30px 30px 0 30px;
+            "
+          >
+            <div style="font-size: 20px; letter-spacing: 2px">
+              预定时间
+              <div style="font-size: 25px; text-align: center">X</div>
+            </div>
+          </div>
+          <div class="flex" style="flex-direction: column; align-items: center">
+            <div class="bookingTitle">扣除费用（%）</div>
+
+            <div>
+              <el-input
+                v-model="ruleData.delayRule.per"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>%</template>
+              </el-input>
+            </div>
+            <div>
+              <el-input
+                v-model="ruleData.delayRule.per1"
+                style="max-width: 280px; margin-top: 20px"
+              >
+                <template #append>%</template>
+              </el-input>
+              <div style="text-align: right;font-size: 12px;">并自动释放位置</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="doneBtn" style="line-height: 32px">
+          <span>完成</span>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -434,6 +603,7 @@ const openService = ref(false);
 const editStatus = ref(false);
 const bookingDrawer = ref(false);
 const deskDrawer = ref(false);
+const handleRuleDrawer = ref(false);
 const canbookTime = ref(); //可预约时间
 const shopInfo = ref({});
 const openTime = ref([]); //营业时间
@@ -448,12 +618,29 @@ const deskData = reactive({
     { value: "为包厢配置", label: "为包厢配置" },
   ],
   settingTarget: "为大厅配置",
-  hall: { name: "为大厅配置", list: [] },
-  room: { name: "为包厢配置", list: [] },
+  hall: { name: "为大厅配置", list: [], oustSizeList: [] },
+  room: { name: "为包厢配置", list: [], oustSizeList: [] },
   TabIdx: 0,
   typeId: "",
+  originData: [], //源数据
   rightDeskData: [],
   outSizeDeskData: [],
+});
+const ruleData = reactive({
+  cancelRule: {
+    val: "",
+    val2: "",
+    val3: "",
+    per: "",
+    per1: "",
+    per2: "",
+  },
+  delayRule: {
+    val: "",
+    val2: "",
+    per: "",
+    per1: "",
+  },
 });
 
 const timeLine = ref(30); //时间间隔
@@ -464,6 +651,11 @@ const TabsList = ref([]); //桌台区域
 const tabChange = (item, idx) => {
   deskData.TabIdx = idx;
   deskData.typeId = item.typeId;
+  getDeskList();
+};
+const selectChange = (e) => {
+  console.log(e);
+  // 恢复右边的数据
   getDeskList();
 };
 
@@ -482,36 +674,23 @@ const getDeskList = async () => {
       res.rows[i].isSelect = true;
       j = res.rows[i].modelId;
       // console.log(j);
-
       newArr[j].push(res.rows[i]);
     }
-    console.log(newArr.filter((x) => x.length > 0));
+    // console.log(newArr.filter((x) => x.length > 0));
+    deskData.originData = newArr.filter((x) => x.length > 0);
+    deskData.rightDeskData = deskData.originData.slice(0);
 
-    deskData.rightDeskData = newArr.filter((x) => x.length > 0);
-    console.log(deskData.rightDeskData);
+    // console.log(deskData.rightDeskData);
   }
 };
 const handleChangeSelect = (item, idx) => {
-  console.log(item, idx);
+  // console.log(item, idx);
   item.isSelect = !item.isSelect;
+  // console.log(deskData.rightDeskData);
   if (deskData.settingTarget === "为大厅配置") {
-    const newArr = deskData.rightDeskData.flat();
-    deskData.hall.list = newArr
-      .map((x) => {
-        if (x.isSelect) {
-          return x;
-        }
-      })
-      .filter((x) => !!x);
+    deskData.hall.list = deskData.rightDeskData.slice(0);
   } else {
-    const newArr = deskData.rightDeskData.flat();
-    deskData.room.list = newArr
-      .map((x) => {
-        if (x.isSelect) {
-          return x;
-        }
-      })
-      .filter((x) => !!x);
+    deskData.room.list = deskData.rightDeskData.slice(0);
   }
 };
 const handleAllDeskSelect = () => {
@@ -521,15 +700,61 @@ const handleAllDeskSelect = () => {
       deskData.rightDeskData[i][j].isSelect = allDeskSelect.value;
     }
   }
+  if (deskData.settingTarget === "为大厅配置") {
+    deskData.hall.list = deskData.rightDeskData.slice(0);
+  } else {
+    deskData.room.list = deskData.rightDeskData.slice(0);
+  }
 };
-const handleSelectDeskDone = () => {
-  // console.log(deskData.rightDeskData);
+const handleShowRuleDrawer = () => {
+  handleRuleDrawer.value = true;
+};
 
-  console.log(deskData.hall);
-  console.log(deskData.room);
+// 将当前选择的桌台 放入对应的list
+const putInList = () => {
+  deskData.hall.oustSizeList = [];
+  deskData.room.oustSizeList = [];
+
+  for (let i = 0; i < deskData.hall.list.length; i++) {
+    // 找到选择的桌子
+    const totalArr = deskData.hall.list[i]
+      .map((x) => {
+        if (x.isSelect) {
+          return x;
+        }
+      })
+      .filter((x) => !!x);
+    deskData.hall.oustSizeList.push(
+      Object.assign({}, deskData.hall.list[i][0], {
+        total: totalArr.length,
+      })
+    );
+  }
+
+  for (let i = 0; i < deskData.room.list.length; i++) {
+    // 找到选择的桌子
+    const totalArr = deskData.room.list[i]
+      .map((x) => {
+        if (x.isSelect) {
+          return x;
+        }
+      })
+      .filter((x) => !!x);
+    deskData.room.oustSizeList.push(
+      Object.assign({}, deskData.room.list[i][0], {
+        total: totalArr.length,
+      })
+    );
+  }
+
+  console.log(deskData.hall.oustSizeList);
 
   deskData.outSizeDeskData = [deskData.hall, deskData.room];
-  console.log(deskData.outSizeDeskData);
+};
+
+const handleSelectDeskDone = () => {
+  putInList();
+  deskDrawer.value = false;
 };
 
 const disabledSeconds = () => {
@@ -553,7 +778,11 @@ const getAreaList = async () => {
   if (res.code === 0) {
     TabsList.value = res.rows;
     TabsList.value.unshift({ typeName: "全部", typeId: "" });
-    getDeskList();
+    await getDeskList();
+
+    deskData.hall.list = deskData.rightDeskData.slice(0);
+    deskData.room.list = deskData.rightDeskData.slice(0);
+    putInList();
   }
 };
 
@@ -816,5 +1045,36 @@ $bgColor: #a98e73;
     border: 1px solid #c2c2c2;
     border-radius: 10px;
   }
+}
+.tablePosition {
+  padding: 6px 15px;
+  background-color: $tabColor;
+  border-radius: 8px;
+  width: fit-content;
+  margin: 15px 10px 10px 10px;
+}
+.tableTypeSty {
+  padding: 12px;
+  background-color: $tabColor;
+  border-radius: 20px;
+  width: calc((100% / 3) - 40px);
+  margin: 10px;
+  height: 13vh;
+  min-height: 110px;
+}
+.ruleBox {
+  background-color: $bgColor;
+  border: 1px solid #000;
+  padding: 0px 0px 30px 0px;
+}
+.mainBtnTitle_other {
+  background-color: $bgColor;
+  padding: 10px 40px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border: 1px solid #000;
+  width: fit-content;
+  font-size: 19px;
+  letter-spacing: 1px;
 }
 </style>
