@@ -517,13 +517,13 @@ export default {
           that.notifiactions.push(notifiaction);
           that.handleOutBill();
         } catch (err) {
-          console.log(err);
+          console.warn(err);
         }
       };
       // 重连
       this.ws.onclose = function (event) {
         if (!that.wsClose) {
-          console.log("重连");
+          // console.log("重连");
           that.getOrderListSocket();
         } else {
           console.log("正常关闭");

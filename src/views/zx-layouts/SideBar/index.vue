@@ -186,9 +186,9 @@ const handleOpen = () => {};
 const handleClose = () => {};
 const handleClickMenuFirst = (item: any, index: Number) => {
   if (item.children) {
-    console.log("有children");
+    // console.log("有children");
   } else {
-    console.log(item, index);
+    // console.log(item, index);
     const menuRouter = item.path + item.component;
     router.push({ path: menuRouter });
   }
