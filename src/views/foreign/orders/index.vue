@@ -22,15 +22,16 @@
         clearable
         @keyup.enter="getList"
       />
-
-      <el-date-picker
-        v-model="query.orderTime"
-        type="date"
-        placeholder="下单时间"
-        size="default"
-        value-format="YYYY-MM-DD"
-      />
-
+      <el-config-provider :locale="locale">
+        <el-date-picker
+        :locale="locale"
+          v-model="query.orderTime"
+          type="date"
+          placeholder="下单时间"
+          size="default"
+          value-format="YYYY-MM-DD"
+        />
+      </el-config-provider>
       <el-button
         type="primary"
         icon="Search"
@@ -78,10 +79,27 @@
           width="150"
         />
 
-        <el-table-column prop="pickupWayLabel" label="就餐方式" sortable  width="150" />
-        <el-table-column prop="mealInfo.mealName" label="套餐名" sortable v-if="activeName === 'TEAM_BUY_PAY'" width="150" />
+        <el-table-column
+          prop="pickupWayLabel"
+          label="就餐方式"
+          sortable
+          width="150"
+        />
+        <el-table-column
+          prop="mealInfo.mealName"
+          label="套餐名"
+          sortable
+          v-if="activeName === 'TEAM_BUY_PAY'"
+          width="150"
+        />
 
-        <el-table-column prop="sureRefundCouponQty" label="可退数量" sortable v-if="activeName === 'TEAM_BUY_PAY'" width="150" />
+        <el-table-column
+          prop="sureRefundCouponQty"
+          label="可退数量"
+          sortable
+          v-if="activeName === 'TEAM_BUY_PAY'"
+          width="150"
+        />
 
         <el-table-column label="操作" width="220">
           <template #default="scope">
@@ -226,7 +244,12 @@
       align-center
     >
       <div style="text-align: center">
-        <el-input-number v-model="cancelNum" size="large" :min="1" :max="cancelRow.sureRefundCouponQty" />
+        <el-input-number
+          v-model="cancelNum"
+          size="large"
+          :min="1"
+          :max="cancelRow.sureRefundCouponQty"
+        />
       </div>
       <template #footer>
         <div class="dialog-footer">
@@ -500,7 +523,7 @@
 <script setup>
 import printTable from "@/components/printTable/diet.vue";
 import KitchenTable from "@/components/printTable/kitchen.vue";
-
+import zhCn from "element-plus/es/locale/lang/zh-cn";
 import { reactive, onMounted, ref, inject, nextTick } from "vue";
 import getLodop from "@/utils/LodopFuncs.js";
 import {
@@ -528,7 +551,7 @@ defineOptions({
   name: "foreign-Order",
   isRouter: true,
 });
-
+const locale = zhCn;
 const route = useRoute();
 const router = useRouter();
 const tableHeight = inject("$com").tableHeight();
@@ -977,7 +1000,7 @@ const handleClick = (e) => {
     const val = e.props.name;
     activeName.value = val;
     console.log(activeName.value);
-    
+
     query.pageNum = 1;
     getList();
   } catch (e) {

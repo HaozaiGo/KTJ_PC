@@ -141,6 +141,12 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item>
+           <el-radio-group v-model="radio1">
+      <el-radio value="1" size="large">Option 1</el-radio>
+      <el-radio value="2" size="large">Option 2</el-radio>
+    </el-radio-group>
+        </el-form-item>
         <el-form-item label="是否开放预约" label-width="108px">
           <el-radio-group v-model="formData.data.isOpenBook">
             <el-radio
