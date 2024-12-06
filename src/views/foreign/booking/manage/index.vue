@@ -49,14 +49,14 @@
       :height="tableHeight"
     >
       <el-table-column prop="orderNo" label="订单编号" sortable />
-      <el-table-column label="待处理剩余时间" width="160"> </el-table-column>
+      <el-table-column label="待处理剩余时间" sortable prop="leftTime">
+      </el-table-column>
       <el-table-column
         prop="book.dineStartTime"
         label="意向预订时间"
         sortable
-        width="180"
       />
-      <el-table-column label="意向预订桌台" sortable width="180">
+      <el-table-column label="意向预订桌台" sortable>
         <template #default="scope">
           {{ scope.row.tableModel.modelName }}({{
             scope.row.tableModel.minQty
@@ -94,7 +94,7 @@
     />
 
     <!-- 详情处理 -->
-    <div class="whiteBg flex-c" v-if="showDetail">
+    <div class="whiteBg flex-c" v-if="showDetail" ref="detailDom">
       <div class="handler rel">
         <div
           class="flex-c"
@@ -106,25 +106,66 @@
         </div>
         <div v-if="step === 1" style="padding: 80px 20px 80px 20px">
           <div class="handler_title">确认处理</div>
-          <div class="flex"><div class="leftName">意向预订时间：</div></div>
-          <div class="flex"><div class="leftName">意向预订台桌：</div></div>
-          <div class="flex"><div class="leftName">人数：</div></div>
-          <div class="flex"><div class="leftName">已支付定金：</div></div>
-          <div class="flex"><div class="leftName">订单编号：</div></div>
-          <div class="flex"><div class="leftName">顾客电话：</div></div>
+          <div class="flex" style="align-items: center; margin-top: 15px">
+            <div class="leftName">意向预订时间：</div>
+            <div>{{ detailData.book.dineStartTime }}</div>
+          </div>
+          <div class="flex" style="align-items: center; margin-top: 15px">
+            <div class="leftName">意向预订台桌：</div>
+            <div>
+              {{ detailData.tableModel.modelName }}
+            </div>
+          </div>
+          <div class="flex" style="align-items: center; margin-top: 15px">
+            <div class="leftName">人数：</div>
+            <div>{{ detailData.book.peopleQty }}</div>
+          </div>
+          <div class="flex" style="align-items: center; margin-top: 15px">
+            <div class="leftName">已支付定金：</div>
+            <div>¥{{ detailData.billAmount }}</div>
+          </div>
+          <div class="flex" style="align-items: center; margin-top: 15px">
+            <div class="leftName">订单编号：</div>
+            <div>{{ detailData.orderNo }}</div>
+          </div>
+          <div class="flex" style="align-items: center; margin-top: 15px">
+            <div class="leftName">顾客电话：</div>
+            <div>{{ detailData.phone }}</div>
+          </div>
         </div>
         <div v-if="step === 2" style="padding: 80px 20px 80px 20px">
           <div class="mainBtnTitle">查看桌台状态</div>
           <div>
-            <p style="text-align: center; margin: 10px 0">2024/11/20</p>
-            <p style="text-align: center">意向桌台：大圆台（6～8）人</p>
-            <div class="chooseDesk flex-c">A01</div>
+            <p style="text-align: center; margin: 10px 0">
+              {{ detailData.book.dineStartTime }}
+            </p>
+            <p style="text-align: center">
+              意向桌台：{{ detailData.tableModel.modelName }}（{{
+                detailData.tableModel.minQty
+              }}～{{ detailData.tableModel.maxQty }}）人
+            </p>
+            <div class="chooseDesk flex-c">{{ deskPicked.tableNo }}</div>
           </div>
 
           <div class="mainBtnTitle">当前预约时间空闲桌台</div>
-          <div style="margin: 20px 0">大圆台（6～8）人</div>
-          <div class="flex">
-            <div class="deskBox flex-c">A01</div>
+          <div style="margin: 10px 0">
+            {{ detailData.tableModel.modelName }}（{{
+              detailData.tableModel.minQty
+            }}～{{ detailData.tableModel.maxQty }}）人
+          </div>
+          <div
+            class="flex"
+            style="flex-wrap: wrap; height: 185px; overflow-y: scroll"
+          >
+            <div
+              class="deskBox flex-c"
+              v-for="(item, idx) in canSelectDestList"
+              :key="idx"
+              @click="handleSelectDesk(item, idx)"
+              :style="deskPickedIdx === idx ? 'background-color: #cdbca6' : ''"
+            >
+              {{ item.tableNo }}
+            </div>
           </div>
         </div>
         <!-- 取消预约 -->
@@ -132,16 +173,31 @@
           <p style="font-size: 20px">是否确定取消预订？</p>
           <p style="font-size: 20px">由于原因：</p>
           <el-input
-            v-model="textarea"
+            v-model="rejectReason"
             style="width: 100%; margin-top: 20px"
             :rows="3"
             type="textarea"
             placeholder="请输入取消预订的原因"
           />
           <div class="flex" style="flex-wrap: wrap; margin-top: 30px">
-            <div class="whyCancel flex-c">该预约时间暂无合适桌台</div>
-            <div class="whyCancel flex-c">该时间段商家暂不营业</div>
-            <div class="whyCancel flex-c">已与顾客协商一致</div>
+            <div
+              class="whyCancel flex-c"
+              @click="rejectReason = '该预约时间暂无合适桌台'"
+            >
+              该预约时间暂无合适桌台
+            </div>
+            <div
+              class="whyCancel flex-c"
+              @click="rejectReason = '该时间段商家暂不营业'"
+            >
+              该时间段商家暂不营业
+            </div>
+            <div
+              class="whyCancel flex-c"
+              @click="rejectReason = '已与顾客协商一致'"
+            >
+              已与顾客协商一致
+            </div>
           </div>
           <p style="margin-top: 15px">
             注：该原因回复，将直接转达给顾客，请如实告知取消原因。
@@ -149,15 +205,17 @@
         </div>
         <div class="bottomBtn flex" v-if="step === 1">
           <div class="cancelBook flex-c" @click="step = 3">取消预订</div>
-          <div class="confirmBook flex-c" @click="step = 2">
+          <div class="confirmBook flex-c" @click="allotDesk">
             确定预订，分配桌台
           </div>
         </div>
         <div class="bottomBtn" v-else-if="step === 2">
-          <div class="confirmBook flex-c">确认分配</div>
+          <div class="confirmBook flex-c" @click="handleConfirmAccpet">
+            确认分配
+          </div>
         </div>
         <div class="bottomBtn" v-else-if="step === 3">
-          <div class="confirmBook flex-c">确认取消</div>
+          <div class="confirmBook flex-c" @click="merchantCancel">确认取消</div>
         </div>
       </div>
     </div>
@@ -211,6 +269,12 @@
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import { ref, reactive, onMounted, inject, computed, nextTick } from "vue";
 import { getLists } from "@/api/project/foreign/order.js";
+import {
+  merchantHandler,
+  checkDeskEmptyList,
+} from "@/api/project/foreign/booking.js";
+
+import { ElMessage } from "element-plus";
 defineOptions({
   name: "manage-Book",
   isRouter: true,
@@ -218,9 +282,16 @@ defineOptions({
 onMounted(() => {
   getList();
 });
+const detailDom = ref(null);
 const step = ref(1);
 const locale = zhCn;
 const showDetail = ref(false);
+const detailData = ref({}); //详情里面的内容
+const rejectReason = ref(""); //商家拒绝原因
+const canSelectDestList = ref([]); //可以被选择的桌台
+const deskPicked = ref({}); //选择了的桌台信息
+const deskPickedIdx = ref(null); //选择了的桌台idx
+
 const showBackMoney = ref(false);
 const activeName = ref("WAIT_ACCEPT");
 const tableHeight = inject("$com").tableHeight();
@@ -232,6 +303,94 @@ const tableData = reactive({
   row: [],
   total: 0,
 });
+const allotDesk = async () => {
+  step.value = 2;
+  deskPicked.value = {};
+  deskPickedIdx.value = null;
+  // 检查哪些桌台可以被预订
+  const body = {
+    isOpenBook: "1",
+    storeId: detailData.value.storeId,
+    modelId: detailData.value.tableModel.modelId,
+    realStatusList: `FREE_TIME,WAIT_CLEAN`,
+  };
+  const res = await checkDeskEmptyList(body);
+  if (res.code === 0) {
+    canSelectDestList.value = res.data;
+  }
+};
+const updateTimer = (payTime, isInBusinessTime) => {
+  const now = new Date().getTime();
+  const elapsedTime = now - new Date(payTime).getTime(); // 计算经过的毫秒数
+
+  const leftTime =
+    isInBusinessTime === "0"
+      ? 20 * 60 * 60 * 1000 - elapsedTime
+      : 30 * 1000 * 60 - elapsedTime; //不在营业时间20小时 / 30分钟剩下的时间
+  if (leftTime > 0) {
+    // 显示结果
+    // 将毫秒转换为秒、分钟和小时
+    // const seconds = Math.floor((leftTime / 1000) % 60);
+    const minutes = Math.floor((leftTime / (1000 * 60)) % 60);
+    const hours = Math.floor((leftTime / (1000 * 60 * 60)) % 24);
+    // const days = Math.floor(leftTime / (1000 * 60 * 60 * 24));
+    // console.log(hours, minutes, seconds);
+    // const setSeconds = seconds > 9 ? seconds : "0" + seconds;
+    const setMinutes = minutes > 9 ? minutes : "0" + minutes;
+    if (isInBusinessTime === "0") {
+      return hours + "小时" + setMinutes;
+    } else {
+      return setMinutes + "分钟";
+    }
+  } else {
+    return "00:00";
+  }
+};
+const merchantCancel = async () => {
+  if (rejectReason.value) {
+    const body = {
+      orderId: detailData.value.orderId,
+      passStatus: "CANCEL",
+      rejectReason: rejectReason.value,
+    };
+
+    const res = await merchantHandler(body);
+    if (res.code === 0) {
+      getList();
+      showDetail.value = false;
+      return ElMessage({
+        message: "取消成功",
+        type: "success",
+        appendTo: detailDom.value,
+      });
+    } else {
+      showDetail.value = false;
+    }
+  } else {
+    return ElMessage({
+      message: "请输入取消预订的原因！",
+      type: "warning",
+      appendTo: detailDom.value,
+    });
+  }
+};
+const handleConfirmAccpet = async () => {
+  const body = {
+    orderId: detailData.value.orderId,
+    passStatus: "ACCEPT",
+    tableModelId: deskPicked.value.modelId,
+    tableNo: deskPicked.value.tableNo,
+  };
+  const res = await merchantHandler(body);
+  if (res.code === 0) {
+    showDetail.value = false;
+    getList();
+  }
+};
+const handleSelectDesk = (item, idx) => {
+  deskPicked.value = item;
+  deskPickedIdx.value = idx;
+};
 
 const getList = async () => {
   console.log(time.value);
@@ -248,11 +407,21 @@ const getList = async () => {
 
   const res = await getLists(body);
   if (res.code === 0) {
+    res.rows.forEach((element) => {
+      element.leftTime = updateTimer(
+        element.payTime,
+        element.book.isInBusinessTime
+      );
+    });
     tableData.row = res.rows;
+    console.log(tableData.row);
+
     tableData.total = res.total;
   }
 };
-const toHandler = () => {
+const toHandler = (item) => {
+  step.value = 1;
+  detailData.value = item;
   showDetail.value = true;
 };
 const toHandlerBookMoney = () => {
@@ -276,7 +445,7 @@ const handleClick = async () => {
 @import "@/assets/css/variables.scss";
 
 .chooseDesk {
-  height: 70px;
+  height: 60px;
   border: 2px solid #bbb6b6;
   margin: 30px 0;
   font-size: 28px;
@@ -287,6 +456,7 @@ const handleClick = async () => {
   font-size: 18px;
   border: 1px solid #000;
   margin-right: 15px;
+  margin-top: 15px;
 }
 .whyCancel {
   height: 40px;
@@ -339,7 +509,6 @@ const handleClick = async () => {
 .leftName {
   width: 160px;
   text-align: right;
-  margin-top: 15px;
 }
 :deep(.el-tabs__item.is-active) {
   background-color: #cdbca6 !important;

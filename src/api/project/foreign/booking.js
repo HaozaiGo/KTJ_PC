@@ -12,7 +12,7 @@ export function editBooking(data) {
   return request({
     url: `/store/api/store/book`,
     method: "PUT",
-    data
+    data,
   });
 }
 
@@ -28,6 +28,25 @@ export function bookingStatus(data) {
   return request({
     url: `/store/api/store/book/edit/open/status`,
     method: "post",
-    data
+    data,
   });
 }
+
+//商家处理接单与否
+export function merchantHandler(data) {
+  return request({
+    url: `/store/api/store/order/book/accept`,
+    method: "post",
+    data,
+  });
+}
+export function checkDeskEmptyList(params) {
+  return request({
+    url: `/store/api/store/table/no/page/list`,
+    method: "get",
+    params
+  });
+}
+
+
+
