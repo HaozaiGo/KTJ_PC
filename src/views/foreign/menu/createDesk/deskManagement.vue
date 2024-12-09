@@ -141,19 +141,19 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
-           <el-radio-group v-model="radio1">
-      <el-radio value="1" size="large">Option 1</el-radio>
-      <el-radio value="2" size="large">Option 2</el-radio>
-    </el-radio-group>
-        </el-form-item>
+        <!-- <el-form-item>
+          <el-radio-group v-model="radio1">
+            <el-radio value="1" size="large">Option 1</el-radio>
+            <el-radio value="2" size="large">Option 2</el-radio>
+          </el-radio-group>
+        </el-form-item> -->
         <el-form-item label="是否开放预约" label-width="108px">
           <el-radio-group v-model="formData.data.isOpenBook">
             <el-radio
               :value="item.dictValue"
               v-for="(item, idx) in statusOptions"
               :key="idx"
-              >{{item.dictLabel}}</el-radio
+              >{{ item.dictLabel }}</el-radio
             >F
           </el-radio-group>
         </el-form-item>
@@ -247,6 +247,35 @@
             追加最大人数：
             <el-input-number v-model="item.addLimitQty" :min="1" :max="10" />
           </div>
+          <div class="interval">
+            桌台图片
+            <el-radio-group v-model="item.modelIcon">
+              <el-radio
+                :value="icon.dictValue"
+                v-for="(icon, idx) in deskIconList"
+                :key="idx"
+              >
+                <div class="flex" style="flex-direction: column">
+                  <img
+                    v-if="icon.dictValue === 'circular'"
+                    src="@/assets/img/merchant/circular.png"
+                    style="width: 32px; height: 32px"
+                  />
+                  <img
+                    v-else-if="icon.dictValue === 'square'"
+                    src="@/assets/img/merchant/square.png"
+                    style="width: 32px; height: 32px"
+                  />
+                  <img
+                    v-else-if="icon.dictValue === 'booth'"
+                    src="@/assets/img/merchant/booth.png"
+                    style="width: 32px; height: 32px"
+                  />
+                  <div style="margin-top: 2px">{{ icon.dictLabel }}</div>
+                </div></el-radio
+              >
+            </el-radio-group>
+          </div>
 
           <el-button
             style="margin-left: 10px"
@@ -320,6 +349,7 @@ defineOptions({
   name: "desk-Management",
   isRouter: true,
 });
+const deskIconList = ref([]); //iconList
 const statusOptions = ref([]); //是否开放预约
 const tableHeight = inject("$com").tableHeight();
 const multipleSelection = ref([]);
@@ -362,8 +392,8 @@ let formData = reactive({
   data: {
     tableNo: "",
     typeId: "",
-    isOpenBook:"",
-    modelId:"",
+    isOpenBook: "",
+    modelId: "",
   },
 });
 const ScanCode = reactive({
@@ -508,6 +538,7 @@ const getDeskTypeList = async () => {
         addLimitQty: 2,
         maxQty: "",
         minQty: "",
+        modelIcon: "",
       },
     ];
   }
@@ -638,6 +669,7 @@ const handleAddDeskType = async (e) => {
       addLimitQty: 2,
       maxQty: "",
       minQty: "",
+      modelIcon: "",
     });
     console.log(manageDeskType.editableTabs);
 
@@ -656,9 +688,10 @@ const handleTabsEditName = (item, idx) => {};
 
 onMounted(async () => {
   inject("$com")
-    .getStoreDict("sys_yes_no")
+    .getStoreDict("sys_yes_no,bill_store_desk_icon")
     .then((res) => {
       statusOptions.value = res.data[0].list;
+      deskIconList.value = res.data[1].list;
     });
   await getStoreList();
   getTabListFirst();

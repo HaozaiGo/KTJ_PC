@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div class="content" style="color: #000">
     <div class="groupBuyData flex-sb">
       <div class="flex">
         <PieChart height="180px" width="180px"></PieChart>
@@ -1421,6 +1421,8 @@ $bgColor: #a98e73;
 .ruleRow {
   padding: 15px 10px 5px 10px;
   .ruleRow_Box {
+    font-weight: bold;
+
     flex: 1;
     text-align: center;
   }
