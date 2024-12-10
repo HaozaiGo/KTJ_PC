@@ -71,6 +71,7 @@
             type="primary"
             size="small"
             @click="toHandler(scope.row)"
+            v-if="activeName === 'WAIT_ACCEPT'"
           >
             去处理
           </el-button>
@@ -131,6 +132,7 @@
           <div class="flex" style="align-items: center; margin-top: 15px">
             <div class="leftName">顾客电话：</div>
             <div>{{ detailData.phone }}</div>
+            <div class="getPhone">去获取</div>
           </div>
         </div>
         <div v-if="step === 2" style="padding: 80px 20px 80px 20px">
@@ -291,7 +293,7 @@ const rejectReason = ref(""); //商家拒绝原因
 const canSelectDestList = ref([]); //可以被选择的桌台
 const deskPicked = ref({}); //选择了的桌台信息
 const deskPickedIdx = ref(null); //选择了的桌台idx
-
+const textarea = ref("");
 const showBackMoney = ref(false);
 const activeName = ref("WAIT_ACCEPT");
 const tableHeight = inject("$com").tableHeight();
@@ -523,5 +525,12 @@ const handleClick = async () => {
 }
 :deep(.el-tabs--top .el-tabs__item.is-top:nth-child(2)) {
   padding-left: 20px !important;
+}
+.getPhone{
+  padding: 5px 10px;
+  border: 1px solid #cdbca6;
+  background: #cdbca6;
+  border-radius: 8px;
+  margin-left: 15px;
 }
 </style>

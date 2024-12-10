@@ -717,6 +717,7 @@ const editStatus = ref(false);
 const bookingDrawer = ref(false);
 const deskDrawer = ref(false);
 const handleRuleDrawer = ref(false);
+const mark = ref(""); //标记
 const canbookTime = ref(); //可预约时间
 const shopInfo = ref({});
 const openTime = ref([]); //营业时间
@@ -761,23 +762,44 @@ const TabsList = ref([]); //桌台区域
 const bookingInfo = ref({}); //预定信息之前的
 
 const tabChange = (item, idx) => {
+  console.log(item, idx);
+
   deskData.TabIdx = idx;
   deskData.typeId = item.typeId;
-  // getDeskList();
+  filterDesk(deskData.typeId);
 };
+
+// 根据typeId对应过滤
+const filterDesk = (typeId) => {
+  if (typeId === "") {
+    deskData.rightDeskData = settingDeskData(
+      deskData.originData.filter((x) => x.mark === mark.value || !x.mark)
+    );
+  } else {
+    const result = deskData.originData.filter(
+      (x) => x.typeId === typeId && (x.mark === mark.value || !x.mark)
+    );
+    deskData.rightDeskData = settingDeskData(result);
+  }
+};
+
 const selectChange = (e) => {
   // console.log(e);
+  mark.value = e === "为大厅配置" ? "hall" : "room";
+  console.log(mark.value);
+
   // console.log(deskData.rightDeskData);
   const flatArr = deskData.rightDeskData.flat();
   const fliterArr = flatArr.filter((x) => x.isSelect);
   //未选中的桌台
   const canChooseIds = fliterArr.map((item) => item.tableId);
-  console.log(canChooseIds);
+  // console.log(canChooseIds);
 
   const result = deskData.originData.filter(
     (item) => !canChooseIds.includes(item.tableId)
   );
   deskData.rightDeskData = settingDeskData(result);
+  filterDesk(deskData.typeId);
 };
 const changeStayPositionTime = (e) => {
   deskStayTime.value = e;
@@ -807,11 +829,6 @@ const getDeskList = async () => {
     res.rows.forEach((x) => (x.isSelect = true));
     deskData.originData = res.rows;
     deskData.rightDeskData = settingDeskData(res.rows.slice(0));
-    if (deskData.settingTarget === "为大厅配置") {
-      deskData.hall.list = deskData.rightDeskData.flat();
-    } else {
-      deskData.room.list = deskData.rightDeskData.flat();
-    }
   }
 };
 const handleChangeSelect = (item, idx) => {
@@ -819,6 +836,7 @@ const handleChangeSelect = (item, idx) => {
   item.isSelect = !item.isSelect;
   if (deskData.settingTarget === "为大厅配置") {
     if (item.isSelect) {
+      item.mark = "hall";
       deskData.hall.list.push(item);
     } else {
       const idx = deskData.hall.list.findIndex(
@@ -828,6 +846,7 @@ const handleChangeSelect = (item, idx) => {
     }
   } else {
     if (item.isSelect) {
+      item.mark = "room";
       deskData.room.list.push(item);
     } else {
       const idx = deskData.room.list.findIndex(
@@ -1007,8 +1026,14 @@ const getAreaList = async () => {
   const res = await getTabLists({ storeId: storeId });
   if (res.code === 0) {
     TabsList.value = res.rows;
+    // 首次加载插入deskData
     TabsList.value.unshift({ typeName: "全部", typeId: "" });
     await getDeskList();
+    if (deskData.settingTarget === "为大厅配置") {
+      deskData.hall.list = deskData.rightDeskData.flat();
+    } else {
+      deskData.room.list = deskData.rightDeskData.flat();
+    }
   }
 };
 
