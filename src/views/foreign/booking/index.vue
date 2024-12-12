@@ -53,6 +53,8 @@
           v-model="bookAmount"
           style="width: 250px"
           placeholder="请输入定金"
+          :min="1"
+          type="number"
         >
           <template #prepend>¥</template>
         </el-input>
@@ -706,6 +708,7 @@ import {
   bookingStatus,
 } from "@/api/project/foreign/booking.js";
 import { getTabLists, getLists } from "@/api/project/foreign/createDesk.js";
+import { ElMessage } from "element-plus";
 defineOptions({
   name: "Booking",
   isRouter: true,
@@ -946,7 +949,12 @@ const disabledSeconds = () => {
 const handleEdit = async () => {
   if (editStatus.value) {
     console.log(canbookTime.value);
-
+    if (bookAmount.value === '0') {
+      return ElMessage({
+        message: "预定定金不能设置为0！",
+        type: "warning",
+      });
+    }
     // 构建时间list
 
     var bookTimeLists = [];
@@ -974,7 +982,7 @@ const handleEdit = async () => {
       bookTimeList: bookTimeLists,
       tableList: [
         {
-          topPosition: "为大厅配置",
+          topPosition: "HALL",
           tableIds: hallList
             .map((x) => {
               if (x.isSelect) {
@@ -984,7 +992,7 @@ const handleEdit = async () => {
             .filter((x) => !!x),
         },
         {
-          topPosition: "为包厢配置",
+          topPosition: "BOX",
           tableIds: roomList
             .map((x) => {
               if (x.isSelect) {

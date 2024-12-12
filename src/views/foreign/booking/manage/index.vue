@@ -79,6 +79,7 @@
             link
             type="primary"
             size="small"
+            v-if="activeName != 'WAIT_ACCEPT'"
             @click="toHandlerBookMoney(scope.row)"
           >
             处理定金
@@ -132,7 +133,7 @@
           <div class="flex" style="align-items: center; margin-top: 15px">
             <div class="leftName">顾客电话：</div>
             <div>{{ detailData.phone }}</div>
-            <div class="getPhone">去获取</div>
+            <div class="getPhone" @click="handleGetPhone">去获取</div>
           </div>
         </div>
         <div v-if="step === 2" style="padding: 80px 20px 80px 20px">
@@ -184,18 +185,21 @@
           <div class="flex" style="flex-wrap: wrap; margin-top: 30px">
             <div
               class="whyCancel flex-c"
+              style="width: fit-content"
               @click="rejectReason = '该预约时间暂无合适桌台'"
             >
               该预约时间暂无合适桌台
             </div>
             <div
               class="whyCancel flex-c"
+              style="width: fit-content"
               @click="rejectReason = '该时间段商家暂不营业'"
             >
               该时间段商家暂不营业
             </div>
             <div
               class="whyCancel flex-c"
+              style="width: fit-content"
               @click="rejectReason = '已与顾客协商一致'"
             >
               已与顾客协商一致
@@ -223,7 +227,7 @@
     </div>
 
     <!-- 定金处理 -->
-    <div class="whiteBg flex-c" v-if="showBackMoney">
+    <div class="whiteBg flex-c" v-if="showBackMoney" ref="refundDom">
       <div class="handler rel">
         <div
           class="flex-c"
@@ -235,9 +239,19 @@
         </div>
         <div style="padding: 80px 20px 80px 20px">
           <div class="handler_title">确认处理</div>
-          <div class="flex"><div class="leftName">用户取消：</div></div>
-          <div class="flex"><div class="leftName">待退定金：</div></div>
-          <div class="flex"><div class="leftName">可退定金：</div></div>
+          <div class="flex">
+            <div class="leftName">用户取消原因：</div>
+            <div>{{ detailData.book.cancelReason || "暂无" }}</div>
+          </div>
+          <div class="flex">
+            <div class="leftName">可退定金：</div>
+            <div>
+              ¥
+              <span style="font-size: 22px; font-weight: bold">{{
+                detailData.billAmount - detailData.refundAmount
+              }}</span>
+            </div>
+          </div>
           <div style="padding-left: 72px; color: #c1c1c1; font-size: 13px">
             （可退定金为用户实际支付的定金金额，请按实际情况操作！）
           </div>
@@ -255,12 +269,23 @@
           </p>
 
           <div class="flex" style="margin-top: 30px; flex-wrap: wrap">
-            <div class="whyCancel flex-c">退¥100（100%）</div>
+            <div
+              class="whyCancel flex-c"
+              v-for="(item, idx) in percentList"
+              :key="idx"
+              style="margin-bottom: 20px"
+              @click="setRefund(item, idx)"
+              :style="refundIdx === idx ? 'background:#cdbca6' : ''"
+            >
+              退{{ item * 100 }}%
+            </div>
           </div>
         </div>
 
         <div class="bottomBtn">
-          <div class="confirmBook flex-c">确认操作退款取消</div>
+          <div class="confirmBook flex-c" @click="handleConfirmRefund">
+            确认操作退款取消
+          </div>
         </div>
       </div>
     </div>
@@ -274,6 +299,8 @@ import { getLists } from "@/api/project/foreign/order.js";
 import {
   merchantHandler,
   checkDeskEmptyList,
+  getPhoneNumber,
+  refundBookOrder,
 } from "@/api/project/foreign/booking.js";
 
 import { ElMessage } from "element-plus";
@@ -284,7 +311,9 @@ defineOptions({
 onMounted(() => {
   getList();
 });
+const percentList = ref([1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]);
 const detailDom = ref(null);
+const refundDom = ref(null);
 const step = ref(1);
 const locale = zhCn;
 const showDetail = ref(false);
@@ -294,6 +323,7 @@ const canSelectDestList = ref([]); //可以被选择的桌台
 const deskPicked = ref({}); //选择了的桌台信息
 const deskPickedIdx = ref(null); //选择了的桌台idx
 const textarea = ref("");
+const refundIdx = ref(null);
 const showBackMoney = ref(false);
 const activeName = ref("WAIT_ACCEPT");
 const tableHeight = inject("$com").tableHeight();
@@ -305,6 +335,36 @@ const tableData = reactive({
   row: [],
   total: 0,
 });
+const handleGetPhone = async () => {
+  const res = await getPhoneNumber(detailData.value.orderId);
+  if (res.code === 0) {
+    detailData.value.phone = res.data;
+  }
+};
+const setRefund = (item, idx) => {
+  textarea.value =
+    item * (detailData.value.billAmount - detailData.value.refundAmount);
+  refundIdx.value = idx;
+};
+const handleConfirmRefund = async () => {
+  if (!textarea.value) {
+    return ElMessage({
+      message: "请输入退款金额！",
+      type: "warning",
+      appendTo: refundDom.value,
+    });
+  } else {
+    const body = {
+      orderId: detailData.value.orderId,
+      reason: "商家PC退款",
+      refundAmount: textarea.value,
+      refundType: "BY_AMOUNT",
+    };
+    const res = await refundBookOrder(body);
+    showBackMoney.value = false;
+    getList();
+  }
+};
 const allotDesk = async () => {
   step.value = 2;
   deskPicked.value = {};
@@ -426,8 +486,10 @@ const toHandler = (item) => {
   detailData.value = item;
   showDetail.value = true;
 };
-const toHandlerBookMoney = () => {
+const toHandlerBookMoney = (item) => {
+  detailData.value = item;
   showBackMoney.value = true;
+  textarea.value = null;
 };
 const handleBacker = () => {
   if (step.value > 1) {
@@ -463,7 +525,7 @@ const handleClick = async () => {
 .whyCancel {
   height: 40px;
   padding: 10px 20px;
-  width: fit-content;
+  width: 120px;
   font-size: 18px;
   border: 1px solid #000;
   margin-right: 15px;
@@ -526,7 +588,7 @@ const handleClick = async () => {
 :deep(.el-tabs--top .el-tabs__item.is-top:nth-child(2)) {
   padding-left: 20px !important;
 }
-.getPhone{
+.getPhone {
   padding: 5px 10px;
   border: 1px solid #cdbca6;
   background: #cdbca6;

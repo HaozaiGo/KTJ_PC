@@ -47,6 +47,20 @@ export function checkDeskEmptyList(params) {
     params
   });
 }
-
+//获取手机号
+export function getPhoneNumber(orderId){
+  return request({
+    url: `/store/api/store/order/store/pay/phone/${orderId}`,
+    method: "get",
+  });
+}
+// 预定订单退款
+export function refundBookOrder(data) {
+  return request({
+    url: `/store/api/store/wx/refund/book`,
+    method: "post",
+    data,
+  });
+}
 
 
