@@ -767,6 +767,7 @@ const tabChange = (item, idx) => {
 // 根据typeId对应过滤
 const filterDesk = (typeId) => {
   if (typeId === "") {
+    // 全部的过滤
     deskData.rightDeskData = settingDeskData(
       deskData.originData.filter((x) => x.mark === mark.value || !x.mark)
     );
@@ -849,6 +850,7 @@ const handleChangeSelect = (item, idx) => {
         (x) => x.tableId === item.tableId
       );
       deskData.hall.list.splice(idx, 1);
+      item.mark = null;
     }
   } else {
     if (item.isSelect) {
@@ -859,6 +861,8 @@ const handleChangeSelect = (item, idx) => {
         (x) => x.tableId === item.tableId
       );
       deskData.room.list.splice(idx, 1);
+      item.mark = null;
+
     }
   }
   console.log(deskData.hall.list, deskData.room.list);
@@ -1318,7 +1322,7 @@ const checkHadSettingBooking = async () => {
       });
 
       deskData.outSizeDeskData.push({
-        name: key === "HALL" ? "大厅" : "包厢",
+        name: key === "HALL" ? "为大厅配置" : "为包厢配置",
         outSizeList: list,
       });
     }
