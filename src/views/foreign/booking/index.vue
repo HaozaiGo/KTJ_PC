@@ -326,39 +326,31 @@
             <div class="flex" style="margin: 15px 0 15px 0">
               <el-time-picker
                 v-model="cusTime[0].startTime"
-                arrow-control
                 placeholder="开放预约起始时间"
-                style="width: 180px"
-                :disabled-seconds="disabledSeconds"
                 value-format="HH:mm:ss"
+                style="width: 180px"
               />
               <span style="margin: 0 20px">至</span>
 
               <el-time-picker
                 v-model="cusTime[0].endTime"
-                arrow-control
                 placeholder="开放预约结束时间"
                 style="width: 180px"
-                :disabled-seconds="disabledSeconds"
                 value-format="HH:mm:ss"
               />
 
               <el-time-picker
                 v-model="cusTime[1].startTime"
-                arrow-control
                 placeholder="开放预约起始时间"
                 style="width: 180px; margin-left: 20px"
-                :disabled-seconds="disabledSeconds"
                 value-format="HH:mm:ss"
               />
               <span style="margin: 0 20px">至</span>
 
               <el-time-picker
                 v-model="cusTime[1].endTime"
-                arrow-control
                 placeholder="开放预约结束时间"
                 style="width: 180px"
-                :disabled-seconds="disabledSeconds"
                 value-format="HH:mm:ss"
               />
             </div>
@@ -818,6 +810,17 @@ const settingDeskData = (data) => {
   }
   return newArr.filter((x) => x.length > 0);
 };
+const settingDeskDataHadPick = (data) => {
+  let newArr = new Array(20).fill().map(() => []);
+
+  for (let i = 0, j = 0; i < data.length; i++) {
+    j = data[i].modelId;
+    if (data[i].isOpenBook === "1") {
+      newArr[j].push(data[i]);
+    }
+  }
+  return newArr.filter((x) => x.length > 0);
+};
 
 const getDeskList = async () => {
   const body = {
@@ -949,7 +952,7 @@ const disabledSeconds = () => {
 const handleEdit = async () => {
   if (editStatus.value) {
     console.log(canbookTime.value);
-    if (bookAmount.value === '0') {
+    if (bookAmount.value === "0") {
       return ElMessage({
         message: "预定定金不能设置为0！",
         type: "warning",
@@ -1167,28 +1170,57 @@ const autoComputedTimeLine = computed(() => {
       return timeLine;
     }
   } else {
-    console.log(cusTime.value);
-    if (timeLine.value === 30) {
-      const timeLine = cusTime.value.map((x, idx) => {
-        const intervalTime = getHour(x.startTime, x.endTime);
-        return {
-          rangeQty: idx,
-          time: halfHour(x.startTime.split(":")[0]).slice(0, intervalTime * 2),
-        };
-      });
-      console.log(timeLine);
-      canbookTime.value = timeLine;
-      return timeLine;
-    } else if (timeLine.value === 60) {
-      const timeLine = cusTime.value.map((x, idx) => {
-        const intervalTime = getHour(x.startTime, x.endTime);
-        return {
-          rangeQty: idx,
-          time: oneHour(x.startTime.split(":")[0]).slice(0, intervalTime),
-        };
-      });
-      canbookTime.value = timeLine;
-      return timeLine;
+    try {
+      if (timeLine.value === 30) {
+        const timeLine = cusTime.value.map((x, idx) => {
+          console.log(x.startTime);
+          console.log(idx);
+
+          if (!x.startTime || !x.endTime) {
+            console.log(cusTime.value);
+
+            return {
+              rangeQty: idx,
+              time: [],
+            };
+          } else {
+            const intervalTime = getHour(x.startTime, x.endTime);
+
+            return {
+              rangeQty: idx,
+              time: halfHour(x.startTime.split(":")[0]).slice(
+                0,
+                intervalTime * 2
+              ),
+            };
+          }
+        });
+        // console.log(timeLine);
+        canbookTime.value = timeLine;
+        return timeLine;
+      } else if (timeLine.value === 60) {
+        const timeLine = cusTime.value.map((x, idx) => {
+          if (!x.startTime || !x.endTime) {
+            console.log(cusTime.value);
+
+            return {
+              rangeQty: idx,
+              time: [],
+            };
+          } else {
+            const intervalTime = getHour(x.startTime, x.endTime);
+
+            return {
+              rangeQty: idx,
+              time: oneHour(x.startTime.split(":")[0]).slice(0, intervalTime),
+            };
+          }
+        });
+        canbookTime.value = timeLine;
+        return timeLine;
+      }
+    } catch (e) {
+      console.log(e);
     }
   }
 });
@@ -1280,13 +1312,13 @@ const checkHadSettingBooking = async () => {
       // console.log(`${key}: ${value}`);
       console.log(settingDeskData(value));
       const list = [];
-      let resetDeskData = settingDeskData(value);
+      let resetDeskData = settingDeskDataHadPick(value);
       resetDeskData.map((x) => {
         list.push(Object.assign({}, x[0], { total: x.length }));
       });
 
       deskData.outSizeDeskData.push({
-        name: key,
+        name: key === "HALL" ? "大厅" : "包厢",
         outSizeList: list,
       });
     }
