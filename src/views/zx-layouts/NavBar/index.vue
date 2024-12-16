@@ -79,7 +79,7 @@
             @click="handleShowBigView"
             v-if="role === 'platform'"
           >
-            <el-icon  color="#000"><View /></el-icon>
+            <el-icon color="#000"><View /></el-icon>
             <span style="color: #000">总览 </span>
           </div>
           <!-- <div
@@ -318,33 +318,32 @@ export default {
     this.role = window.localStorage.getItem("role");
   },
   mounted() {
-
     if (this.role === "merchant") {
       common.getStoreDict("bill_print_method").then((res) => {
         this.printerMethod = res.data[0].list;
       });
-    }
-    setTimeout(() => {
-      this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
+      setTimeout(() => {
+        this.storeId = JSON.parse(localStorage.getItem("storeId")).storeId;
 
-      var agent = navigator.userAgent.toLowerCase();
-      var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
-      if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
-        console.log("这是windows32位系统");
-        this.getPrinterOption();
-      }
-      if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
-        console.log("这是windows64位系统");
-        this.getPrinterOption();
-      }
-      if (isMac) {
-        console.log("这是mac系统");
-      }
-      if (this.role === "merchant") {
-        this.getOrderListSocket();
-        this.getTableNoList();
-      }
-    }, 1500);
+        var agent = navigator.userAgent.toLowerCase();
+        var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+        if (agent.indexOf("win32") >= 0 || agent.indexOf("wow32") >= 0) {
+          console.log("这是windows32位系统");
+          this.getPrinterOption();
+        }
+        if (agent.indexOf("win64") >= 0 || agent.indexOf("wow64") >= 0) {
+          console.log("这是windows64位系统");
+          this.getPrinterOption();
+        }
+        if (isMac) {
+          console.log("这是mac系统");
+        }
+        if (this.role === "merchant") {
+          this.getOrderListSocket();
+          this.getTableNoList();
+        }
+      }, 1500);
+    }
   },
   methods: {
     logout() {
@@ -762,8 +761,8 @@ li.el-menu-item.is-active.is-active {
   padding-right: $base-padding;
   overflow: hidden;
   user-select: none;
-  background:  linear-gradient(to right, #e0cbac, #c9ab7e);;
-  
+  background: linear-gradient(to right, #e0cbac, #c9ab7e);
+
   box-shadow: $base-box-shadow;
   z-index: 100;
 

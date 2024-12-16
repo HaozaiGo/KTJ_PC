@@ -83,7 +83,7 @@ import router from "@/router/index.ts";
 import { isPassword, getCodeImg } from "@/utils/validate";
 import { getToken, removeToken } from "@/utils/auth.js";
 import { getRouterList, getFavorites } from "@/api/common/router.js";
-import { login,getFilePath_platform } from "@/api/common/user.js";
+import { login, getFilePath_platform } from "@/api/common/user.js";
 import { baseSettings } from "@/stores/counter";
 export default {
   name: "Login",
@@ -119,7 +119,7 @@ export default {
       title: this.$baseTitle,
       loginForm: {
         username: process.env.NODE_ENV === "development" ? "ktj" : "",
-        password: process.env.NODE_ENV === "development" ? "admin123" : "",
+        password: process.env.NODE_ENV === "development" ? "ktjadmin2024" : "",
         code: "",
         uuid: "",
         client_id: "web",
@@ -239,7 +239,7 @@ export default {
           this.loading = true;
           const res = await login(this.loginForm);
           // 登录success
-    
+
           if (res.code === 0) {
             window.localStorage.setItem("token", res.data);
           } else {
@@ -249,7 +249,7 @@ export default {
           getRouterList().then((res) => {
             if (res.code === 0) {
               const route = res.data;
-            
+
               // console.log(route);
               this.store.setRoute(route);
               window.localStorage.setItem("routes", JSON.stringify(route));
@@ -273,8 +273,7 @@ export default {
       const baseUrl = await getFilePath_platform();
       if (baseUrl.code === 0) {
         this.store.baseFileUrl = baseUrl.data;
-        localStorage.setItem('filePath',baseUrl.data)
-     
+        localStorage.setItem("filePath", baseUrl.data);
       }
     },
   },
