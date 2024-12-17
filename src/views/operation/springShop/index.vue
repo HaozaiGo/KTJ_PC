@@ -2,7 +2,7 @@
   <div class="content">
     <!-- 定位、营业时间、是否上架、联系电话 -->
     <div class="merchant-info">
-      <el-page-header content="商家基本信息" />
+      <el-page-header content="商家基本信息" icon="" title=" " />
 
       <el-card class="info-card">
         <el-row>
@@ -11,30 +11,37 @@
             <div class="card-header" style="margin-bottom: 15px">基本信息</div>
 
             <div v-if="!editMode" class="shopInfo">
-              <p>营业时间：{{ merchant.id }}</p>
-              <p>定位经度：{{ merchant.category }}</p>
-              <p>定位纬度：{{ merchant.category }}</p>
-              <p>是否上架：{{ merchant.category }}</p>
+              <p>营业时间：{{ merchant.startTime }} ~ {{ merchant.endTime }}</p>
+              <p>定位经度：{{ merchant.longitude }}</p>
+              <p>定位纬度：{{ merchant.latitude }}</p>
+              <p>是否营业：{{ merchant.onlineStatus === "1" ? "是" : "否" }}</p>
             </div>
             <div v-else class="inputSty">
+              <div class="flex">
+                <el-input
+                  v-model="merchant.startTime"
+                  placeholder="营业开始时间："
+                ></el-input>
+                <el-input
+                  v-model="merchant.endTime"
+                  placeholder="营业结束时间："
+                ></el-input>
+              </div>
+
               <el-input
-                v-model="merchant.name"
-                placeholder="营业时间："
-              ></el-input>
-              <el-input
-                v-model="merchant.name"
+                v-model="merchant.longitude"
                 placeholder="定位经度："
               ></el-input>
               <el-input
-                v-model="merchant.name"
+                v-model="merchant.latitude"
                 placeholder="定位纬度："
               ></el-input>
-              <el-select v-model="merchant.category" placeholder="是否上架">
+              <el-select v-model="merchant.onlineStatus" placeholder="是否上架">
                 <el-option
-                  v-for="category in categories"
-                  :key="category"
-                  :label="category"
-                  :value="category"
+                  v-for="(category, index) in categories"
+                  :key="index"
+                  :label="category.value"
+                  :value="category.key"
                 />
               </el-select>
             </div>
@@ -47,9 +54,9 @@
               style="margin-left: 25px; margin-bottom: 12px"
             >
               商家名称：帮到你自营商城（春节限定）
-              <el-button type="primary" @click="saveChanges">
-                {{ editMode ? "保存" : "编辑" }}</el-button
-              >
+              <div class="mainBtn" @click="saveChanges">
+                {{ editMode ? "保存" : "编辑" }}
+              </div>
             </div>
             <div v-if="!editMode" class="shopInfo" style="margin-left: 25px">
               <p>联系号码：{{ merchant.phone }}</p>
@@ -69,66 +76,143 @@
           </el-col>
         </el-row>
       </el-card>
+      <el-page-header
+        content="自营商品分类列表"
+        icon=""
+        title=" "
+        style="margin-bottom: 20px"
+      />
 
       <el-card>
-        <div class="flex">
-          <div
-            class="flex flex-col gap-2 p-4 w-300px h-300px m-auto bg-gray-500/5 rounded"
-            ref="el"
-          >
-            <div
-              v-for="item in list"
-              :key="item.id"
-              class="h-30 bg-gray-500/5 rounded p-3 cursor-move"
-            >
-              {{ item.name }}
+        <div class="flex-sb">
+          <div class="flex" style="flex: 1">
+            <div class="flex" ref="el">
+              <div
+                v-for="(item, idx) in list"
+                :key="idx"
+                class="productBox"
+                @click="chooseItem(item, idx)"
+                :style="
+                  chooseItemIdx === idx
+                    ? 'background:#a32e21;color:#FFF;border:2px solid #000'
+                    : ''
+                "
+              >
+                <div v-if="item.editSatus">
+                  <el-input
+                    v-model="item.name"
+                    style="width: 120px"
+                    size="small"
+                    @blur="finishEditProductType(item)"
+                  />
+                </div>
+                <div v-else>
+                  {{ item.name }}
+                </div>
+              </div>
             </div>
+            <preview-list :list="list" />
           </div>
-          <preview-list :list="list" />
+
+          <div class="flex">
+            <div class="mainBtn" @click="handleAddType">新增</div>
+            <div
+              class="mainBtn"
+              style="margin: 5px 10px"
+              @click="handleDelType"
+            >
+              删除
+            </div>
+            <div class="mainBtn" @click="handleChangeProductType">保存</div>
+          </div>
         </div>
       </el-card>
+
+      <div class="nextStep mainBtn">
+        <div class="flex-c" @click="linkToProductManagement">
+          <el-icon><Present /></el-icon> 商品管理<el-icon
+            ><DArrowRight
+          /></el-icon>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { reactive, onMounted, ref, inject } from "vue";
+import { useRouter } from "vue-router";
+import {
+  getShopInfo,
+  editInfo,
+  productTypeList,
+  editProductTypeList,
+} from "@/api/project/operation/springShop.js";
 import { useDraggable } from "vue-draggable-plus";
 defineOptions({
   name: "spring-Shop",
   isRouter: true,
 });
-
+const router = useRouter();
 const editMode = ref(false);
+
 const el = ref();
 const merchant = ref({
   name: "商家名称",
-  id: "123456",
-  category: "餐饮",
-  phone: "12345678901",
-  email: "example@example.com",
+  category: "",
+  phone: "",
   address: "地址信息",
 });
-
-const list = ref([
-  {
-    name: "Joao",
-    id: 1,
-  },
-  {
-    name: "Jean",
-    id: 2,
-  },
-  {
-    name: "Johanna",
-    id: 3,
-  },
-  {
-    name: "Juan",
-    id: 4,
-  },
+const list = ref([]);
+const chooseItemIdx = ref(null);
+const categories = ref([
+  { key: "1", value: "上架" },
+  { key: "0", value: "下架" },
 ]);
-const categories = ref(["餐饮", "零售", "服务"]);
+onMounted(() => {
+  getShopInfoApi();
+  getProductTypeList();
+});
+const linkToProductManagement = () => {
+  router.push({
+    path: `/operation/springShop/productMenagement`,
+  });
+};
+const getShopInfoApi = async () => {
+  const res = await getShopInfo();
+  if (res.code === 0) {
+    merchant.value = res.data;
+  }
+};
+const getProductTypeList = async () => {
+  const res = await productTypeList();
+  if (res.code === 0) {
+    list.value = res.rows;
+  }
+};
+const handleAddType = () => {
+  list.value.push({
+    name: "",
+    editSatus: true,
+    storeId: merchant.value.storeId,
+  });
+};
+const handleDelType = () => {
+  list.value.splice(chooseItemIdx.value, 1);
+};
+const chooseItem = (item, idx) => {
+  chooseItemIdx.value = idx;
+};
+// 修改完成商品类型
+const handleChangeProductType = async () => {
+  const res = await editProductTypeList(list.value);
+};
+
+// 完成新增修改Input
+const finishEditProductType = (item) => {
+  item.editSatus = false;
+};
+
 const { start } = useDraggable(el, list, {
   animation: 150,
   ghostClass: "ghost",
@@ -139,8 +223,11 @@ const { start } = useDraggable(el, list, {
     console.log("update");
   },
 });
-const saveChanges = () => {
+const saveChanges = async () => {
   editMode.value = !editMode.value;
+  if (!editMode.value) {
+    const res = await editInfo(merchant.value);
+  }
 };
 </script>
 
@@ -163,6 +250,22 @@ const saveChanges = () => {
 }
 .shopInfo {
   font-size: 17px;
+}
+.productBox {
+  padding: 10px 30px;
+  margin: 10px 15px;
+  background-color: #a42f22;
+  color: #fddcb2;
+  border-radius: 12px;
+  letter-spacing: 2px;
+  border: 2px solid #a42f22;
+  font-size: 20px;
+}
+.nextStep {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  font-size: 22px;
 }
 </style>
 
