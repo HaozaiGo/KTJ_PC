@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="logo">
       <img
-        src="@/assets/img/login_images/Logo.png"
+        src="@/assets/img/login_images/KTJ_Logo.png"
         alt="logo"
         style="width: 220px; height: 230px"
       />
