@@ -4,7 +4,7 @@
       <img
         src="@/assets/img/login_images/KTJ_Logo.png"
         alt="logo"
-        style="width: 220px; height: 230px"
+        style="width: 220px; height: 260px"
       />
       <div>
         <img

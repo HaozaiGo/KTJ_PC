@@ -14,6 +14,7 @@
               <p>营业时间：{{ merchant.startTime }} ~ {{ merchant.endTime }}</p>
               <p>定位经度：{{ merchant.longitude }}</p>
               <p>定位纬度：{{ merchant.latitude }}</p>
+              <p>优惠力度：{{ merchant.discount }}%</p>
               <p>是否营业：{{ merchant.onlineStatus === "1" ? "是" : "否" }}</p>
             </div>
             <div v-else class="inputSty">
@@ -36,6 +37,9 @@
                 v-model="merchant.latitude"
                 placeholder="定位纬度："
               ></el-input>
+              <el-input v-model="merchant.discount" placeholder="优惠力度："
+                ><template #append>%</template></el-input
+              >
               <el-select v-model="merchant.onlineStatus" placeholder="是否上架">
                 <el-option
                   v-for="(category, index) in categories"
@@ -182,6 +186,7 @@ const getShopInfoApi = async () => {
   const res = await getShopInfo();
   if (res.code === 0) {
     merchant.value = res.data;
+    merchant.value.discount = merchant.value.discount * 100;
   }
 };
 const getProductTypeList = async () => {
@@ -226,7 +231,10 @@ const { start } = useDraggable(el, list, {
 const saveChanges = async () => {
   editMode.value = !editMode.value;
   if (!editMode.value) {
-    const res = await editInfo(merchant.value);
+    const updateDiscount = merchant.value.discount / 100;
+    const res = await editInfo(
+      Object.assign({}, merchant.value, { discount: updateDiscount })
+    );
   }
 };
 </script>

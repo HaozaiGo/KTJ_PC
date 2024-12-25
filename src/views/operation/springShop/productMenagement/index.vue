@@ -198,6 +198,16 @@
           <el-radio-group v-model="tasteData.form1.salesStatus">
             <el-radio
               :value="item.dictValue"
+              v-for="(item, index) in saleStatus"
+              :key="index"
+              >{{ item.dictLabel }}</el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="是否运费">
+          <el-radio-group v-model="tasteData.form1.isShippingFee">
+            <el-radio
+              :value="item.dictValue"
               v-for="(item, index) in yesOrNoList"
               :key="index"
               >{{ item.dictLabel }}</el-radio
@@ -239,10 +249,11 @@ defineOptions({
 });
 onMounted(async () => {
   inject("$com")
-    .getDict("bill_store_menu_unit,sys_yes_no")
+    .getDict("bill_store_menu_unit,sys_yes_no,bill_sales_status")
     .then((res) => {
       unitOptions.value = res.data[0].list;
       yesOrNoList.value = res.data[1].list;
+      saleStatus.value = res.data[2].list;
     });
   getList();
   setTimeout(() => {
@@ -258,6 +269,7 @@ const ruleFormRef1 = ref(null);
 const uploadFileRef = ref();
 const unitOptions = ref([]);
 const yesOrNoList = ref([]);
+const saleStatus = ref([]);
 const tableHeight = inject("$com").tableHeight();
 const loading = ref(true);
 const tasteData = reactive({
@@ -276,6 +288,7 @@ const tasteData = reactive({
     salesStatus: "",
     specDetail: "",
     salesStatus: "",
+    isShippingFee: "",
   },
   leftData: [],
   rightData: [],
@@ -296,6 +309,7 @@ class Form1 {
   salesStatus = "";
   isNice = "0";
   salesStatus = "1"; //在售情况
+  isShippingFee = "0";
 }
 const handleDelMenu = (row) => {
   ElMessageBox.confirm("是否确定删除此商品？", "提醒", {
