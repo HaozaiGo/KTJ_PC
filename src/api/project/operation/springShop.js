@@ -83,3 +83,28 @@ export function delGood(goodsId) {
     method: "DELETE",
   });
 }
+
+//查询订单列表
+export function getOrderList(params) {
+  return request({
+    url: `/api/bill/small/store/order/list`,
+    method: "get",
+    params,
+  });
+}
+
+// 获取订单详情
+export function getOrderDetail(orderId) {
+  return request({
+    url: `/api/bill/small/store/order/${orderId}`,
+    method: "get",
+  });
+}
+// 退款
+export function backToUser(data) {
+  return request({
+    url: `/api/bill/small/store/refund`,
+    method: "post",
+    data,
+  });
+}

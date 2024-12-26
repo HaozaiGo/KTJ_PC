@@ -132,6 +132,63 @@
         </div>
       </el-card>
 
+      <el-page-header
+        content="自营商品订单信息"
+        icon=""
+        title=" "
+        style="margin: 20px 0"
+      />
+      <el-card>
+        <el-table
+          :data="tableData.list"
+          style="width: 100%; margin: 10px 0"
+          row-key="id"
+          border
+          default-expand-all
+          @selection-change="handleSelectionChange"
+          :max-height="tableHeight"
+        >
+          <el-table-column prop="orderNo" label="订单编号" sortable />
+          <el-table-column prop="payTime" label="下单时间" sortable />
+          <el-table-column prop="billAmount" label="优惠前的价" sortable />
+          <el-table-column prop="amount" label="优惠后的价" sortable />
+          <el-table-column prop="phone" label="手机号" sortable />
+          <el-table-column prop="bookTime" label="提货时间" sortable />
+          <el-table-column prop="isRefund" label="是否退款" sortable>
+            <template #default="scope">
+              <span>{{ scope.row.isRefund === "0" ? "否" : "是" }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="remark" label="备注" sortable />
+          <el-table-column label="操作" width="220">
+            <template #default="scope">
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="getDetail(scope.row)"
+              >
+                查看详情
+              </el-button>
+              <el-button
+                link
+                type="primary"
+                size="small"
+                @click="moneyBackToUser(scope.row)"
+                >退款</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          layout="prev, pager, next"
+          :total="tableData.total"
+          style="float: right"
+          @current-change="changePageSize"
+        />
+      </el-card>
+
       <div class="nextStep mainBtn">
         <div class="flex-c" @click="linkToProductManagement">
           <el-icon><Present /></el-icon> 商品管理<el-icon
@@ -139,6 +196,49 @@
           /></el-icon>
         </div>
       </div>
+
+      <el-dialog
+        v-model="dialogVisible"
+        title="查看订单详情"
+        width="800"
+        align-center
+      >
+        <div>
+          用户名称：{{ OrderDetail.nickName }}
+          <el-table
+            :data="OrderDetail.goodsList"
+            style="width: 100%; margin: 10px 0"
+            row-key="id"
+            border
+            default-expand-all
+            :max-height="tableHeight"
+          >
+            <el-table-column prop="coverUrl" label="商品图" sortable>
+              <template #default="scope">
+                <el-image
+                  style="width: 80px; height: 80px"
+                  :src="filePath + scope.row.coverUrl"
+                  fit="fill"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="typeName" label="商品类型" sortable />
+            <el-table-column prop="name" label="商品名称" sortable />
+            <el-table-column prop="price" label="单价" sortable />
+            <el-table-column prop="realPrice" label="折后价" sortable />
+            <el-table-column prop="qty" label="数量" sortable />
+            <el-table-column prop="specDetail" label="规格" sortable />
+          </el-table>
+        </div>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="dialogVisible = false" type="primary"
+              >确定</el-button
+            >
+            <el-button @click="dialogVisible = false"> 取消 </el-button>
+          </div>
+        </template>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -151,15 +251,24 @@ import {
   editInfo,
   productTypeList,
   editProductTypeList,
+  getOrderList,
+  getOrderDetail,
+  backToUser,
 } from "@/api/project/operation/springShop.js";
 import { useDraggable } from "vue-draggable-plus";
+import { ElMessageBox } from "element-plus";
 defineOptions({
   name: "spring-Shop",
   isRouter: true,
 });
 const router = useRouter();
 const editMode = ref(false);
-
+const dialogVisible = ref(false);
+const tableData = ref({
+  list: [],
+  total: 0,
+  pageNum: 1,
+});
 const el = ref();
 const merchant = ref({
   name: "商家名称",
@@ -168,7 +277,10 @@ const merchant = ref({
   address: "地址信息",
 });
 const list = ref([]);
+const tableHeight = inject("$com").tableHeight() + 80;
+const OrderDetail = ref({});
 const chooseItemIdx = ref(null);
+const filePath = localStorage.getItem("filePath");
 const categories = ref([
   { key: "1", value: "上架" },
   { key: "0", value: "下架" },
@@ -176,11 +288,51 @@ const categories = ref([
 onMounted(() => {
   getShopInfoApi();
   getProductTypeList();
+  getList();
 });
+const moneyBackToUser = (row) => {
+  console.log(row);
+
+  ElMessageBox.confirm("确定退款?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      const res = await backToUser({
+        orderId: row.orderId,
+        reason: "商家退款",
+      });
+      if (res.code === 0) {
+        getList();
+      }
+    })
+    .catch((action) => {
+      console.log(action);
+    });
+};
+const getDetail = async (row) => {
+  const res = await getOrderDetail(row.orderId);
+  if (res.code === 0) OrderDetail.value = res.data;
+  dialogVisible.value = true;
+};
+const changePageSize = (e) => {
+  tableData.value.pageNum = e;
+  getList();
+};
 const linkToProductManagement = () => {
   router.push({
     path: `/operation/springShop/productMenagement`,
   });
+};
+const getList = async () => {
+  const res = await getOrderList({
+    pageNum: tableData.value.pageNum,
+  });
+  if (res.code === 0) {
+    tableData.value.list = res.rows;
+    tableData.value.total = res.total;
+  }
 };
 const getShopInfoApi = async () => {
   const res = await getShopInfo();
@@ -241,7 +393,9 @@ const saveChanges = async () => {
 
 <style lang="scss" scoped>
 .merchant-info {
+  height: calc(100vh - 140px);
   padding: 20px;
+  overflow-y: scroll;
 }
 .info-card {
   margin: 20px 0;
