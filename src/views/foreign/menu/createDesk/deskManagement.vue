@@ -58,6 +58,7 @@
         <el-table-column type="selection" width="45" />
         <el-table-column prop="tableNo" label="桌号" sortable />
         <el-table-column prop="typeName" label="区域类型" sortable />
+        <el-table-column prop="modelName" label="桌台类型" sortable />
 
         <el-table-column prop="createBy" label="创建人" sortable />
 

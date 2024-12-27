@@ -1,6 +1,10 @@
 <template>
   <div class="user-item" @click="handleClick">
-    <img :src="user.avatarUrl?user.avatarUrl:defalutAvatar" alt="avatar" class="avatar" />
+    <img
+      :src="user.avatarUrl ? filePath + user.avatarUrl : defalutAvatar"
+      alt="avatar"
+      class="avatar"
+    />
     <div class="user-info">
       <div class="user-name">{{ user.nickName }}</div>
       <div v-if="hasNewMessage" class="new-message-indicator"></div>
@@ -9,32 +13,34 @@
 </template>
 
 <script>
-import defalutAvatar from '@/assets/img/commonPic/avatar.png'
+import defalutAvatar from "@/assets/img/commonPic/avatar.png";
 export default {
-  name: 'UserItem',
+  name: "UserItem",
   data() {
     return {
-      defalutAvatar
-    }},
+      filePath: localStorage.getItem("filePath"),
+      defalutAvatar,
+    };
+  },
   props: {
     user: {
       type: Object,
-      required: true
+      required: true,
     },
     hasNewMessage: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     handleClick() {
-      this.$emit('click', this.user)
-    }
+      this.$emit("click", this.user);
+    },
   },
-  mounted(){
+  mounted() {
     // console.log(this.hasNewMessage);
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
@@ -46,7 +52,6 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s ease;
   position: relative;
- 
 }
 .user-item:hover {
   background-color: #f9f9f9;
@@ -70,7 +75,6 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  
 }
 .new-message-indicator {
   width: 10px;
