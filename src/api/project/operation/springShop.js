@@ -108,3 +108,10 @@ export function backToUser(data) {
     data,
   });
 }
+//生成支付宝code
+export function getAlipayCode(data) {
+  return request({
+    url: `/api/bill/small/store/order/random/number`,
+    method: "get",
+  });
+}

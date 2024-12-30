@@ -24,8 +24,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-       // target: 'http://192.168.1.59',//开发
-        target: 'http://124.223.101.232',//开发
+        // target: 'http://192.168.1.59',//开发
+        //target: 'http://124.223.101.232',//开发
+        target: 'http://192.168.1.4', //超
 
         //target: 'www.bdncn.cn',//online
 

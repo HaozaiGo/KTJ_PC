@@ -196,6 +196,37 @@
         </div>
       </div>
 
+      <div
+        class="mainBtn"
+        style="position: fixed; bottom: 40px; right: 260px; font-size: 22px"
+      >
+        <div class="flex-c" @click="openZFBCode">
+          <img
+            src="@/assets/img/commonPic/zfb.png"
+            style="width: 30px; height: 30px"
+          />
+          支付宝支付<el-icon><DArrowRight /></el-icon>
+        </div>
+      </div>
+
+      <el-dialog
+        v-model="zfbdialogVisible"
+        title="支付宝支付"
+        width="600"
+        align-center
+      >
+        <div style="text-align: center;font-size: 44px;">{{ zfbCode }}</div>
+        <template #footer>
+          <div class="flex" style="justify-content: flex-end;">
+            <div class="mainBtn" @click="zfbdialogVisible = false" style="margin-right: 20px;"> 取消</div>
+  
+            <div class="mainBtn" @click="createCode">
+              生成支付码
+            </div>
+          </div>
+        </template>
+      </el-dialog>
+
       <el-dialog
         v-model="dialogVisible"
         title="查看订单详情"
@@ -253,6 +284,7 @@ import {
   getOrderList,
   getOrderDetail,
   backToUser,
+  getAlipayCode,
 } from "@/api/project/operation/springShop.js";
 import { useDraggable } from "vue-draggable-plus";
 import { ElMessageBox } from "element-plus";
@@ -263,6 +295,8 @@ defineOptions({
 const router = useRouter();
 const editMode = ref(false);
 const dialogVisible = ref(false);
+const zfbdialogVisible = ref(false);
+const zfbCode = ref("");
 const tableData = ref({
   list: [],
   total: 0,
@@ -309,6 +343,18 @@ const moneyBackToUser = (row) => {
     .catch((action) => {
       console.log(action);
     });
+};
+const openZFBCode = () => {
+  zfbdialogVisible.value = true;
+  createCode();
+};
+
+const createCode = async () => {
+  const res = await getAlipayCode();
+
+  if (res.code === 0) {
+    zfbCode.value = res.data;
+  }
 };
 const getDetail = async (row) => {
   const res = await getOrderDetail(row.orderId);
