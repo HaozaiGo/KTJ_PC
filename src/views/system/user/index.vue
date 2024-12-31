@@ -55,7 +55,9 @@
         <el-table-column prop="phonenumber" label="手机号" sortable />
         <el-table-column prop="email" label="邮箱" sortable />
         <el-table-column prop="createTime" label="创建时间" sortable />
-        <el-table-column label="状态" width="180">
+        <el-table-column prop="isPlanManLabel" label="是否推荐人" sortable />
+
+        <el-table-column label="状态" >
           <template #default="scope">
             <div>
               <el-switch
@@ -100,7 +102,7 @@
         :inline="true"
         :model="formData.data"
         class="demo-form-inline"
-        label-width="80px"
+        label-width="90px"
         :rules="rules"
         ref="formRef"
       >
@@ -176,9 +178,19 @@
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="formData.data.status">
+          <el-radio-group v-model="formData.data.status" >
             <el-radio value="1">正常</el-radio>
             <el-radio value="0">停用</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="是否推荐人" style="margin-left: 72px;">
+          <el-radio-group v-model="formData.data.isPlanMan">
+            <el-radio
+              v-for="(item, idx) in yesOrNo"
+              :key="idx"
+              :value="item.dictValue"
+              >{{ item.dictLabel }}</el-radio
+            >
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -193,7 +205,7 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref, toRefs,inject } from "vue";
+import { reactive, onMounted, ref, toRefs, inject } from "vue";
 import {
   getSystemUsers,
   addUser,
@@ -208,6 +220,7 @@ defineOptions({
   name: "U-ser",
   isRouter: true,
 });
+const yesOrNo = ref([]);
 const tableHeight = inject("$com").tableHeight();
 const deptList = ref([]);
 const multipleSelection = ref([]);
@@ -227,6 +240,7 @@ let formData = reactive({
     sex: "",
     roleIds: [],
     status: "1",
+    isPlanMan:"",
   },
 });
 const formRef = ref(null);
@@ -331,6 +345,12 @@ const getList = async () => {
 
 onMounted(async () => {
   getList();
+  inject("$com")
+    .getDict("sys_yes_no")
+    .then((res) => {
+      yesOrNo.value = res.data[0].list;
+    });
+
   const dept = await getDeptList();
   if (dept.code === 0) {
     deptList.value = dept.data;
