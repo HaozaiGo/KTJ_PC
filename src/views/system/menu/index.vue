@@ -6,11 +6,11 @@
         style="width: 200px"
         placeholder="菜单名称"
       />
-      <el-button type="primary" icon="Search" @click="getList()"
+      <el-button type="primary" icon="Search" @click="getList()" style="margin-left: 15px;"
         >搜索</el-button
       >
     </div>
-    <div>
+    <div style="margin-top: 15px;">
       <el-button type="primary" icon="Plus" round size="small" @click="add"
         >新增</el-button
       >

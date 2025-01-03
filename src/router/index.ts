@@ -23,7 +23,7 @@ export const constantRoutes = [
   // 数据大屏
   {
     path: "/SystemView",
-    component: () => import("@/views/pages/systemView/index.vue"),
+    component: () => import("@/views/bigScreen/systemView/index.vue"),
     hidden: true,
   },
   {

@@ -3,14 +3,14 @@
     <div class="search">
       <el-input
         v-model="query.deptName"
-        style="width: 200px"
+        style="width: 200px;margin-right: 15px;"
         placeholder="部门名称"
       />
       <el-button type="primary" icon="Search" @click="getList()"
         >搜索</el-button
       >
     </div>
-    <div>
+    <div style="margin-top: 15px;">
       <el-button type="primary" icon="Plus" round size="small" @click="add"
         >新增</el-button
       >
