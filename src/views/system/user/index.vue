@@ -57,7 +57,7 @@
         <el-table-column prop="createTime" label="创建时间" sortable />
         <el-table-column prop="isPlanManLabel" label="是否推荐人" sortable />
 
-        <el-table-column label="状态" >
+        <el-table-column label="状态">
           <template #default="scope">
             <div>
               <el-switch
@@ -127,7 +127,10 @@
             v-model="formData.data.phonenumber"
             placeholder="输入手机号码"
             clearable
-          />
+            style="width: 200px"
+          >
+            <template #prepend> 86 </template>
+          </el-input>
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input
@@ -168,6 +171,7 @@
             v-model="formData.data.roleIds"
             placeholder="选择角色"
             clearable
+            @change="handleChangeRole"
           >
             <el-option
               :label="item.roleName"
@@ -178,12 +182,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="formData.data.status" >
+          <el-radio-group v-model="formData.data.status">
             <el-radio value="1">正常</el-radio>
             <el-radio value="0">停用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="是否推荐人" style="margin-left: 72px;">
+        <el-form-item label="是否推荐人" style="margin-left: 72px">
           <el-radio-group v-model="formData.data.isPlanMan">
             <el-radio
               v-for="(item, idx) in yesOrNo"
@@ -192,6 +196,27 @@
               >{{ item.dictLabel }}</el-radio
             >
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="银行账号" prop="bankNo" v-if="showBankInfo">
+          <el-input
+            v-model="formData.data.bankNo"
+            placeholder="输入银行账号"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="开户行" prop="bankName" v-if="showBankInfo">
+          <el-input
+            v-model="formData.data.bankName"
+            placeholder="输入开户行"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="开户地" prop="bankAddress" v-if="showBankInfo">
+          <el-input
+            v-model="formData.data.bankAddress"
+            placeholder="输入开户地"
+            clearable
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -212,6 +237,7 @@ import {
   deleteSystemUser,
   statusChange,
   editUser,
+  getAuthRole,
 } from "@/api/project/system/system.js";
 import { getDeptList, getRoles } from "@/api/common/user.js";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -224,6 +250,7 @@ const yesOrNo = ref([]);
 const tableHeight = inject("$com").tableHeight();
 const deptList = ref([]);
 const multipleSelection = ref([]);
+const showBankInfo = ref(false);
 const rolesList = ref([]); //角色list
 const query = reactive({
   nickName: "",
@@ -240,10 +267,20 @@ let formData = reactive({
     sex: "",
     roleIds: [],
     status: "1",
-    isPlanMan:"",
+    isPlanMan: "",
+    bankNo: "",
+    bankName: "",
+    bankAddress: "",
   },
 });
 const formRef = ref(null);
+const handleChangeRole = (e) => {
+  if (e.includes(8)) {
+    showBankInfo.value = true;
+  } else {
+    showBankInfo.value = false;
+  }
+};
 const rules = {
   nickName: [
     {
@@ -266,6 +303,13 @@ const rules = {
       trigger: "change",
     },
   ],
+  bankNo: [
+    {
+      required: true,
+      message: "请输入银行账号",
+      trigger: "change",
+    },
+  ],
 };
 const dialogVisible = ref(false);
 const state = ref("add");
@@ -274,10 +318,25 @@ const add = () => {
   formData = reactive({ data: { password: "123456", status: "1" } });
   state.value = "add";
   dialogVisible.value = true;
+  showBankInfo.value = false;
 };
+
+//获取授权角色
+const getAuthRoles = async (item) => {
+  const res = await getAuthRole(item.userId);
+  formData.data.roleIds = res.data.roleIds;
+  if (res.data.roleIds.includes(8)) {
+    showBankInfo.value = true;
+  } else {
+    showBankInfo.value = false;
+  }
+};
+
 // 编辑
-const edit = (item) => {
+const edit = async (item) => {
   formData.data = { ...item };
+  await getAuthRoles(item);
+
   state.value = "edit";
   dialogVisible.value = true;
 };
@@ -313,8 +372,10 @@ const handleComfirm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
       if (state.value === "add") {
+        formData.data.phonenumber = "86" + formData.data.phonenumber;
         await addUser(formData.data);
       } else {
+        formData.data.phonenumber = "86" + formData.data.phonenumber;
         await editUser(formData.data);
       }
       getList();

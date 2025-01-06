@@ -24,8 +24,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        //target: 'http://192.168.1.59',//开发
-        target: 'http://124.223.101.232',//开发
+        target: 'http://192.168.1.59',//毅
+        //target: 'http://124.223.101.232',//开发
         //target: 'http://192.168.1.4', //超
 
         //target: 'www.bdncn.cn',//online
@@ -34,8 +34,9 @@ export default defineConfig({
         // rewrite: (path) => path.replace(/^\/api/, ""), //地址重写
       },
       '/store': {
-        // target: 'http://192.168.1.59',//开发
+        // target: 'http://192.168.1.59',//毅
         target: 'http://124.223.101.232',//开发
+         //target: 'http://192.168.1.4', //超
         //target: 'www.bdncn.cn',//online
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/jss/, ""), //地址重写

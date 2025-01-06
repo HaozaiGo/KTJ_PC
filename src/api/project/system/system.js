@@ -46,3 +46,12 @@ export function statusChange(params) {
     params,
   });
 }
+
+// 获取已授权的角色
+export function getAuthRole(userId) {
+  return request({
+    url: `/api/system/user/authRole/${userId}`,
+    method: "get",
+  
+  });
+}
