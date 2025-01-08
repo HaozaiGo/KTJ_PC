@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { rules } from "@/utils/rules";
+import { rules } from "@/utils/validate.js";
 import { gerShopOption } from "@/api/project/foreign/employee.js";
 export default {
   name: "Avatar",

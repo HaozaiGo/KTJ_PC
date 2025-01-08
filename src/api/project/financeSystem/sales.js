@@ -34,3 +34,50 @@ export function cashierSaleData(params) {
     params,
   });
 }
+
+//入账
+
+export function innerAccountApi(data) {
+  return request({
+    url: "/api/bill/inner/order/performance/inAccount",
+    method: "post",
+    data,
+  });
+}
+//导出推荐人---会计
+export function exportExcelAccountant(data) {
+  return request({
+    url: "/api/bill/inner/order/performance/exportInfo",
+    method: "post",
+    responseType: "blob",
+    data,
+  });
+}
+
+
+//导出推荐人---出纳
+export function exportExcel(data) {
+  return request({
+    url: "/api/bill/inner/order/performance/export",
+    method: "post",
+    responseType: "blob",
+    data,
+  });
+}
+//结算
+export function settleApi(data) {
+  return request({
+    url: "/api/bill/inner/order/performance/settle",
+    method: "post",
+    data,
+  });
+}
+
+// 特殊处理
+export function specialHandler(data) {
+  return request({
+    url: "/api/bill/inner/order/performance/special",
+    method: "post",
+    data,
+  });
+}
