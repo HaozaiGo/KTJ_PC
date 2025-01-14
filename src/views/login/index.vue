@@ -119,7 +119,7 @@ export default {
       title: this.$baseTitle,
       loginForm: {
         username: process.env.NODE_ENV === "development" ? "ktj" : "",
-        password: process.env.NODE_ENV === "development" ? "ktjadmin2024" : "",
+        password: process.env.NODE_ENV === "development" ? "ktjAdmin2025" : "",
         code: "",
         uuid: "",
         client_id: "web",

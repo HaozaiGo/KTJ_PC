@@ -123,8 +123,9 @@ const onUpload = async (file, fileList) => {
     ElMessage.error("图片大小不能超过5MB!");
     fileList.splice(-1, 1); //移除当前超出大小的文件
     return false;
-  } else if (rawFile.size / 1024 / 1024 > 10) {
-    ElMessage.error("文件大小不能超过10MB!");
+  } else if (rawFile.size / 1024 / 1024 > 70) {
+    
+    ElMessage.error("文件大小不能超过70MB!");
     fileList.splice(-1, 1); //移除当前超出大小的文件
     return false;
   } else {
