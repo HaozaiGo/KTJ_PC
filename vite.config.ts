@@ -8,7 +8,7 @@ import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import commonjs from 'vite-plugin-commonjs';
 export default defineConfig({
-  base:"/dev/dest/",
+  base:"/signup/",
   plugins: [vue(), vueJsx(), commonjs()],
   resolve: {
     alias: {
