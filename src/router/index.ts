@@ -10,7 +10,7 @@ import { vueRouter } from "./global";
 // 公共路由
 export const constantRoutes = [
   {
-    path: "/login",
+    path: "/signup/login",
     component: () => import("@/views/login/index.vue"),
     hidden: true,
   },
