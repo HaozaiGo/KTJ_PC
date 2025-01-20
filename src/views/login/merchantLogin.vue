@@ -83,7 +83,7 @@
           class="flex contact"
           style="justify-content: center; margin-bottom: 10px"
         >
-          <div>
+          <div >
             <p style="font-size: 16px; color: #000; font-weight: bold">
               联系邮箱
             </p>
@@ -179,6 +179,8 @@ export default {
                 message: "信息验证失败！请重新登录",
                 type: "warning",
               });
+              loading.close();
+
               return;
             }
           });

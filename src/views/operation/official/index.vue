@@ -202,7 +202,7 @@ import {
   getProductListApi,
 } from "@/api/project/operation/official.js";
 import { useDraggable } from "vue-draggable-plus";
-import { ElLoading, ElMessage,ElMessageBox } from "element-plus";
+import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
 defineOptions({
   name: "official",
   isRouter: true,
@@ -267,7 +267,7 @@ const handleDelProduct = () => {
     .then(async () => {
       const res = await delProductListApi(productionObj.value.id);
       if (res.code === 0) {
-        getProductList()
+        getProductList();
       }
     })
     .catch(() => {
@@ -357,18 +357,20 @@ const getShopInfoApi = async () => {
   const res = await getOfficialInfo();
   if (res.code === 0) {
     merchant.value = res.data;
-    const ourApp = merchant.value.apk.split("/");
+    const ourApp = merchant.value.apk ? merchant.value.apk.split("/") : [];
     merchant.value.ourAppName = ourApp[ourApp.length - 1];
-    const storeApk = merchant.value.storeApk.split("/");
+    const storeApk = merchant.value.storeApk
+      ? merchant.value.storeApk.split("/")
+      : [];
     merchant.value.storeAppName = storeApk[storeApk.length - 1];
     merchant.value.coverUrlsList = merchant.value.coverUrls
-      .split(",")
-      .map((x) => {
-        return {
-          url: x,
-          editSatus: false,
-        };
-      });
+      ? merchant.value.coverUrls.split(",").map((x) => {
+          return {
+            url: x,
+            editSatus: false,
+          };
+        })
+      : [];
     console.log(merchant.value.coverUrlsList);
   }
 };
